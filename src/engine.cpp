@@ -116,7 +116,7 @@ bool safe_relative(const std::string& value) {
     if (value.empty() || value.size() > MaxPath || !valid_utf8(value) || value.find('\0') != std::string::npos ||
         value.find('\\') != std::string::npos || value.find(':') != std::string::npos) return false;
     const auto p = path_from_utf8(value);
-    if (p.is_absolute() || p.has_root_name()) return false;
+    if (p.is_absolute() || p.has_root_name() || p.has_root_directory()) return false;
     for (const auto& part : p) if (part.empty() || part == "." || part == "..") return false;
     return path_to_utf8(p) == value;
 }

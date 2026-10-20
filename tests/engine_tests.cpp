@@ -268,7 +268,7 @@ void bom_crlf_and_final_line() {
 void binary_and_invalid_utf8() {
     Workspace w;
     write(w.root / "valid", "valid_token\n");
-    write(w.root / "nul", std::string("alpha\0beta", 10));
+    write(w.root / "binary_nul", std::string("alpha\0beta", 10));
     write(w.root / "invalid", "\xC0\xAF");
     write(w.root / "surrogate", "\xED\xA0\x80");
     const auto b = create_index(w.root, w.index, options());
