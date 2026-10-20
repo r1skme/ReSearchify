@@ -1,0 +1,9 @@
+{
+  "api_version": 1,
+  "id": "find-1",
+  "command": "find",
+  "query": {"and": [{"term": "RenderFrame"}, {"not": {"term": "deprecated"}}]},
+  "path": ["src/**"],
+  "limit": 8,
+  "max_output_bytes": 16384
+}

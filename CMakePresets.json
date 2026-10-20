@@ -1,0 +1,18 @@
+{
+  "version": 2,
+  "configurePresets": [
+    {"name":"release","generator":"Ninja","binaryDir":"${sourceDir}/build/release","cacheVariables":{"CMAKE_BUILD_TYPE":"Release","BUILD_TESTING":"ON"}},
+    {"name":"asan","inherits":"release","binaryDir":"${sourceDir}/build/asan","cacheVariables":{"CMAKE_BUILD_TYPE":"Debug","RESEARCHIFY_SANITIZERS":"ON"}},
+    {"name":"msvc","generator":"Visual Studio 17 2022","architecture":"x64","binaryDir":"${sourceDir}/build/msvc","cacheVariables":{"BUILD_TESTING":"ON","RESEARCHIFY_STATIC_RUNTIME":"ON"}}
+  ],
+  "buildPresets": [
+    {"name":"release","configurePreset":"release"},
+    {"name":"asan","configurePreset":"asan"},
+    {"name":"msvc","configurePreset":"msvc","configuration":"Release"}
+  ],
+  "testPresets": [
+    {"name":"release","configurePreset":"release","output":{"outputOnFailure":true}},
+    {"name":"asan","configurePreset":"asan","output":{"outputOnFailure":true}},
+    {"name":"msvc","configurePreset":"msvc","configuration":"Release","output":{"outputOnFailure":true}}
+  ]
+}

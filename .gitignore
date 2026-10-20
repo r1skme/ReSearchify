@@ -1,0 +1,8 @@
+/build*/
+/.build*/
+/dist/
+/.researchify/
+/bench-data*/
+*.user
+*.pdb
+*.ilk
