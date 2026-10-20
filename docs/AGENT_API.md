@@ -1,6 +1,6 @@
 # Agent interface, API version 1
 
-Application2.0.0, disk format2, ranking version2. Obtain actual command schemas with `researchify schema --json` or `schema COMMAND --json`; help, schema and validation use one registry. Unknown fields are errors. Defaults described in schemas are applied by execution rather than mutating incoming JSON. An update retains saved build settings unless explicitly overridden.
+Application2.0.0, disk format2, ranking version2. Obtain actual command schemas with `rs schema --json` or `schema COMMAND --json`; help, schema and validation use one registry. Unknown fields are errors. Defaults described in schemas are applied by execution rather than mutating incoming JSON. An update retains saved build settings unless explicitly overridden.
 
 ## Common contract
 

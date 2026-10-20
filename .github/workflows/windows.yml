@@ -1,32 +1,84 @@
-name: MSVC and portable C++20
+name: Build and test
+
 on:
   push:
+    branches: [main]
   pull_request:
   workflow_dispatch:
+
+permissions:
+  contents: write
+
 jobs:
-  msvc:
+  windows:
+    name: Windows x64 (MSVC)
     runs-on: windows-2022
     steps:
       - uses: actions/checkout@v4
-      - name: Configure MSVC x64
-        run: cmake -S . -B build -A x64 -DBUILD_TESTING=ON
-      - name: Build Release
+      - name: Configure
+        run: cmake -S . -B build -G "Visual Studio 17 2022" -A x64 -DBUILD_TESTING=ON -DRESEARCHIFY_STATIC_RUNTIME=ON
+      - name: Build
         run: cmake --build build --config Release --parallel 4
-      - name: Run tests
+      - name: Test
         run: ctest --test-dir build -C Release --output-on-failure
-      - name: Benchmark smoke test
-        run: .\build\Release\cs_bench.exe --work .\bench-smoke --files 300 --lines 50 --threads 4 --memory-mb 128 --repeats 3
-  gcc:
+      - name: Quick start check
+        shell: pwsh
+        run: |
+          .\build\Release\rs.exe --help
+          .\build\Release\rs.exe --version
+      - name: Package portable ZIP
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path dist/package | Out-Null
+          Copy-Item build/Release/rs.exe dist/package/rs.exe
+          Copy-Item README.md, README.ru.md dist/package/
+          Compress-Archive -Path dist/package/* -DestinationPath dist/ReSearchify-Windows-x64.zip -Force
+          if (!(Test-Path dist/ReSearchify-Windows-x64.zip)) { throw 'Portable archive missing' }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: researchify-windows-portable
+          path: dist/ReSearchify-Windows-x64.zip
+          if-no-files-found: error
+
+  linux:
+    name: Linux (GCC)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+      - run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON
       - run: cmake --build build --parallel 4
       - run: ctest --test-dir build --output-on-failure
+
   sanitizers:
+    name: Address/UB sanitizer
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DRESEARCHIFY_SANITIZERS=ON
+      - run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DRESEARCHIFY_SANITIZERS=ON -DBUILD_TESTING=ON
       - run: cmake --build build --parallel 4
       - run: ctest --test-dir build --output-on-failure
+
+  preview:
+    name: Publish tested Windows download
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [windows, linux, sanitizers]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: researchify-windows-portable
+          path: dist
+      - name: Checksums
+        run: |
+          cd dist
+          sha256sum ReSearchify-Windows-x64.zip > SHA256SUMS.txt
+      - name: GitHub preview release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          tag="preview-${GITHUB_SHA:0:12}"
+          gh release create "$tag" \
+            dist/ReSearchify-Windows-x64.zip dist/SHA256SUMS.txt \
+            --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --prerelease \
+            --title "ReSearchify preview (${GITHUB_SHA:0:7})" \
+            --notes "Windows x64 portable build. MSVC, Linux and sanitizer tests passed for this commit. Download the ZIP, extract rs.exe and open a terminal in your project."

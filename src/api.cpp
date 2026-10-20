@@ -224,7 +224,7 @@ fs::path discover(const J& request) {
         if (parent == at || parent.empty()) break;
         at = parent;
     }
-    throw Error("E_INDEX_NOT_FOUND", "No .researchify marker found; run researchify init . or pass --index");
+    throw Error("E_INDEX_NOT_FOUND", "No .researchify marker found; run rs -i . or pass --index");
 }
 J base(const J& request) {
     J out = O{{"api_version", 1}, {"status", "ok"}, {"execution_complete", true}, {"warnings", A{}}};
@@ -925,7 +925,7 @@ int run_mcp(std::istream& in, std::ostream& out, const fs::path& fixed_index) {
 int run_cli(const std::vector<std::string>& argv) {
     std::vector<std::string> args = argv;
     if (args.size() > 1) {
-        const auto& short_command = args[1];
+        const auto short_command = args[1];
         if (short_command == "-s") args[1] = "find";
         else if (short_command == "-rs" || short_command == "-l") {
             args[1] = "find";

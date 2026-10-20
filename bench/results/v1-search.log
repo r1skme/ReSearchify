@@ -1,0 +1,10 @@
+CONFIG cpp=20 threads=16 memory_mb=256 hardware_concurrency_hint=5
+OPEN seconds=0.299987 files=100000 lines=5000000 active_segments=1 retained_generations=1 index_bytes=714655875
+QUERY name=term iterations=7 warmup=1 p50_ms=1.503647 p95_ms=1.687468 min_ms=1.398118 max_ms=1.687468 matches=1 candidates=1 scanned_bytes=3525
+QUERY name=and iterations=7 warmup=1 p50_ms=67.473562 p95_ms=87.265069 min_ms=64.786845 max_ms=87.265069 matches=1000 candidates=1000 scanned_bytes=3666561
+QUERY name=or iterations=7 warmup=1 p50_ms=3.409355 p95_ms=4.144852 min_ms=2.889178 max_ms=4.144852 matches=2 candidates=2 scanned_bytes=7050
+QUERY name=not iterations=7 warmup=1 p50_ms=3.361992 p95_ms=6.751157 min_ms=2.732854 max_ms=6.751157 matches=1 candidates=1 scanned_bytes=3525
+QUERY name=phrase iterations=7 warmup=1 p50_ms=2.570922 p95_ms=3.200258 min_ms=2.058237 max_ms=3.200258 matches=1 candidates=1 scanned_bytes=3525
+QUERY name=regex iterations=7 warmup=1 p50_ms=2.509148 p95_ms=3.388018 min_ms=2.154241 max_ms=3.388018 matches=1 candidates=1 scanned_bytes=3525
+QUERY name=broad_term iterations=1 warmup=0 p50_ms=4868.821751 p95_ms=4868.821751 min_ms=4868.821751 max_ms=4868.821751 matches=100000 candidates=100000 scanned_bytes=366645610
+QUERY name=broad_regex iterations=1 warmup=0 p50_ms=15870.892540 p95_ms=15870.892540 min_ms=15870.892540 max_ms=15870.892540 matches=100000 candidates=100000 scanned_bytes=366645610

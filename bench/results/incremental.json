@@ -1,0 +1,65 @@
+[
+  {
+    "iteration": 0,
+    "mode": "v1-strict",
+    "seconds": 4.5474267319996216,
+    "growth_bytes": 11690757,
+    "output": "generation=2 files=100000 lines=5000001 bytes=366645627\nadded=0 changed=1 unchanged=99999 removed=0 skipped=0\nhashed=100000 tokenized=1 segments=2 workers=16 memory_budget_bytes=268435456 seconds=4.482678\n"
+  },
+  {
+    "iteration": 0,
+    "mode": "v2-strict",
+    "seconds": 5.445470523999575,
+    "growth_bytes": 16408,
+    "output": "{\"added\":0,\"api_version\":1,\"bytes\":366645627,\"changed\":1,\"execution_complete\":true,\"files\":100000,\"generation\":\"2\",\"global_scan\":true,\"hashed\":100000,\"lines\":5000001,\"memory_budget_bytes\":268435456,\"removed\":0,\"seconds\":5.4090722150000001,\"segments\":18,\"skipped\":0,\"status\":\"ok\",\"tokenized\":1,\"unchanged\":99999,\"warnings\":[],\"workers\":16}\n"
+  },
+  {
+    "iteration": 0,
+    "mode": "v2-known-path",
+    "seconds": 0.020837496000240208,
+    "growth_bytes": 22282,
+    "output": "{\"added\":0,\"api_version\":1,\"bytes\":366645627,\"changed\":1,\"execution_complete\":true,\"files\":100000,\"generation\":\"2\",\"global_scan\":false,\"hashed\":1,\"lines\":5000001,\"memory_budget_bytes\":268435456,\"removed\":0,\"seconds\":0.0146324,\"segments\":19,\"skipped\":0,\"status\":\"ok\",\"tokenized\":1,\"unchanged\":0,\"warnings\":[\"Only supplied paths were checked; other workspace changes may be absent\"],\"workers\":16}\n"
+  },
+  {
+    "iteration": 1,
+    "mode": "v1-strict",
+    "seconds": 2.0167635150000933,
+    "growth_bytes": 11690774,
+    "output": "generation=3 files=100000 lines=5000002 bytes=366645644\nadded=0 changed=1 unchanged=99999 removed=0 skipped=0\nhashed=100000 tokenized=1 segments=2 workers=16 memory_budget_bytes=268435456 seconds=1.989246\n"
+  },
+  {
+    "iteration": 1,
+    "mode": "v2-strict",
+    "seconds": 3.194275062000088,
+    "growth_bytes": 16462,
+    "output": "{\"added\":0,\"api_version\":1,\"bytes\":366645644,\"changed\":1,\"execution_complete\":true,\"files\":100000,\"generation\":\"3\",\"global_scan\":true,\"hashed\":100000,\"lines\":5000002,\"memory_budget_bytes\":268435456,\"removed\":0,\"seconds\":3.1699987150000002,\"segments\":18,\"skipped\":0,\"status\":\"ok\",\"tokenized\":1,\"unchanged\":99999,\"warnings\":[],\"workers\":16}\n"
+  },
+  {
+    "iteration": 1,
+    "mode": "v2-known-path",
+    "seconds": 0.03435895700022229,
+    "growth_bytes": 22427,
+    "output": "{\"added\":0,\"api_version\":1,\"bytes\":366645644,\"changed\":1,\"execution_complete\":true,\"files\":100000,\"generation\":\"3\",\"global_scan\":false,\"hashed\":1,\"lines\":5000002,\"memory_budget_bytes\":268435456,\"removed\":0,\"seconds\":0.028661892000000001,\"segments\":19,\"skipped\":0,\"status\":\"ok\",\"tokenized\":1,\"unchanged\":0,\"warnings\":[\"Only supplied paths were checked; other workspace changes may be absent\"],\"workers\":16}\n"
+  },
+  {
+    "iteration": 2,
+    "mode": "v1-strict",
+    "seconds": 2.1376828399997976,
+    "growth_bytes": 11690791,
+    "output": "generation=4 files=100000 lines=5000003 bytes=366645661\nadded=0 changed=1 unchanged=99999 removed=0 skipped=0\nhashed=100000 tokenized=1 segments=2 workers=16 memory_budget_bytes=268435456 seconds=2.115399\n"
+  },
+  {
+    "iteration": 2,
+    "mode": "v2-strict",
+    "seconds": 3.440453792999506,
+    "growth_bytes": 16497,
+    "output": "{\"added\":0,\"api_version\":1,\"bytes\":366645661,\"changed\":1,\"execution_complete\":true,\"files\":100000,\"generation\":\"4\",\"global_scan\":true,\"hashed\":100000,\"lines\":5000003,\"memory_budget_bytes\":268435456,\"removed\":0,\"seconds\":3.4122929399999999,\"segments\":18,\"skipped\":0,\"status\":\"ok\",\"tokenized\":1,\"unchanged\":99999,\"warnings\":[],\"workers\":16}\n"
+  },
+  {
+    "iteration": 2,
+    "mode": "v2-known-path",
+    "seconds": 0.02544348700030241,
+    "growth_bytes": 22535,
+    "output": "{\"added\":0,\"api_version\":1,\"bytes\":366645661,\"changed\":1,\"execution_complete\":true,\"files\":100000,\"generation\":\"4\",\"global_scan\":false,\"hashed\":1,\"lines\":5000003,\"memory_budget_bytes\":268435456,\"removed\":0,\"seconds\":0.018780089999999999,\"segments\":19,\"skipped\":0,\"status\":\"ok\",\"tokenized\":1,\"unchanged\":0,\"warnings\":[\"Only supplied paths were checked; other workspace changes may be absent\"],\"workers\":16}\n"
+  }
+]

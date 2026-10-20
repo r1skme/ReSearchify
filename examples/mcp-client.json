@@ -1,7 +1,7 @@
 {
   "mcpServers": {
     "researchify": {
-      "command": "C:\\Tools\\ReSearchify\\researchify.exe",
+      "command": "C:\\Tools\\ReSearchify\\rs.exe",
       "args": ["mcp", "--stdio", "--index", "D:\\Indexes\\MyProject-v2"]
     }
   }
