@@ -272,7 +272,11 @@ void binary_and_invalid_utf8() {
     write(w.root / "invalid", "\xC0\xAF");
     write(w.root / "surrogate", "\xED\xA0\x80");
     const auto b = create_index(w.root, w.index, options());
-    CHECK(b.files == 1 && b.skipped == 3);
+    if (b.files != 1 || b.skipped != 3) {
+        std::string message = "unexpected file classification: files=" + std::to_string(b.files) + " skipped=" + std::to_string(b.skipped);
+        for (const auto& warning : b.warnings) message += " | " + warning;
+        throw std::runtime_error(message);
+    }
     CHECK(Index(w.index).search("valid_token").total_matches == 1);
     CHECK(Index(w.index).verify().files == 1);
 }

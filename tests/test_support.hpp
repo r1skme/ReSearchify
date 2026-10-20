@@ -18,7 +18,7 @@ inline void require(bool result, const char* expression, const char* file, int l
 #define REQUIRE(...) ::test::require(bool(__VA_ARGS__), #__VA_ARGS__, __FILE__, __LINE__)
 template<class F> void rejects(F&& fn, const std::string& code = "") {
     bool caught = false;
-    try { fn(); } catch (const Error& e) { caught = true; if (!code.empty()) REQUIRE(e.code() == code); }
+    try { fn(); } catch (const Error& e) { caught = true; if (!code.empty() && e.code() != code) throw std::runtime_error("expected " + code + ", got " + e.code() + ": " + e.what()); }
     REQUIRE(caught);
 }
 struct Workspace {
