@@ -1,0 +1,39 @@
+{
+  "format": "researchify-storage-breakdown-v1",
+  "measured_utc": "2026-10-23T09:25:20.784475+00:00",
+  "provenance": "Post-timing read-only classification; original benchmark report directory bytes and timings remain unchanged. Excludes transaction and nested segment spill artifacts from committed bytes without deleting anything.",
+  "indexes": {
+    "baseline-compact": {
+      "committed_index_bytes": 505425112,
+      "transaction_scratch_bytes": 246423768,
+      "spill_scratch_bytes": 0,
+      "coordination_bytes": 420,
+      "literal_sidecar_bytes": 0,
+      "total_file_bytes": 751849300
+    },
+    "optimized-compact": {
+      "committed_index_bytes": 521926014,
+      "transaction_scratch_bytes": 95448165,
+      "spill_scratch_bytes": 0,
+      "coordination_bytes": 75,
+      "literal_sidecar_bytes": 16424945,
+      "total_file_bytes": 617374254
+    },
+    "baseline-fast": {
+      "committed_index_bytes": 711060495,
+      "transaction_scratch_bytes": 33597633,
+      "spill_scratch_bytes": 21466428,
+      "coordination_bytes": 0,
+      "literal_sidecar_bytes": 0,
+      "total_file_bytes": 766124556
+    },
+    "optimized-fast": {
+      "committed_index_bytes": 710777848,
+      "transaction_scratch_bytes": 0,
+      "spill_scratch_bytes": 0,
+      "coordination_bytes": 0,
+      "literal_sidecar_bytes": 0,
+      "total_file_bytes": 710777848
+    }
+  }
+}

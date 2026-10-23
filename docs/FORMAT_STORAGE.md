@@ -1,6 +1,6 @@
 # Disk format 2
 
-All formats are implemented in `src/disk.cpp` and `src/engine.cpp`. Files are local, immutable after publication, and unencrypted. Integer offsets must fit a signed `std::streamoff`. CRC-32 detects accidental damage, not malicious forgery.
+Container formats are implemented in `src/disk.cpp` and `src/engine.cpp`; the optional literal-signature payload is defined in `include/researchify/literal_filter.hpp`. Files are local, immutable after publication, and unencrypted. Integer offsets must fit a signed `std::streamoff`. CRC-32 detects accidental damage, not malicious forgery. The checksum is IEEE CRC-32 (reflected polynomial `0xEDB88320`), not CRC-32C; any accelerated implementation must preserve the existing byte-for-byte checksums.
 
 ## Primitives
 
@@ -23,11 +23,13 @@ All formats are implemented in `src/disk.cpp` and `src/engine.cpp`. Files are lo
 
 Counts, sortedness, generations, UTF-8, root scope, options and totals are validated. Unknown format magic is not guessed as a compatible v1 index. The filename generation and encoded generation must agree.
 
+Opt-in `profile_stages` instrumentation is not part of the saved policy or commit encoding. The optional literal sidecar described below does not change this manifest layout or disk format number.
+
 New commits are written as `commit-G.bin.tmp` and renamed only after referenced immutable files are ready. Unpublished transaction directories are not part of the index view.
 
 ## Prefix-compressed table
 
-Catalogs and term dictionaries use the same B+tree.
+Catalogs, term dictionaries and optional literal-signature tables use the same B+tree.
 
 Header36 bytes: magic8 `CSTBL2\r\n`, root offset u64, end of contiguous leaf region u64, total entry count u64, CRC32 of preceding32 bytes.
 
@@ -61,6 +63,7 @@ A normal update creates replacement tables for changed buckets only. The manifes
 * `content.bin`: concatenated raw bytes of captured UTF-8 files; record offsets and checksums identify individual documents. BOM/CRLF remain in storage and are normalized only for matching/line display.
 * `terms.tbl`: complete term key → posting descriptor.
 * `postings.bin`: magic `CSPOST2\n`, followed by non-inline posting blocks.
+* `literal.tbl`, optional: compact-profile document signatures in the checked B+tree format. It is an accelerator, not a replacement for snapshots or exact postings.
 
 A term key is prefix byte2 followed by a complete UTF-8 token, or byte1 followed by exactly3 raw trigram bytes. Source NUL is not indexed. Temporary sort keys append NUL and ordered docID. This makes term separation unambiguous without relying on hashes.
 
@@ -71,6 +74,26 @@ Descriptor tag1: start offset, end offset, document frequency, all varints. List
 Cursor seek can skip a block using its checked header bounds. Skipped payload bytes are not read by that query; full verification checks every block and exact descriptor counts/contiguity. Inline short lists avoid an I/O/header for every identifier unique to one file.
 
 Fast-profile trigram frequency is1 because only document membership and an initial evidence position are required. Token frequencies preserve actual counts.
+
+### Optional compact literal signatures
+
+New compact builds consider files of at least 512 raw source bytes for a signature. There is no entry for smaller files or a signature that saturated during construction, and a segment with no signatures need not contain `literal.tbl`. The fast profile continues to use its existing inverted trigram postings instead. Each key is the eight-byte ordered document ID; each value is exactly 157 bytes:
+
+| Offset | Bytes | Encoding |
+| --- | --- | --- |
+| 0 | 5 | ASCII `RSLF1` |
+| 5 | 8 | First content-fingerprint word, little-endian u64 |
+| 13 | 8 | Second content-fingerprint word, little-endian u64 |
+| 21 | 8 | Existing document CRC-32 encoded as u64, upper bits zero |
+| 29 | 128 | 1024-bit signature, sixteen little-endian u64 words |
+
+The 157-byte value size excludes the key and B+tree/page overhead. The table uses ordinary page/header CRC protection, and the value's fingerprint/CRC must match the active catalog record before it can filter that document.
+
+The signature records two hashed bits for every four-byte window within each normalized line. Normalization is identical to matching: remove the first-line UTF-8 BOM and trailing CR; do not join adjacent lines. Windows include bytes inside long tokens and within/across UTF-8 code points. Hash collisions can only cause extra exact verification. Document construction saturates conservatively when its density or processing limit is reached; query masks instead contain only bits required by the query and must not use document saturation rules. Literals shorter than four bytes yield no exclusion. A signature cannot establish a positive match, frequency, position or score.
+
+A missing table or document entry means "verify the content normally", never "no match". Invalid table checksums, unsupported signature versions/sizes or a mismatch with the live document identity raise `E_INDEX_CORRUPT`. Full engine `verify` uses a fresh cache, checks sidecar table structure/pages and entry shapes, and recomputes each live document's saved signature from its fully verified snapshot bytes. Queries validate only the metadata/pages they touch; they are not a substitute for full verification of unused pages.
+
+This sidecar is an optional, additive extension within disk format 2. New readers accept old v2 segments without it; old v2 readers ignore the extra table and continue exact search. Mixed generations with and without signatures remain readable without schema migration. Rebuilding or compacting with the new writer can add signatures; an unchanged-file/no-op update is not a promise to retrofit old segments. Unknown future sidecar versions are not silently interpreted as `RSLF1`. Sidecars follow the existing immutable segment publication, reader-pin and GC lifecycle.
 
 ## Pins, locks and recovery
 

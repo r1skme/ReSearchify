@@ -1,0 +1,52 @@
+{
+  "old_binary": "/workspace/scratch/93bfa6b783da/ReSearchify-baseline/build/rs",
+  "new_binary": "/workspace/scratch/93bfa6b783da/ReSearchify/build/rs",
+  "old_sha256": "b0a2c90c2dcaa3a71993751ec895807f32e8959e7439397971880564087e9154",
+  "new_sha256": "2ebf0907a27962d71da1dde69dfa860b244237c7d30141c773b85e29f1bbbb9b",
+  "comparisons": [
+    {
+      "writer": "old",
+      "profile": "compact",
+      "readers": [
+        "old",
+        "new"
+      ],
+      "queries_compared": 7,
+      "files_compared": 3,
+      "status": "passed"
+    },
+    {
+      "writer": "new",
+      "profile": "compact",
+      "readers": [
+        "old",
+        "new"
+      ],
+      "queries_compared": 7,
+      "files_compared": 3,
+      "status": "passed"
+    },
+    {
+      "writer": "old",
+      "profile": "fast",
+      "readers": [
+        "old",
+        "new"
+      ],
+      "queries_compared": 7,
+      "files_compared": 3,
+      "status": "passed"
+    },
+    {
+      "writer": "new",
+      "profile": "fast",
+      "readers": [
+        "old",
+        "new"
+      ],
+      "queries_compared": 7,
+      "files_compared": 3,
+      "status": "passed"
+    }
+  ]
+}

@@ -1,0 +1,889 @@
+{
+  "format": "researchify-paired-jsonl-v1",
+  "complete": true,
+  "platform": "Linux-6.18.55-x86_64-with-glibc2.39",
+  "machine": "x86_64",
+  "python": "3.12.14",
+  "seed": 1729,
+  "index_path": "/workspace/scratch/93bfa6b783da/ReSearchify/bench-data-harness/optimized-compact",
+  "index": {
+    "generation": "1",
+    "profile": "compact",
+    "files": 64,
+    "lines": 768,
+    "bytes": 45512,
+    "root": "/workspace/scratch/93bfa6b783da/ReSearchify/bench-data-harness/source"
+  },
+  "binaries": {
+    "baseline": {
+      "path": "/workspace/scratch/93bfa6b783da/ReSearchify-baseline/build/rs",
+      "sha256": "b0a2c90c2dcaa3a71993751ec895807f32e8959e7439397971880564087e9154"
+    },
+    "current": {
+      "path": "/workspace/scratch/93bfa6b783da/ReSearchify/build/rs",
+      "sha256": "86a12b278f1414c81beba973cb67387c34d09b91842f78de5a02af7758c05b4a"
+    }
+  },
+  "conditions": {
+    "readers": "Two concurrent persistent processes, strictly sequential request execution",
+    "index": "Same immutable explicitly supplied index for both readers; format compatibility required",
+    "cache": "OS cache uncontrolled; first request and additional warmups excluded; NOT cold-cache",
+    "ordering": "Seeded balanced alternating AB/BA pair order, at most one extra first position",
+    "first_request": "Each service starts immediately before its first request; remaining startup included",
+    "wall": "Client write/flush to complete response line; JSON parsing excluded",
+    "engine": "Unprofiled response metrics.seconds; internal wall time, NOT CPU time",
+    "correctness": "Exact count-only result fields compared between readers and on every exchange",
+    "scope": "No positions, ranking, snippets, full per-file oracle, CPU or RSS claim in this harness",
+    "resources": "Both processes remain resident; use isolated perf_benchmark runs for per-process CPU/RSS",
+    "memory_mb_per_reader": 256,
+    "threads": "Each executable's default; profiles and both startup samples retained separately"
+  },
+  "queries": [
+    {
+      "name": "term",
+      "query": "needle_42",
+      "matching_files": 1,
+      "request": {
+        "command": "find",
+        "query": "needle_42",
+        "limit": 0,
+        "snippets": 0,
+        "memory_mb": 256,
+        "regex_steps": 18446744073709551615
+      },
+      "startup_order": [
+        "current",
+        "baseline"
+      ],
+      "first_request": {
+        "current": {
+          "request_wall_seconds": 0.0025034430000232533,
+          "engine_seconds": 0.000861885,
+          "response": {
+            "api_version": 1,
+            "execution_complete": true,
+            "has_more": false,
+            "id": 0,
+            "metrics": {
+              "candidates": 1,
+              "scanned_bytes": 0,
+              "seconds": 0.000861885
+            },
+            "next_cursor": null,
+            "output_truncated": false,
+            "position_units": {
+              "column": "utf8_byte",
+              "column_base": 1,
+              "line_base": 1
+            },
+            "results": [],
+            "returned": 0,
+            "snapshot": {
+              "freshness": "unknown",
+              "generation": "1",
+              "source": "index"
+            },
+            "status": "ok",
+            "total": 1,
+            "warnings": []
+          }
+        },
+        "baseline": {
+          "request_wall_seconds": 0.0015030200011096895,
+          "engine_seconds": 0.000113971,
+          "response": {
+            "api_version": 1,
+            "execution_complete": true,
+            "has_more": false,
+            "id": 0,
+            "metrics": {
+              "candidates": 1,
+              "scanned_bytes": 0,
+              "seconds": 0.000113971
+            },
+            "next_cursor": null,
+            "output_truncated": false,
+            "position_units": {
+              "column": "utf8_byte",
+              "column_base": 1,
+              "line_base": 1
+            },
+            "results": [],
+            "returned": 0,
+            "snapshot": {
+              "freshness": "unknown",
+              "generation": "1",
+              "source": "index"
+            },
+            "status": "ok",
+            "total": 1,
+            "warnings": []
+          }
+        }
+      },
+      "warmup_order": [
+        [
+          "baseline",
+          "current"
+        ]
+      ],
+      "warmups": {
+        "baseline": [
+          {
+            "request_wall_seconds": 0.00012176300151622854,
+            "engine_seconds": 1.4642e-05,
+            "response": {
+              "api_version": 1,
+              "execution_complete": true,
+              "has_more": false,
+              "id": 1,
+              "metrics": {
+                "candidates": 1,
+                "scanned_bytes": 0,
+                "seconds": 1.4642e-05
+              },
+              "next_cursor": null,
+              "output_truncated": false,
+              "position_units": {
+                "column": "utf8_byte",
+                "column_base": 1,
+                "line_base": 1
+              },
+              "results": [],
+              "returned": 0,
+              "snapshot": {
+                "freshness": "unknown",
+                "generation": "1",
+                "source": "index"
+              },
+              "status": "ok",
+              "total": 1,
+              "warnings": []
+            }
+          }
+        ],
+        "current": [
+          {
+            "request_wall_seconds": 0.00018669100245460868,
+            "engine_seconds": 5.7186e-05,
+            "response": {
+              "api_version": 1,
+              "execution_complete": true,
+              "has_more": false,
+              "id": 1,
+              "metrics": {
+                "candidates": 1,
+                "scanned_bytes": 0,
+                "seconds": 5.7186e-05
+              },
+              "next_cursor": null,
+              "output_truncated": false,
+              "position_units": {
+                "column": "utf8_byte",
+                "column_base": 1,
+                "line_base": 1
+              },
+              "results": [],
+              "returned": 0,
+              "snapshot": {
+                "freshness": "unknown",
+                "generation": "1",
+                "source": "index"
+              },
+              "status": "ok",
+              "total": 1,
+              "warnings": []
+            }
+          }
+        ]
+      },
+      "paired_order": [
+        [
+          "baseline",
+          "current"
+        ],
+        [
+          "current",
+          "baseline"
+        ],
+        [
+          "baseline",
+          "current"
+        ]
+      ],
+      "tools": {
+        "baseline": {
+          "request_wall_ms": {
+            "iterations": 3,
+            "median": 0.09576399679644965,
+            "p95": 0.13063599908491597,
+            "min": 0.08581900328863412,
+            "max": 0.13063599908491597,
+            "samples": [
+              0.09576399679644965,
+              0.13063599908491597,
+              0.08581900328863412
+            ]
+          },
+          "engine_wall_ms": {
+            "iterations": 3,
+            "median": 0.012138,
+            "p95": 0.01989,
+            "min": 0.011027,
+            "max": 0.01989,
+            "samples": [
+              0.012138,
+              0.01989,
+              0.011027
+            ]
+          },
+          "raw": [
+            {
+              "request_wall_seconds": 9.576399679644965e-05,
+              "engine_seconds": 1.2138e-05,
+              "response": {
+                "api_version": 1,
+                "execution_complete": true,
+                "has_more": false,
+                "id": 2,
+                "metrics": {
+                  "candidates": 1,
+                  "scanned_bytes": 0,
+                  "seconds": 1.2138e-05
+                },
+                "next_cursor": null,
+                "output_truncated": false,
+                "position_units": {
+                  "column": "utf8_byte",
+                  "column_base": 1,
+                  "line_base": 1
+                },
+                "results": [],
+                "returned": 0,
+                "snapshot": {
+                  "freshness": "unknown",
+                  "generation": "1",
+                  "source": "index"
+                },
+                "status": "ok",
+                "total": 1,
+                "warnings": []
+              }
+            },
+            {
+              "request_wall_seconds": 0.00013063599908491597,
+              "engine_seconds": 1.989e-05,
+              "response": {
+                "api_version": 1,
+                "execution_complete": true,
+                "has_more": false,
+                "id": 3,
+                "metrics": {
+                  "candidates": 1,
+                  "scanned_bytes": 0,
+                  "seconds": 1.989e-05
+                },
+                "next_cursor": null,
+                "output_truncated": false,
+                "position_units": {
+                  "column": "utf8_byte",
+                  "column_base": 1,
+                  "line_base": 1
+                },
+                "results": [],
+                "returned": 0,
+                "snapshot": {
+                  "freshness": "unknown",
+                  "generation": "1",
+                  "source": "index"
+                },
+                "status": "ok",
+                "total": 1,
+                "warnings": []
+              }
+            },
+            {
+              "request_wall_seconds": 8.581900328863412e-05,
+              "engine_seconds": 1.1027e-05,
+              "response": {
+                "api_version": 1,
+                "execution_complete": true,
+                "has_more": false,
+                "id": 4,
+                "metrics": {
+                  "candidates": 1,
+                  "scanned_bytes": 0,
+                  "seconds": 1.1027e-05
+                },
+                "next_cursor": null,
+                "output_truncated": false,
+                "position_units": {
+                  "column": "utf8_byte",
+                  "column_base": 1,
+                  "line_base": 1
+                },
+                "results": [],
+                "returned": 0,
+                "snapshot": {
+                  "freshness": "unknown",
+                  "generation": "1",
+                  "source": "index"
+                },
+                "status": "ok",
+                "total": 1,
+                "warnings": []
+              }
+            }
+          ]
+        },
+        "current": {
+          "request_wall_ms": {
+            "iterations": 3,
+            "median": 0.1267609986825846,
+            "p95": 0.15744600023026578,
+            "min": 0.10248400212731212,
+            "max": 0.15744600023026578,
+            "samples": [
+              0.15744600023026578,
+              0.10248400212731212,
+              0.1267609986825846
+            ]
+          },
+          "engine_wall_ms": {
+            "iterations": 3,
+            "median": 0.019789,
+            "p95": 0.020190000000000003,
+            "min": 0.019609,
+            "max": 0.020190000000000003,
+            "samples": [
+              0.019789,
+              0.019609,
+              0.020190000000000003
+            ]
+          },
+          "raw": [
+            {
+              "request_wall_seconds": 0.00015744600023026578,
+              "engine_seconds": 1.9789e-05,
+              "response": {
+                "api_version": 1,
+                "execution_complete": true,
+                "has_more": false,
+                "id": 2,
+                "metrics": {
+                  "candidates": 1,
+                  "scanned_bytes": 0,
+                  "seconds": 1.9789e-05
+                },
+                "next_cursor": null,
+                "output_truncated": false,
+                "position_units": {
+                  "column": "utf8_byte",
+                  "column_base": 1,
+                  "line_base": 1
+                },
+                "results": [],
+                "returned": 0,
+                "snapshot": {
+                  "freshness": "unknown",
+                  "generation": "1",
+                  "source": "index"
+                },
+                "status": "ok",
+                "total": 1,
+                "warnings": []
+              }
+            },
+            {
+              "request_wall_seconds": 0.00010248400212731212,
+              "engine_seconds": 1.9609e-05,
+              "response": {
+                "api_version": 1,
+                "execution_complete": true,
+                "has_more": false,
+                "id": 3,
+                "metrics": {
+                  "candidates": 1,
+                  "scanned_bytes": 0,
+                  "seconds": 1.9609e-05
+                },
+                "next_cursor": null,
+                "output_truncated": false,
+                "position_units": {
+                  "column": "utf8_byte",
+                  "column_base": 1,
+                  "line_base": 1
+                },
+                "results": [],
+                "returned": 0,
+                "snapshot": {
+                  "freshness": "unknown",
+                  "generation": "1",
+                  "source": "index"
+                },
+                "status": "ok",
+                "total": 1,
+                "warnings": []
+              }
+            },
+            {
+              "request_wall_seconds": 0.00012676099868258461,
+              "engine_seconds": 2.019e-05,
+              "response": {
+                "api_version": 1,
+                "execution_complete": true,
+                "has_more": false,
+                "id": 4,
+                "metrics": {
+                  "candidates": 1,
+                  "scanned_bytes": 0,
+                  "seconds": 2.019e-05
+                },
+                "next_cursor": null,
+                "output_truncated": false,
+                "position_units": {
+                  "column": "utf8_byte",
+                  "column_base": 1,
+                  "line_base": 1
+                },
+                "results": [],
+                "returned": 0,
+                "snapshot": {
+                  "freshness": "unknown",
+                  "generation": "1",
+                  "source": "index"
+                },
+                "status": "ok",
+                "total": 1,
+                "warnings": []
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "literal",
+      "query": "\"needle_42 = 0;\"",
+      "matching_files": 1,
+      "request": {
+        "command": "find",
+        "query": "\"needle_42 = 0;\"",
+        "limit": 0,
+        "snippets": 0,
+        "memory_mb": 256,
+        "regex_steps": 18446744073709551615
+      },
+      "startup_order": [
+        "current",
+        "baseline"
+      ],
+      "first_request": {
+        "current": {
+          "request_wall_seconds": 0.009108590998948785,
+          "engine_seconds": 0.007529793,
+          "response": {
+            "api_version": 1,
+            "execution_complete": true,
+            "has_more": false,
+            "id": 0,
+            "metrics": {
+              "candidates": 64,
+              "scanned_bytes": 713,
+              "seconds": 0.007529793
+            },
+            "next_cursor": null,
+            "output_truncated": false,
+            "position_units": {
+              "column": "utf8_byte",
+              "column_base": 1,
+              "line_base": 1
+            },
+            "results": [],
+            "returned": 0,
+            "snapshot": {
+              "freshness": "unknown",
+              "generation": "1",
+              "source": "index"
+            },
+            "status": "ok",
+            "total": 1,
+            "warnings": []
+          }
+        },
+        "baseline": {
+          "request_wall_seconds": 0.003911019000952365,
+          "engine_seconds": 0.002403582,
+          "response": {
+            "api_version": 1,
+            "execution_complete": true,
+            "has_more": false,
+            "id": 0,
+            "metrics": {
+              "candidates": 64,
+              "scanned_bytes": 45512,
+              "seconds": 0.002403582
+            },
+            "next_cursor": null,
+            "output_truncated": false,
+            "position_units": {
+              "column": "utf8_byte",
+              "column_base": 1,
+              "line_base": 1
+            },
+            "results": [],
+            "returned": 0,
+            "snapshot": {
+              "freshness": "unknown",
+              "generation": "1",
+              "source": "index"
+            },
+            "status": "ok",
+            "total": 1,
+            "warnings": []
+          }
+        }
+      },
+      "warmup_order": [
+        [
+          "current",
+          "baseline"
+        ]
+      ],
+      "warmups": {
+        "baseline": [
+          {
+            "request_wall_seconds": 0.0008737229982216377,
+            "engine_seconds": 0.000744068,
+            "response": {
+              "api_version": 1,
+              "execution_complete": true,
+              "has_more": false,
+              "id": 1,
+              "metrics": {
+                "candidates": 64,
+                "scanned_bytes": 45512,
+                "seconds": 0.000744068
+              },
+              "next_cursor": null,
+              "output_truncated": false,
+              "position_units": {
+                "column": "utf8_byte",
+                "column_base": 1,
+                "line_base": 1
+              },
+              "results": [],
+              "returned": 0,
+              "snapshot": {
+                "freshness": "unknown",
+                "generation": "1",
+                "source": "index"
+              },
+              "status": "ok",
+              "total": 1,
+              "warnings": []
+            }
+          }
+        ],
+        "current": [
+          {
+            "request_wall_seconds": 0.00034031199902528897,
+            "engine_seconds": 0.000191217,
+            "response": {
+              "api_version": 1,
+              "execution_complete": true,
+              "has_more": false,
+              "id": 1,
+              "metrics": {
+                "candidates": 64,
+                "scanned_bytes": 713,
+                "seconds": 0.000191217
+              },
+              "next_cursor": null,
+              "output_truncated": false,
+              "position_units": {
+                "column": "utf8_byte",
+                "column_base": 1,
+                "line_base": 1
+              },
+              "results": [],
+              "returned": 0,
+              "snapshot": {
+                "freshness": "unknown",
+                "generation": "1",
+                "source": "index"
+              },
+              "status": "ok",
+              "total": 1,
+              "warnings": []
+            }
+          }
+        ]
+      },
+      "paired_order": [
+        [
+          "current",
+          "baseline"
+        ],
+        [
+          "baseline",
+          "current"
+        ],
+        [
+          "current",
+          "baseline"
+        ]
+      ],
+      "tools": {
+        "baseline": {
+          "request_wall_ms": {
+            "iterations": 3,
+            "median": 1.0004440009652171,
+            "p95": 1.0459730001457501,
+            "min": 0.9590310000930913,
+            "max": 1.0459730001457501,
+            "samples": [
+              1.0459730001457501,
+              0.9590310000930913,
+              1.0004440009652171
+            ]
+          },
+          "engine_wall_ms": {
+            "iterations": 3,
+            "median": 0.85821,
+            "p95": 0.906293,
+            "min": 0.830218,
+            "max": 0.906293,
+            "samples": [
+              0.906293,
+              0.830218,
+              0.85821
+            ]
+          },
+          "raw": [
+            {
+              "request_wall_seconds": 0.0010459730001457501,
+              "engine_seconds": 0.000906293,
+              "response": {
+                "api_version": 1,
+                "execution_complete": true,
+                "has_more": false,
+                "id": 2,
+                "metrics": {
+                  "candidates": 64,
+                  "scanned_bytes": 45512,
+                  "seconds": 0.000906293
+                },
+                "next_cursor": null,
+                "output_truncated": false,
+                "position_units": {
+                  "column": "utf8_byte",
+                  "column_base": 1,
+                  "line_base": 1
+                },
+                "results": [],
+                "returned": 0,
+                "snapshot": {
+                  "freshness": "unknown",
+                  "generation": "1",
+                  "source": "index"
+                },
+                "status": "ok",
+                "total": 1,
+                "warnings": []
+              }
+            },
+            {
+              "request_wall_seconds": 0.0009590310000930913,
+              "engine_seconds": 0.000830218,
+              "response": {
+                "api_version": 1,
+                "execution_complete": true,
+                "has_more": false,
+                "id": 3,
+                "metrics": {
+                  "candidates": 64,
+                  "scanned_bytes": 45512,
+                  "seconds": 0.000830218
+                },
+                "next_cursor": null,
+                "output_truncated": false,
+                "position_units": {
+                  "column": "utf8_byte",
+                  "column_base": 1,
+                  "line_base": 1
+                },
+                "results": [],
+                "returned": 0,
+                "snapshot": {
+                  "freshness": "unknown",
+                  "generation": "1",
+                  "source": "index"
+                },
+                "status": "ok",
+                "total": 1,
+                "warnings": []
+              }
+            },
+            {
+              "request_wall_seconds": 0.0010004440009652171,
+              "engine_seconds": 0.00085821,
+              "response": {
+                "api_version": 1,
+                "execution_complete": true,
+                "has_more": false,
+                "id": 4,
+                "metrics": {
+                  "candidates": 64,
+                  "scanned_bytes": 45512,
+                  "seconds": 0.00085821
+                },
+                "next_cursor": null,
+                "output_truncated": false,
+                "position_units": {
+                  "column": "utf8_byte",
+                  "column_base": 1,
+                  "line_base": 1
+                },
+                "results": [],
+                "returned": 0,
+                "snapshot": {
+                  "freshness": "unknown",
+                  "generation": "1",
+                  "source": "index"
+                },
+                "status": "ok",
+                "total": 1,
+                "warnings": []
+              }
+            }
+          ]
+        },
+        "current": {
+          "request_wall_ms": {
+            "iterations": 3,
+            "median": 0.260382003034465,
+            "p95": 0.30609999885200523,
+            "min": 0.2334100026928354,
+            "max": 0.30609999885200523,
+            "samples": [
+              0.260382003034465,
+              0.30609999885200523,
+              0.2334100026928354
+            ]
+          },
+          "engine_wall_ms": {
+            "iterations": 3,
+            "median": 0.136065,
+            "p95": 0.136565,
+            "min": 0.125649,
+            "max": 0.136565,
+            "samples": [
+              0.136065,
+              0.136565,
+              0.125649
+            ]
+          },
+          "raw": [
+            {
+              "request_wall_seconds": 0.000260382003034465,
+              "engine_seconds": 0.000136065,
+              "response": {
+                "api_version": 1,
+                "execution_complete": true,
+                "has_more": false,
+                "id": 2,
+                "metrics": {
+                  "candidates": 64,
+                  "scanned_bytes": 713,
+                  "seconds": 0.000136065
+                },
+                "next_cursor": null,
+                "output_truncated": false,
+                "position_units": {
+                  "column": "utf8_byte",
+                  "column_base": 1,
+                  "line_base": 1
+                },
+                "results": [],
+                "returned": 0,
+                "snapshot": {
+                  "freshness": "unknown",
+                  "generation": "1",
+                  "source": "index"
+                },
+                "status": "ok",
+                "total": 1,
+                "warnings": []
+              }
+            },
+            {
+              "request_wall_seconds": 0.00030609999885200523,
+              "engine_seconds": 0.000136565,
+              "response": {
+                "api_version": 1,
+                "execution_complete": true,
+                "has_more": false,
+                "id": 3,
+                "metrics": {
+                  "candidates": 64,
+                  "scanned_bytes": 713,
+                  "seconds": 0.000136565
+                },
+                "next_cursor": null,
+                "output_truncated": false,
+                "position_units": {
+                  "column": "utf8_byte",
+                  "column_base": 1,
+                  "line_base": 1
+                },
+                "results": [],
+                "returned": 0,
+                "snapshot": {
+                  "freshness": "unknown",
+                  "generation": "1",
+                  "source": "index"
+                },
+                "status": "ok",
+                "total": 1,
+                "warnings": []
+              }
+            },
+            {
+              "request_wall_seconds": 0.0002334100026928354,
+              "engine_seconds": 0.000125649,
+              "response": {
+                "api_version": 1,
+                "execution_complete": true,
+                "has_more": false,
+                "id": 4,
+                "metrics": {
+                  "candidates": 64,
+                  "scanned_bytes": 713,
+                  "seconds": 0.000125649
+                },
+                "next_cursor": null,
+                "output_truncated": false,
+                "position_units": {
+                  "column": "utf8_byte",
+                  "column_base": 1,
+                  "line_base": 1
+                },
+                "results": [],
+                "returned": 0,
+                "snapshot": {
+                  "freshness": "unknown",
+                  "generation": "1",
+                  "source": "index"
+                },
+                "status": "ok",
+                "total": 1,
+                "warnings": []
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

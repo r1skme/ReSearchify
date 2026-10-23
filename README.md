@@ -107,6 +107,8 @@ For the complete query language, see [QUERY.md](docs/QUERY.md).
 
 ### Measured performance
 
+For the current optimization branch, see the reproducible [performance report](docs/PERFORMANCE_OPTIMIZATION.md). It distinguishes old/new results from ripgrep comparisons, index construction from search, and tested platforms from CI configuration. The historical v1/v2 figures below are **not measurements of this branch**.
+
 Results from the same **100,000-file / 5,000,000-line** synthetic source corpus (about **350 MiB** of text), comparing the previous CodeSearch v1 engine against the indexed v2 engine that ReSearchify builds on:
 
 | Measurement | v1 | v2 / ReSearchify baseline |
@@ -118,6 +120,22 @@ Results from the same **100,000-file / 5,000,000-line** synthetic source corpus 
 | Disk added by one edited file | about 11.7 MB | **about 16 KB** |
 
 Index size is **29% smaller** on that corpus; a warm rare-term query was about **19× faster**. These figures compare **two versions of this project**, **not** against `rg`, `grep`, or Everything, and are **not** Windows measurements. They depend on CPU, disk cache, corpus and query. A broad regex can still be slow (about 19.9 s in this v2 baseline); full strict refreshes still read unchanged files to detect hidden edits. See [BENCHMARKS.md](docs/BENCHMARKS.md) for setup, raw results and limitations.
+
+### Performance controls (current source)
+
+```sh
+rs -l "needle_42 = 0;" --threads 0 --profile --json
+rs -l "needle_42 = 0;" --threads 1 --json
+rs -u --profile-stages --json
+```
+
+Search uses a bounded adaptive worker count by default (`--threads 0`); `--threads 1` is the serial reference. Only sufficiently large eligible content scans use multiple workers. Small/selective queries, posting-only searches and regex currently stay serial. All workers share the query's candidate/read budgets and preserve exact ranking, counts and pagination.
+
+Search `--profile` adds stage timings and counters to `metrics.profile`; build/update `--profile-stages` adds `stage_profile`. These diagnostics are opt-in and worker time sums are **not** additional wall time. Normal JSON/JSONL output stays unchanged when profiling is off.
+
+New `compact` indexes include a small optional per-document literal filter, rather than full trigram postings. `fast` keeps its trigram index. Old format-2 indexes remain readable; a normal full compaction can populate the optional filters without changing the query contract. Missing filters fall back to ordinary verification. CRC/fingerprint checks are not disabled. The core remains C++20 with no third-party runtime dependencies or mandatory CPU instruction extensions.
+
+These options describe the current source branch; an older downloaded release may not yet contain them. Use `rs schema find --json` to discover the installed binary's actual options.
 
 ## Use with an AI agent
 
@@ -167,7 +185,7 @@ ctest --test-dir build --output-on-failure
 ./build/rs --help
 ```
 
-The C++ core requires **no third-party libraries**. Windows builds use a static MSVC runtime by default. CI checks Windows x64, Linux x64/ARM64, macOS Intel/Apple Silicon and Linux sanitizers; see [the workflow](.github/workflows/windows.yml). An Actions workflow is not evidence of a successful run—check its actual result before sharing a binary.
+The C++ core requires **no third-party libraries**. Windows builds use a static MSVC runtime by default. CI checks Windows x64, Linux x64/ARM64, macOS Intel/Apple Silicon, an additional Linux Clang build and Linux sanitizers; see [the workflow](.github/workflows/windows.yml). An Actions workflow is not evidence of a successful run—check its actual result before sharing a binary.
 
 ## Documentation
 
