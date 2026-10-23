@@ -340,6 +340,31 @@ The overall 70-minute benchmark step timed out at **2026-10-23T16:28:12Z**. The 
 
 [Exact unchanged ZIP](../bench/results/native-tiny-39976554801-windows-x64.zip), SHA256 `59bb53b0a28e11351d005ae7b949dd60a7b3ee5775f03a2f3b5500a314a9cb4e`; [unchanged summary](../bench/results/native-tiny-39976554801-windows-x64-summary.json); [validation/timeout excerpts](../bench/results/native-tiny-39976554801-windows-x64-validation.json); [provenance](../bench/results/native-tiny-39976554801-provenance.json). Its checkout is the primary macOS run 19 source recorded above. Independent arithmetic checks reproduced 164 retained distributions and exactly compared every completed marker result; the raw ZIP retains all min/max, CPU, RSS and per-request data.
 
+## Retained final-core Windows run 20: another incomplete combined window
+
+Run 39978466280 passed Windows CTest 13/13 in 50.90 seconds and 41 Python harness tests in 0.606 seconds. Linux GCC x64/ARM64, Clang x64, ASan/UBSan and both macOS jobs completed successfully in this run. Windows completed all 24 full correctness comparisons, both 21-pair search series, both 1000-term/21-literal JSONL sessions, and all five 1000-process CLI blocks. These are a separate complete set of search medians, without replacing any primary run 18 or run 19 rows.
+
+| Profile/query | Original median ms | Current median ms | rg median ms |
+| --- | --- | --- | --- |
+| compact/term | 11.120 | 10.857 | 1845.511 |
+| compact/literal | 2848.198 | 517.981 | 1845.071 |
+| compact/broad_term | 401.829 | 381.259 | 3565.528 |
+| compact/broad_regex | 3370.238 | 711.393 | 3572.294 |
+| compact/anchored_regex | 3394.053 | 731.909 | 3558.330 |
+| compact/missing_term | 11.823 | 11.709 | 1875.275 |
+| fast/term | 11.996 | 11.802 | 1901.068 |
+| fast/literal | 178.836 | 24.653 | 1883.340 |
+| fast/broad_term | 407.653 | 390.520 | 3589.236 |
+| fast/broad_regex | 3507.503 | 728.556 | 3596.100 |
+| fast/anchored_regex | 3522.656 | 740.783 | 3623.627 |
+| fast/missing_term | 11.992 | 11.778 | 1953.800 |
+
+The combined benchmark step reached its 70-minute timeout at **2026-10-23T16:41:49Z**. The 1000-rg CLI block took 2008.173 seconds (33.47 minutes). Compact updates completed 70 operations / 46 checks; fast updates completed only two strict-no-op operations and zero post-operation checks. Both drivers restored their source files. The unchanged summary remains `complete: false`; no full-suite pass or engine deadlock is inferred.
+
+Head `708b46f54fdfd3d571b1145e36253866dd1a1bc6`, actual merge checkout `f17c259821427705c199ca0fbb7bc6c3b261e2cd`, and local `78fcf5701762888349b04642a020db8f5bbf04c7` share full tree `d72e3bad31a4db37a5028d90d145dec9b91fb9cb`. Current Windows binary SHA256 is `52537cca882c8a24dc87e6a7b0a89394deb71bbce1e39f4d145450f05d7bea37`. This measured source precedes the Windows lock repair and retains its own identity.
+
+[Exact unchanged ZIP](../bench/results/native-tiny-39978466280-windows-x64.zip), SHA256 `e45f3540dbd7b63c499dc8081ad690bf55d94dc631c72b8654cd51d1d40f87e7`; [unchanged summary](../bench/results/native-tiny-39978466280-windows-x64-summary.json); [validation/timeout excerpts and independent arithmetic](../bench/results/native-tiny-39978466280-windows-x64-validation.json); [full source/job/artifact provenance](../bench/results/native-tiny-39978466280-provenance.json). All 164 retained distributions were independently recomputed; all completed operation statuses, warm responses and exact marker result comparisons passed. The raw ZIP retains all other metrics and incomplete update details.
+
 ## Run 21 macOS harness failure and canonical-path test repair
 
 Both macOS jobs built natively and passed all 13 CTest suites: Apple Silicon in 15.99 seconds; Intel in 24.28 seconds. Python then ran 45 tests on each architecture, with four failures and nine skips (32 passes). Every failure came from the same assertion at `scripts/test_tiny_update_comparison.py:45`: the driver resolved `/var/folders/.../after` to `/private/var/folders/.../after`, while the mock expected the unresolved spelling. Native performance and packaging were skipped after that failed harness gate.

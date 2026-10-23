@@ -1,0 +1,867 @@
+{
+  "format": "researchify-native-ci-provenance-v1",
+  "scope": "Separate final-NFA-core repeat; native Windows search/session completed, enclosing combined step timed out during fast updates",
+  "workflow_run_id": 39978466280,
+  "workflow_run_url": "https://github.com/r1skme/ReSearchify/actions/runs/39978466280",
+  "run_head_commit": "708b46f54fdfd3d571b1145e36253866dd1a1bc6",
+  "run_head_tree": "d72e3bad31a4db37a5028d90d145dec9b91fb9cb",
+  "checkout_commit": "f17c259821427705c199ca0fbb7bc6c3b261e2cd",
+  "checkout_tree": "d72e3bad31a4db37a5028d90d145dec9b91fb9cb",
+  "checkout_parents": [
+    "f06dfbcca862407167a672cb42a6df8653c86791",
+    "708b46f54fdfd3d571b1145e36253866dd1a1bc6"
+  ],
+  "local_core_commit": "78fcf5701762888349b04642a020db8f5bbf04c7",
+  "local_core_tree": "d72e3bad31a4db37a5028d90d145dec9b91fb9cb",
+  "source_trees_equal": true,
+  "jobs": [
+    {
+      "id": 120499188083,
+      "name": "Linux x64 (Clang)",
+      "status": "completed",
+      "conclusion": "success",
+      "run_id": 39978466280,
+      "logs_url": null,
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2
+        },
+        {
+          "name": "Run cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=clang++ -DBUILD_TESTING=ON",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3
+        },
+        {
+          "name": "Run cmake --build build --parallel 4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4
+        },
+        {
+          "name": "Run ctest --test-dir build --output-on-failure",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11
+        }
+      ]
+    },
+    {
+      "id": 120499188232,
+      "name": "Linux arm64 (GCC)",
+      "status": "completed",
+      "conclusion": "success",
+      "run_id": 39978466280,
+      "logs_url": null,
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3
+        },
+        {
+          "name": "Ensure ripgrep comparison is available",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4
+        },
+        {
+          "name": "Configure",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5
+        },
+        {
+          "name": "Build",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6
+        },
+        {
+          "name": "Test",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7
+        },
+        {
+          "name": "Test measurement harness",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8
+        },
+        {
+          "name": "Benchmark smoke (not a performance gate)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10
+        },
+        {
+          "name": "Verify architecture, smoke-test and package",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 23
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 24
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 25
+        }
+      ]
+    },
+    {
+      "id": 120499188259,
+      "name": "Linux x64 (GCC)",
+      "status": "completed",
+      "conclusion": "success",
+      "run_id": 39978466280,
+      "logs_url": null,
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3
+        },
+        {
+          "name": "Ensure ripgrep comparison is available",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4
+        },
+        {
+          "name": "Configure",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5
+        },
+        {
+          "name": "Build",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6
+        },
+        {
+          "name": "Test",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7
+        },
+        {
+          "name": "Test measurement harness",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8
+        },
+        {
+          "name": "Benchmark smoke (not a performance gate)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10
+        },
+        {
+          "name": "Verify architecture, smoke-test and package",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 23
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 24
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 25
+        }
+      ]
+    },
+    {
+      "id": 120499188434,
+      "name": "Address/UB sanitizer",
+      "status": "completed",
+      "conclusion": "success",
+      "run_id": 39978466280,
+      "logs_url": null,
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2
+        },
+        {
+          "name": "Run cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DRESEARCHIFY_SANITIZERS=ON -DBUILD_TESTING=ON",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3
+        },
+        {
+          "name": "Run cmake --build build --parallel 4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4
+        },
+        {
+          "name": "Run ctest --test-dir build --output-on-failure",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11
+        }
+      ]
+    },
+    {
+      "id": 120499188639,
+      "name": "Windows x64 (MSVC)",
+      "status": "completed",
+      "conclusion": "failure",
+      "run_id": 39978466280,
+      "logs_url": null,
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3
+        },
+        {
+          "name": "Ensure ripgrep comparison is available",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4
+        },
+        {
+          "name": "Configure",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5
+        },
+        {
+          "name": "Build",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6
+        },
+        {
+          "name": "Test",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7
+        },
+        {
+          "name": "Test measurement harness",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8
+        },
+        {
+          "name": "Benchmark smoke (not a performance gate)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10
+        },
+        {
+          "name": "Check whether tiny-file timing inputs changed",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11
+        },
+        {
+          "name": "Check out original Windows performance baseline",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12
+        },
+        {
+          "name": "Build original native Windows comparison binary",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13
+        },
+        {
+          "name": "Native 100k tiny-file comparison (correctness gate only)",
+          "status": "completed",
+          "conclusion": "failure",
+          "number": 14
+        },
+        {
+          "name": "Preserve Windows tiny-file evidence, including incomplete runs",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 15
+        },
+        {
+          "name": "Quick start check",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 16
+        },
+        {
+          "name": "Package portable ZIP",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 17
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 18
+        },
+        {
+          "name": "Post Check out original Windows performance baseline",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 34
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 35
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 36
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 37
+        }
+      ]
+    },
+    {
+      "id": 120499188746,
+      "name": "macOS x64 (Clang)",
+      "status": "completed",
+      "conclusion": "success",
+      "run_id": 39978466280,
+      "logs_url": null,
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3
+        },
+        {
+          "name": "Ensure ripgrep comparison is available",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4
+        },
+        {
+          "name": "Configure",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5
+        },
+        {
+          "name": "Build",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6
+        },
+        {
+          "name": "Test",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7
+        },
+        {
+          "name": "Test measurement harness",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8
+        },
+        {
+          "name": "Benchmark smoke (not a performance gate)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10
+        },
+        {
+          "name": "Check whether native timing inputs changed",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11
+        },
+        {
+          "name": "Check out original performance baseline",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12
+        },
+        {
+          "name": "Check out previous optimized checkpoint",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13
+        },
+        {
+          "name": "Build native comparison binaries",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 14
+        },
+        {
+          "name": "Paired native performance comparisons (correctness gate only)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 15
+        },
+        {
+          "name": "Preserve native comparison evidence, including failed/incomplete runs",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 16
+        },
+        {
+          "name": "Verify architecture, smoke-test and package",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 17
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 18
+        },
+        {
+          "name": "Post Check out previous optimized checkpoint",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 33
+        },
+        {
+          "name": "Post Check out original performance baseline",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 34
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 35
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 36
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 37
+        }
+      ]
+    },
+    {
+      "id": 120499188798,
+      "name": "macOS arm64 (Clang)",
+      "status": "completed",
+      "conclusion": "success",
+      "run_id": 39978466280,
+      "logs_url": null,
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3
+        },
+        {
+          "name": "Ensure ripgrep comparison is available",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4
+        },
+        {
+          "name": "Configure",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5
+        },
+        {
+          "name": "Build",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6
+        },
+        {
+          "name": "Test",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7
+        },
+        {
+          "name": "Test measurement harness",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8
+        },
+        {
+          "name": "Benchmark smoke (not a performance gate)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10
+        },
+        {
+          "name": "Check whether native timing inputs changed",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11
+        },
+        {
+          "name": "Check out original performance baseline",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12
+        },
+        {
+          "name": "Check out previous optimized checkpoint",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13
+        },
+        {
+          "name": "Build native comparison binaries",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 14
+        },
+        {
+          "name": "Paired native performance comparisons (correctness gate only)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 15
+        },
+        {
+          "name": "Preserve native comparison evidence, including failed/incomplete runs",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 16
+        },
+        {
+          "name": "Verify architecture, smoke-test and package",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 17
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 18
+        },
+        {
+          "name": "Post Check out previous optimized checkpoint",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 33
+        },
+        {
+          "name": "Post Check out original performance baseline",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 34
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 35
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 36
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 37
+        }
+      ]
+    },
+    {
+      "id": 120535355627,
+      "name": "Publish tested multi-platform preview",
+      "status": "completed",
+      "conclusion": "skipped",
+      "run_id": 39978466280,
+      "logs_url": null,
+      "steps": null
+    }
+  ],
+  "artifacts": [
+    {
+      "id": 12516418374,
+      "name": "native-performance-windows-tiny-x64",
+      "size_in_bytes": 253204,
+      "url": "https://api.github.com/repos/r1skme/ReSearchify/actions/artifacts/12516418374",
+      "archive_download_url": "https://api.github.com/repos/r1skme/ReSearchify/actions/artifacts/12516418374/zip",
+      "expired": false,
+      "created_at": "2026-10-23T16:41:51Z",
+      "expires_at": "2027-01-21T15:27:48Z",
+      "updated_at": "2026-10-23T16:41:51Z",
+      "digest": "sha256:e45f3540dbd7b63c499dc8081ad690bf55d94dc631c72b8654cd51d1d40f87e7",
+      "workflow_run": {
+        "id": 39978466280,
+        "repository_id": 1427610584,
+        "head_repository_id": 1427610584,
+        "head_branch": "perf/cross-platform-optimization",
+        "head_sha": "708b46f54fdfd3d571b1145e36253866dd1a1bc6"
+      },
+      "local_file": "bench/results/native-tiny-39978466280-windows-x64.zip",
+      "local_sha256": "e45f3540dbd7b63c499dc8081ad690bf55d94dc631c72b8654cd51d1d40f87e7",
+      "digest_verified": true,
+      "members": [
+        {
+          "name": "compact-process.json",
+          "size_bytes": 102180,
+          "sha256": "5cbbd2b4eb234c6b433ad898d8d611bdcd538a3ea59a4c1817a50f6c3a4e8387"
+        },
+        {
+          "name": "compact-process.log",
+          "size_bytes": 106746,
+          "sha256": "351152b19aef58d897b0ed61a0408c8a6a8bf10600c1afa3dcd403cf77c82585"
+        },
+        {
+          "name": "compact-sessions.json",
+          "size_bytes": 2402862,
+          "sha256": "357c772e0fcef08f35b43ac363cb4fe0f460a92c67c3dc743a27359ecef4a6ac"
+        },
+        {
+          "name": "compact-sessions.log",
+          "size_bytes": 254,
+          "sha256": "ba95564d3e0bdc7c1dbd4d4fd7193e5e5a7cd6e79e32b8a67fc78faab3887602"
+        },
+        {
+          "name": "compact-updates.json",
+          "size_bytes": 217722,
+          "sha256": "028f60c58128bbe9665a2a5a45d5af0248138197f3e337e2c8376bbe54bdf3d6"
+        },
+        {
+          "name": "compact-updates.log",
+          "size_bytes": 190,
+          "sha256": "15b09edcbc71195f042d6e0ea4283a66607f366af69263c1088c0f38117525c8"
+        },
+        {
+          "name": "fast-process.json",
+          "size_bytes": 101817,
+          "sha256": "d50125e9df7f6deca8c03bcf530a84852c219984aa83ed474564f3069e732fff"
+        },
+        {
+          "name": "fast-process.log",
+          "size_bytes": 106383,
+          "sha256": "fa1a8517aab46490fdd6dfbdeb25d2f08926f81a17c17653fe4d673119d4e98f"
+        },
+        {
+          "name": "fast-sessions.json",
+          "size_bytes": 2402740,
+          "sha256": "1606e16e0961d1004a70835b9612131c8281df8f1498483b30354cf2bbf7bd6b"
+        },
+        {
+          "name": "fast-sessions.log",
+          "size_bytes": 248,
+          "sha256": "fc70ef1267f8644a52866a570a0b5dbbe1bfc508c721237b0a30586f64401d71"
+        },
+        {
+          "name": "fast-updates.json",
+          "size_bytes": 9158,
+          "sha256": "04818b65b9830d4094252d42c401e4f778711c824e0aaed2ada8ef5732615227"
+        },
+        {
+          "name": "fast-updates.log",
+          "size_bytes": 2030,
+          "sha256": "fa8d7bb3e9ba8f452670e2e4df0722b54cdc0ca3179b2b2e3e1ef0c64c85155b"
+        },
+        {
+          "name": "summary.json",
+          "size_bytes": 248024,
+          "sha256": "693d548ea73f06bc11ff2da3a5a24e4e842ca4906efd2f598ebc196b8a63b222"
+        },
+        {
+          "name": "update-fixture.json",
+          "size_bytes": 698,
+          "sha256": "f6258af52b439b4d99e4114e28adbc011da6930d547a994898e03c2e4aec74f7"
+        }
+      ]
+    }
+  ],
+  "note": "All other native build/test/harness jobs passed in this run. Only the Windows artifact is retained here; Mac primary performance remains whole run19. Exact source identity is preserved rather than assigning these timings to the later Windows lock repair."
+}
