@@ -18,6 +18,15 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Ensure ripgrep comparison is available
+        shell: pwsh
+        run: |
+          if (-not (Get-Command rg -ErrorAction SilentlyContinue)) {
+            choco install ripgrep --yes --no-progress
+            if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          }
+          rg --version
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
       - name: Configure
         run: cmake -S . -B build -G "Visual Studio 17 2022" -A x64 -DBUILD_TESTING=ON -DRESEARCHIFY_STATIC_RUNTIME=ON
       - name: Build
@@ -39,7 +48,7 @@ jobs:
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
           ./build/Release/cs_bench.exe --work perf-smoke --phase search --index fast --memory-mb 64 --repeats 3 --stages 1
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
-          python scripts/perf_benchmark.py --executable build/Release/rs.exe --index perf-smoke/index --corpus perf-smoke/source --iterations 3 --memory-mb 64 --query literal --query broad_regex --query no_match --output perf-smoke/measurements.json
+          python scripts/perf_benchmark.py --executable build/Release/rs.exe --index perf-smoke/index --corpus perf-smoke/source --iterations 3 --memory-mb 64 --query literal --query broad_regex --query no_match --rg rg --output perf-smoke/measurements.json
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
       - uses: actions/upload-artifact@v4
         with:
@@ -83,6 +92,13 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Ensure ripgrep comparison is available
+        run: |
+          if ! command -v rg >/dev/null; then
+            sudo apt-get update
+            sudo apt-get install --yes ripgrep
+          fi
+          rg --version
       - name: Configure
         run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON
       - name: Build
@@ -98,7 +114,7 @@ jobs:
           ./build/cs_bench --work perf-smoke --phase search --memory-mb 64 --repeats 3 --stages 1
           ./build/cs_bench --work perf-smoke --phase create --index fast --profile fast --threads 2 --memory-mb 64
           ./build/cs_bench --work perf-smoke --phase search --index fast --memory-mb 64 --repeats 3 --stages 1
-          python scripts/perf_benchmark.py --executable build/rs --index perf-smoke/index --corpus perf-smoke/source --iterations 3 --memory-mb 64 --query literal --query broad_regex --query no_match --output perf-smoke/measurements.json
+          python scripts/perf_benchmark.py --executable build/rs --index perf-smoke/index --corpus perf-smoke/source --iterations 3 --memory-mb 64 --query literal --query broad_regex --query no_match --rg rg --output perf-smoke/measurements.json
       - uses: actions/upload-artifact@v4
         with:
           name: perf-linux-${{ matrix.arch }}
@@ -141,6 +157,12 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Ensure ripgrep comparison is available
+        run: |
+          if ! command -v rg >/dev/null; then
+            brew install ripgrep
+          fi
+          rg --version
       - name: Configure
         run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_DEPLOYMENT_TARGET=13.3 -DBUILD_TESTING=ON
       - name: Build
@@ -156,7 +178,7 @@ jobs:
           ./build/cs_bench --work perf-smoke --phase search --memory-mb 64 --repeats 3 --stages 1
           ./build/cs_bench --work perf-smoke --phase create --index fast --profile fast --threads 2 --memory-mb 64
           ./build/cs_bench --work perf-smoke --phase search --index fast --memory-mb 64 --repeats 3 --stages 1
-          python scripts/perf_benchmark.py --executable build/rs --index perf-smoke/index --corpus perf-smoke/source --iterations 3 --memory-mb 64 --query literal --query broad_regex --query no_match --output perf-smoke/measurements.json
+          python scripts/perf_benchmark.py --executable build/rs --index perf-smoke/index --corpus perf-smoke/source --iterations 3 --memory-mb 64 --query literal --query broad_regex --query no_match --rg rg --output perf-smoke/measurements.json
       - uses: actions/upload-artifact@v4
         with:
           name: perf-macos-${{ matrix.arch }}

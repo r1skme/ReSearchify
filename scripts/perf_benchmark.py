@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import argparse
 import ctypes
+import hashlib
 import json
 import math
 import os
@@ -26,6 +27,11 @@ import sys
 import tempfile
 import threading
 import time
+
+
+def binary_identity(path: str) -> str:
+    with open(path, "rb") as stream:
+        return hashlib.file_digest(stream, "sha256").hexdigest()
 
 
 def distribution(samples: list[float]) -> dict:
@@ -222,14 +228,28 @@ def normalized(response: dict) -> dict:
     return {key: response.get(key) for key in ("total", "returned", "has_more", "next_cursor", "results")}
 
 
+def validate_noop_session(responses: list[dict], reference: dict) -> None:
+    if not responses or len(responses) % 2 != 1:
+        raise RuntimeError("Incomplete update/find session")
+    if any(normalized(response) != normalized(reference) for response in responses[::2]):
+        raise RuntimeError("Results changed during strict no-op update session")
+    for response in responses[1::2]:
+        if any(response.get(field) != 0 for field in ("added", "changed", "removed", "tokenized")):
+            raise RuntimeError("Update changed the index; this is not a strict no-op benchmark")
+
+
 def parse_rg_counts(output: str) -> dict[str, int]:
     counts = {}
-    remaining = output
-    while remaining:
-        path, separator, tail = remaining.partition("\0")
-        value, newline, remaining = tail.partition("\n")
-        if not separator or not newline:
+    position = 0
+    while position < len(output):
+        separator = output.find("\0", position)
+        end = output.find("\n", separator + 1) if separator >= 0 else -1
+        if separator < 0 or end < 0:
             raise ValueError("Malformed ripgrep --null --count-matches output")
+        # Never copy the remaining output: large result sets otherwise turn
+        # correctness parsing into O(n^2) work outside the target measurements.
+        path, value = output[position:separator], output[separator + 1:end]
+        position = end + 1
         normalized_path = path.replace("\\", "/")
         if normalized_path.startswith("./"):
             normalized_path = normalized_path[2:]
@@ -325,10 +345,14 @@ def main() -> None:
         if Path(metadata["root"]).resolve() != corpus:
             parser.error("index and ripgrep corpus root differ")
     report = {"format": "researchify-perf-v1", "executable": executable,
+              "executable_sha256": binary_identity(executable),
               "platform": platform.platform(), "machine": platform.machine(), "python": platform.python_version(),
               "index": {key: metadata.get(key) for key in ("generation", "files", "lines", "bytes", "profile", "index_bytes")},
               "index_storage": index_storage(index),
               "conditions": {"os_cache": "uncontrolled; explicit warm-up; NOT cold-cache",
+                             "memory_mb": args.memory_mb,
+                             "search_threads": args.search_threads if args.search_threads is not None else "executable default",
+                             "rg_threads": args.rg_threads if args.rg_threads is not None else "ripgrep default",
                              "standalone": "fresh target process per sample, including startup and shutdown",
                              "jsonl": "one persistent process; first request/warmups excluded from latency distribution",
                              "rss": "per process high-water mark, not allocator budget or per-request RSS; POSIX fallback can include inherited Python pre-exec memory floor",
@@ -358,7 +382,7 @@ def main() -> None:
                 raise RuntimeError("CLI results changed between repetitions: " + case["name"])
             samples.append(sample)
             metrics.append(response["metrics"])
-        row = {"name": case["name"], "query": case["query"], "matching_files": warmup["total"],
+        row = {"name": case["name"], "query": case["query"], "command": argv, "matching_files": warmup["total"],
                "standalone": metric_summary(samples), "engine_metrics": metrics,
                "rg": None, "correctness": "repeated CLI/JSONL exact count consistency"}
         request = {"command": "find", "query": case["query"], "limit": 0, "snippets": 0,
@@ -377,6 +401,8 @@ def main() -> None:
         if "profile" in fields:
             profiled = measure({"kind": "jsonl", "argv": [executable, "serve", "--stdio", "--index", index],
                                 "requests": [{**request, "id": 0, "profile": True}], "timeout": args.timeout})["responses"][0]
+            if normalized(profiled) != normalized(warmup):
+                raise RuntimeError("Profiling changed search results: " + case["name"])
             row["separate_profile_sample"] = profiled.get("profile", profiled.get("metrics", {}).get("profile"))
         if args.interleave_update:
             mixed_requests = [{**request, "id": 0}]
@@ -385,8 +411,7 @@ def main() -> None:
                                    {**request, "id": iteration * 2 + 2}]
             mixed = measure({"kind": "jsonl", "argv": [executable, "serve", "--stdio", "--allow-write", "--index", index],
                              "requests": mixed_requests, "timeout": args.timeout})
-            if any(normalized(response) != normalized(warmup) for response in mixed["responses"][2::2]):
-                raise RuntimeError("Results changed after strict no-op update")
+            validate_noop_session(mixed["responses"], warmup)
             row["jsonl_update_find"] = {
                 "update_wall_ms": distribution([value * 1000 for value in mixed["request_seconds"][1::2]]),
                 "find_after_update_wall_ms": distribution([value * 1000 for value in mixed["request_seconds"][2::2]]),
@@ -423,6 +448,8 @@ def main() -> None:
         report["queries"].append(row)
         print(f"{case['name']}: {warmup['total']} files; CLI median {row['standalone']['wall_ms']['median']:.3f} ms; "
               f"JSONL median {row['jsonl']['request_wall_ms']['median']:.3f} ms", file=sys.stderr, flush=True)
+    if binary_identity(executable) != report["executable_sha256"]:
+        raise RuntimeError("Executable changed during measurement; rerun against an immutable build")
     text = json.dumps(report, ensure_ascii=False, indent=2)
     print(text)
     if args.output:

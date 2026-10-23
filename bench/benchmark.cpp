@@ -214,7 +214,8 @@ void run_searches(const Options& o, const fs::path& directory) {
                       << " verification_seconds=" << p.verification_seconds << " line_processing_seconds=" << p.line_processing_seconds
                       << " matching_seconds=" << p.matching_seconds << " snippet_seconds=" << p.snippet_seconds
                       << " content_opens=" << p.content_opens << " content_reads=" << p.content_reads
-                      << " content_bytes=" << p.content_bytes << " regex_steps=" << p.regex_steps << " workers=" << p.workers << '\n';
+                      << " content_bytes=" << p.content_bytes << " filtered_documents=" << p.filtered_documents
+                      << " regex_steps=" << p.regex_steps << " workers=" << p.workers << '\n';
         }
     }
     if (!selected) throw Error("Unknown --query benchmark case: " + o.query_name);

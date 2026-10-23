@@ -8,7 +8,6 @@ search number. Warm JSONL measurements remain in perf_benchmark.py.
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 from pathlib import Path
 import platform
@@ -17,11 +16,6 @@ import shutil
 import sys
 
 import perf_benchmark as bench
-
-
-def identity(path: str) -> str:
-    with open(path, "rb") as stream:
-        return hashlib.file_digest(stream, "sha256").hexdigest()
 
 
 def main() -> None:
@@ -67,7 +61,7 @@ def main() -> None:
     report = {
         "format": "researchify-paired-v1", "platform": platform.platform(), "machine": platform.machine(),
         "seed": args.seed, "iterations": args.iterations,
-        "binaries": {name: {"path": exe, "sha256": identity(exe)} for name, exe in executables.items()},
+        "binaries": {name: {"path": exe, "sha256": bench.binary_identity(exe)} for name, exe in executables.items()},
         "indexes": {name: {**{key: value.get(key) for key in ("generation", "profile", "files", "lines", "bytes")},
                            "status_directory_bytes_including_scratch": value.get("index_bytes"),
                            **bench.index_storage(indexes[name])}
@@ -141,6 +135,12 @@ def main() -> None:
         # Checkpoint completed cases; interrupted runs never masquerade as full.
         report["complete"] = False
         args.output.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+    for name, exe in executables.items():
+        if bench.binary_identity(exe) != report["binaries"][name]["sha256"]:
+            raise RuntimeError(name + " executable changed during measurement; incomplete checkpoint preserved")
+        final_status = bench.success(bench.command([exe, "status", "--index", indexes[name], "--json"], args.timeout))
+        if any(final_status[key] != status[name][key] for key in ("generation", "files", "lines", "bytes", "profile")):
+            raise RuntimeError(name + " index changed during measurement; incomplete checkpoint preserved")
     report["complete"] = True
     args.output.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     print(json.dumps(report, indent=2))

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Standard-library tests for the development performance harness."""
 import math
+import hashlib
 from pathlib import Path
 import sys
 import unittest
@@ -10,6 +11,11 @@ import perf_benchmark as bench
 
 
 class PerformanceHarnessTests(unittest.TestCase):
+    def test_executable_identity(self):
+        path = str(Path(__file__).resolve())
+        expected = hashlib.sha256(Path(path).read_bytes()).hexdigest()
+        self.assertEqual(bench.binary_identity(path), expected)
+
     def test_distribution_and_raw_samples(self):
         result = bench.distribution([4, 1, 2, 3])
         self.assertEqual(result["median"], 2.5)
@@ -37,6 +43,13 @@ class PerformanceHarnessTests(unittest.TestCase):
         self.assertIn("literal", {c["name"] for c in suite})
         self.assertIn("regex_no_match", {c["name"] for c in suite})
 
+    def test_large_count_output(self):
+        output = "".join(f"./group/file_{i}.cpp\0{i + 1}\n" for i in range(10000))
+        result = bench.parse_rg_counts(output)
+        self.assertEqual(len(result), 10000)
+        self.assertEqual(result["group/file_0.cpp"], 1)
+        self.assertEqual(result["group/file_9999.cpp"], 10000)
+
     def test_pagination_fits_current_result_budget(self):
         page = bench.correctness_page_limit(64)
         self.assertGreater(page, 0)
@@ -50,10 +63,22 @@ class PerformanceHarnessTests(unittest.TestCase):
         self.assertEqual(bench.normalized(a), bench.normalized(b))
         self.assertNotEqual(bench.normalized(a), bench.normalized({**b, "total": 4}))
 
+    def test_noop_session_rejects_real_updates(self):
+        find = {"total": 1, "returned": 0, "results": []}
+        update = {"added": 0, "changed": 0, "removed": 0, "tokenized": 0}
+        bench.validate_noop_session([find, update, find], find)
+        for field in update:
+            with self.assertRaises(RuntimeError):
+                bench.validate_noop_session([find, {**update, field: 1}, find], find)
+        with self.assertRaises(RuntimeError):
+            bench.validate_noop_session([{**find, "total": 2}, update, find], find)
+        with self.assertRaises(RuntimeError):
+            bench.validate_noop_session([find, update], find)
+
     def test_isolated_child_measurement(self):
         result = bench.command([sys.executable, "-c", "print('measured target')"], 10)
         self.assertEqual(result["returncode"], 0)
-        self.assertEqual(result["stdout"], "measured target\n")
+        self.assertEqual(result["stdout"].splitlines(), ["measured target"])
         self.assertEqual(result["stderr"], "")
         self.assertGreater(result["wall_seconds"], 0)
         if result["cpu_seconds"] is not None:
