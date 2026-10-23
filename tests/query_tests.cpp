@@ -1,10 +1,12 @@
 #include "researchify/query.hpp"
 #include "researchify/engine.hpp"
+#include "../src/query_internal.hpp"
 
 #include <algorithm>
 #include <cstdint>
 #include <functional>
 #include <iostream>
+#include <limits>
 #include <random>
 #include <regex>
 #include <string>
@@ -65,6 +67,13 @@ void utf8_and_tokens() {
     require(tokens.empty(), "punctuation is not an identifier");
     for_each_token("abc", [&](Token t) { tokens.emplace_back(t.text); });
     require(tokens == std::vector<std::string>{"abc"}, "final token without delimiter");
+    for (std::size_t padding = 0; padding < 24; ++padding) {
+        const std::string prefix(padding, 'a');
+        require(valid_utf8(prefix + "😀" + std::string(24 - padding, 'b')), "Unicode scalar at varied byte offsets");
+        require(!valid_utf8(prefix + std::string("\xed\xa0\x80", 3)), "surrogate rejection at varied byte offsets");
+        require(!valid_utf8(prefix + std::string("\xf0\x80\x80\x80", 4)), "overlong rejection at varied byte offsets");
+        require(!valid_utf8(prefix + std::string("\xf0\x90\x80", 3)), "truncated tail at varied byte offsets");
+    }
 }
 
 void parser() {
@@ -274,6 +283,173 @@ void differential_boolean_regex() {
     }
 }
 
+void regex_prefix_and_class_fast_paths() {
+    using namespace researchify;
+    std::string long_unicode_prefix;
+    for (unsigned i = 0; i < 31; ++i) long_unicode_prefix += "я";
+    long_unicode_prefix += "😀";
+    // A never-accepting alternative prevents prefix extraction. The two NFAs
+    // must still return identical leftmost / earliest-end byte ranges, at every
+    // valid start offset, including assertions and nullable constructions.
+    const std::vector<std::string> patterns{
+        "needle_[0-9]+", "^abc", "abc$", "\\babc", "\\Babc", "abc\\bdef", "ab\\Bcd",
+        "a{0}abc", "(abc){2,3}", "a?bc", "a*bc", "ab(c|d)", "(ab|a)b", "a.*b",
+        "abc|", "a{0}", "^$", "", "\\b世界\\b", "привет.+", "😀[a-z]+", "a$bc",
+        std::string(70, 'a') + "b", long_unicode_prefix + "[0-9]+", "abc\\x00def",
+        "[\\D0]", "[^\\s]", "[a-z\\W]", "(return|if|while)[ \\t]",
+        "([ab]?)*c", "(a?|b?)*c", "(^a|b)", "(a|b\\b)"
+    };
+    const std::vector<std::string> fixed_inputs{
+        "", "abc", "xabc abc!", "xxabcdef abcd", "needle_x needle_42 needle_43", "ababcd",
+        "abcabcabc", "\nabc\r", " 世界!", "a世界世界", "😀abc", "xпривет мир", std::string(90, 'a') + "b",
+        std::string("ab\0abc", 6), std::string("xabc\0def", 8), "x" + long_unicode_prefix + "42"
+    };
+    std::mt19937 random(20261023);
+    for (const auto& pattern : patterns) {
+        const Regex fast(pattern), reference("(" + pattern + ")|(\\b\\B)");
+        RegexWorkspace fast_work, reference_work, validated_work;
+        for (std::size_t trial = 0; trial < fixed_inputs.size() + 100; ++trial) {
+            std::string input;
+            if (trial < fixed_inputs.size()) input = fixed_inputs[trial];
+            else {
+                const auto length = random() % 20;
+                for (unsigned i = 0; i < length; ++i) input += "abc !012_\r\n"[random() % 11];
+            }
+            for (std::size_t start = 0; start <= input.size(); ++start) {
+                if (start < input.size() && (static_cast<unsigned char>(input[start]) & 0xc0) == 0x80) continue;
+                std::uint64_t fast_budget = 10000000, reference_budget = 10000000, validated_budget = 10000000;
+                RegexMatch actual, expected, validated;
+                const bool actual_found = fast.find(input, actual, fast_budget, fast_work, start);
+                const bool expected_found = reference.find(input, expected, reference_budget, reference_work, start);
+                const bool validated_found = detail::ValidatedRegexAccess::find(
+                    fast, input, validated, validated_budget, validated_work, start);
+                require(actual_found == expected_found, "prefix boolean differential: " + pattern);
+                require(actual_found == validated_found && fast_budget == validated_budget,
+                        "validated input preserves results and work budget: " + pattern);
+                if (actual_found) require(actual.begin == expected.begin && actual.end == expected.end,
+                                          "prefix byte range differential: " + pattern);
+                if (actual_found) require(actual.begin == validated.begin && actual.end == validated.end,
+                                          "validated input preserves byte ranges: " + pattern);
+            }
+        }
+    }
+    // Independent oracle for every ASCII class member, including controls and
+    // NUL. Non-ASCII is covered separately by the Unicode tests above.
+    for (const auto* pattern : {"[a-z]", "[a-zA-Z0-9_]", "[^a-z]", "[\\D0]", "[\\s]", "[^\\w]", "[a-z\\W]"}) {
+        const Regex actual(pattern);
+        const std::regex expected(pattern);
+        for (unsigned cp = 0; cp < 128; ++cp) {
+            const std::string input(1, static_cast<char>(cp));
+            RegexMatch result;
+            std::uint64_t budget = 10000;
+            require(actual.find(input, result, budget) == std::regex_search(input, expected), "ASCII class bitmap differential");
+        }
+    }
+    Regex prefixed("needle_[0-9]+");
+    RegexMatch result;
+    std::uint64_t budget = 10000;
+    rejects([&] { prefixed.find(std::string(32, 'x') + std::string("\xff", 1), result, budget); },
+            "prefix must not bypass invalid UTF-8 without a match");
+    rejects([&] { prefixed.find("needle_42" + std::string("\xff", 1), result, budget); },
+            "prefix must not bypass invalid UTF-8 after a match");
+    budget = 0;
+    rejects([&] { prefixed.find("no match", result, budget); }, "prefix must not bypass zero budget");
+    budget = 10;
+    rejects([&] { prefixed.find("no match", result, budget); }, "prefix scan charges skipped bytes");
+}
+
+void regex_validated_input_budget() {
+    using namespace researchify;
+    // Check every budget boundary for several actual NFA executions. This also
+    // covers failure after workspace reuse, nullable patterns and UTF-8 offsets.
+    const std::vector<std::pair<std::string, std::string>> cases{
+        {"needle_[0-9]+", "no match"}, {"needle_[0-9]+", "xneedle_42"},
+        {"\\b世界\\b", " 世界!"}, {"^a.*b$", "aaab"}, {"a*", "ba"}, {"[а-я]+", " яя!"}
+    };
+    for (const auto& [pattern, input] : cases) {
+        const Regex regex(pattern);
+        RegexWorkspace strict_work, validated_work;
+        for (std::size_t start = 0; start <= input.size(); ++start) {
+            for (std::uint64_t limit = 0; limit < 256; ++limit) {
+                std::uint64_t strict_left = limit, validated_left = limit;
+                RegexMatch strict_match, validated_match;
+                bool strict_found = false, validated_found = false;
+                std::string strict_error, validated_error;
+                try { strict_found = regex.find(input, strict_match, strict_left, strict_work, start); }
+                catch (const Error& e) { strict_error = e.code() + ":" + e.what(); }
+                try { validated_found = detail::ValidatedRegexAccess::find(
+                    regex, input, validated_match, validated_left, validated_work, start); }
+                catch (const Error& e) { validated_error = e.code() + ":" + e.what(); }
+                require(strict_error == validated_error, "validated input preserves budget/offset error");
+                require(strict_left == validated_left, "validated input preserves remaining work units");
+                require(strict_found == validated_found, "validated input preserves budgeted result");
+                if (strict_found) require(strict_match.begin == validated_match.begin && strict_match.end == validated_match.end,
+                                          "validated input preserves budgeted byte range");
+            }
+        }
+    }
+    // Neither public overload can inherit a validated state from reused storage
+    // or workspace. Reject invalid bytes before and after an otherwise valid hit.
+    const Regex regex("needle_[0-9]+");
+    RegexWorkspace workspace;
+    RegexMatch match;
+    std::string input = "needle_42";
+    std::uint64_t budget = 10000;
+    require(regex.find(input, match, budget, workspace), "strict input warm-up");
+    for (const auto& invalid : {std::string("\xff", 1) + "needle_42", "needle_42" + std::string("\xff", 1),
+                               std::string("no match\xc3", 9)}) {
+        input = invalid;
+        budget = 10000;
+        rejects([&] { regex.find(input, match, budget, workspace); }, "strict reused workspace rejects invalid UTF-8");
+        budget = 10000;
+        rejects([&] { regex.find(input, match, budget); }, "strict public overload rejects invalid UTF-8");
+    }
+}
+
+void regex_initial_rejection_budget() {
+    using namespace researchify;
+    // Neither alternative can accept these subjects. The unchanged NFA work
+    // contract is validation + initial closure + (loop, two threads, closure)
+    // per remaining scalar. The second pattern's seven closure pops include
+    // an already-visited epsilon-loop ID, which must still consume one unit.
+    for (const auto& [pattern, closure] : std::vector<std::pair<std::string, std::uint64_t>>{
+             {"(a|b)", 3}, {"(a?)*b", 7}}) {
+        const Regex regex(pattern);
+        RegexWorkspace workspace;
+        for (const auto& input : {std::string(), std::string("xxx"), std::string(" \r\n"),
+                                  std::string("x\0x", 3), std::string("😀πxx")}) {
+            for (std::size_t start = 0; start <= input.size(); ++start) {
+                if (start < input.size() && (static_cast<unsigned char>(input[start]) & 0xc0) == 0x80) continue;
+                std::uint64_t scalars = 0;
+                for (auto at = start; at < input.size(); ++at)
+                    if ((static_cast<unsigned char>(input[at]) & 0xc0) != 0x80) ++scalars;
+                const auto validation = static_cast<std::uint64_t>(input.size()) + 1;
+                const auto cost = validation + closure + (3 + closure) * scalars;
+                for (std::uint64_t limit = 0; limit <= cost + 1; ++limit) {
+                    // Force epoch wrap with reused populated workspace too.
+                    workspace.epoch = (std::numeric_limits<std::size_t>::max)();
+                    auto budget = limit;
+                    RegexMatch match;
+                    bool found = false;
+                    std::string error;
+                    try { found = regex.find(input, match, budget, workspace, start); }
+                    catch (const Error& e) { error = e.code(); }
+                    require(!found, "first-character rejection preserves nonmatch");
+                    require(error == (limit < cost ? "E_BUDGET" : ""), "initial rejection exact budget boundary");
+                    const auto expected = limit < validation ? limit : limit < cost ? 0 : limit - cost;
+                    require(budget == expected, "initial rejection preserves remaining budget on success and exhaustion");
+                }
+            }
+        }
+    }
+    const Regex regex("(a|b)");
+    RegexWorkspace workspace;
+    RegexMatch result;
+    std::uint64_t budget = 10000;
+    rejects([&] { regex.find(std::string("xxx\xff", 4), result, budget, workspace); },
+            "initial rejection does not bypass public UTF-8 validation");
+}
+
 void concurrency() {
     const researchify::Regex regex("^([a-z]+|[а-я]+)_[0-9]{2}$");
     std::vector<std::thread> workers;
@@ -298,7 +474,10 @@ int main() {
     const std::vector<std::pair<const char*, std::function<void()>>> tests{
         {"utf8_and_tokens", utf8_and_tokens}, {"query_parser", parser}, {"three_valued_truth_tables", truth_tables},
         {"regex_matching", regex_matching}, {"regex_errors_and_budget", regex_rejections_and_budget},
-        {"regex_differential", differential_boolean_regex}, {"regex_concurrency", concurrency}};
+        {"regex_differential", differential_boolean_regex}, {"regex_fast_paths", regex_prefix_and_class_fast_paths},
+        {"regex_validated_input_budget", regex_validated_input_budget},
+        {"regex_initial_rejection_budget", regex_initial_rejection_budget},
+        {"regex_concurrency", concurrency}};
     try {
         for (const auto& test : tests) {
             std::cout << "[RUN ] " << test.first << '\n';

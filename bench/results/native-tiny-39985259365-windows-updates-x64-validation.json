@@ -1,0 +1,37 @@
+{
+  "format": "researchify-native-validation-excerpts-v1",
+  "workflow_run_id": 39985259365,
+  "job_id": 120522640551,
+  "job_name": "Windows x64 update comparison (independent runner)",
+  "source": "https://api.github.com/repos/r1skme/ReSearchify/actions/jobs/120522640551/logs",
+  "status": "completed",
+  "conclusion": "success",
+  "ctest": {
+    "executed": false,
+    "note": "This independent update-only runner builds the two native binaries and performs the complete update benchmark; CTest belongs to a separate failed Windows job."
+  },
+  "benchmark_step": {
+    "name": "Native 100k tiny-file updates only (correctness gate only)",
+    "status": "completed",
+    "conclusion": "success",
+    "number": 7,
+    "started_at": "2026-10-23T16:17:06Z",
+    "completed_at": "2026-10-23T16:26:48Z",
+    "completed": true
+  },
+  "log_excerpts": [
+    "2026-10-23T16:15:29.8120517Z Microsoft Windows Server 2022",
+    "2026-10-23T16:15:29.8123056Z Image: windows-2022",
+    "2026-10-23T16:15:35.6004484Z HEAD is now at d5ecb3a Merge 108ff41d2016abcc931bc8bd9418e288fd9d2677 into f06dfbcca862407167a672cb42a6df8653c86791",
+    "2026-10-23T16:15:50.8466914Z -- The CXX compiler identification is MSVC 19.44.35229.0",
+    "2026-10-23T16:16:32.7792714Z -- The CXX compiler identification is MSVC 19.44.35229.0"
+  ],
+  "note": "Selected decoded build/host log excerpts, not an unchanged full log archive. Update-only correctness does not establish concurrent GC/read-open correctness; the separate search job failed that test.",
+  "independent_artifact_checks": {
+    "unique_profile_distributions": 70,
+    "update_operations": 140,
+    "marker_checks": 84,
+    "rename_or_verify_checks": 8,
+    "method": "Each unique profile report checked once; duplicate archived child report matches copied bytes exactly. All retained sample distributions recomputed; exact marker results and completed returncode/status/completeness checked; corpus digest and edit mtime restoration verified."
+  }
+}

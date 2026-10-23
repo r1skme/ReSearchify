@@ -1,7 +1,6 @@
 #pragma once
 #include <utility>
 #include <cstddef>
-#include <cstddef>
 #include <cstdint>
 #include <filesystem>
 #include <functional>
@@ -36,6 +35,14 @@ struct BuildOptions {
     bool changed_only = false;
     std::vector<std::string> changed_files;
     std::function<void(const std::string&)> checkpoint;
+    bool profile_stages = false;
+};
+struct BuildProfile {
+    bool enabled = false;
+    // Thread-stage sums can overlap. Capture includes tokenization and writes;
+    // enumeration includes producer backpressure. Do not add them to wall time.
+    double enumeration_seconds = 0, queue_wait_seconds = 0, metadata_lookup_seconds = 0, validation_seconds = 0;
+    double capture_seconds = 0, posting_write_seconds = 0, catalog_seconds = 0, commit_seconds = 0;
 };
 struct BuildReport {
     std::uint64_t generation = 0, files = 0, lines = 0, bytes = 0;
@@ -45,6 +52,7 @@ struct BuildReport {
     double seconds = 0;
     bool global_scan = true;
     std::vector<std::string> warnings;
+    BuildProfile profile;
 };
 struct SearchOptions {
     std::size_t limit = 20, offset = 0;
@@ -52,6 +60,12 @@ struct SearchOptions {
     std::uint64_t max_scan_bytes = 0, max_regex_steps = 100000000, max_candidates = 0;
     std::vector<std::string> paths;
     bool sort_path = false;
+    // 0 selects a bounded adaptive worker count; 1 forces serial execution.
+    std::size_t threads = 0;
+    // Stage timing is opt-in; disabled searches do not time each input line.
+    bool profile = false;
+    // Optional thread-safe cooperative cancellation predicate (C++ API).
+    std::function<bool()> cancelled;
     // Keyset continuation keeps memory bounded independently of the page number.
     bool after = false;
     double after_score = 0;
@@ -64,10 +78,20 @@ struct SearchHit {
     std::uint64_t matches = 0;
     std::vector<Snippet> snippets;
 };
+struct SearchProfile {
+    bool enabled = false;
+    std::size_t workers = 1;
+    double planning_seconds = 0, candidate_seconds = 0, content_open_seconds = 0;
+    double content_read_seconds = 0, verification_seconds = 0, line_processing_seconds = 0;
+    double matching_seconds = 0, snippet_seconds = 0;
+    std::uint64_t content_opens = 0, content_reads = 0, content_bytes = 0, regex_steps = 0;
+    std::uint64_t filtered_documents = 0;
+};
 struct SearchReport {
     std::uint64_t generation = 0, total_matches = 0, remaining_matches = 0, candidates = 0, scanned_bytes = 0;
     double seconds = 0;
     std::vector<SearchHit> hits;
+    SearchProfile profile;
 };
 struct Statistics {
     std::uint64_t generation = 0, files = 0, lines = 0, bytes = 0, tokens = 0;

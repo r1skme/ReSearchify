@@ -1,0 +1,126 @@
+{
+  "format": "researchify-tiny-planner-validation-v1",
+  "date": "2026-10-23",
+  "source_base": "349175274bb338fc5e39ca4ec417c296cc4f868e",
+  "source_tested": "499f5f64a9dbb514d043025f4fe3448646043ada",
+  "stages": [
+    {
+      "name": "Pre-follow-up",
+      "source_commit": "349175274bb338fc5e39ca4ec417c296cc4f868e",
+      "binary_sha256": "c0046d12c64100b636bed378d8796a3d1c058b9ed692d3f8c8915adf6c80a4dd"
+    },
+    {
+      "name": "Single full-coverage driver",
+      "source_commit": "56b1aa333b344434bdc682ef231155d45953cc42",
+      "binary_sha256": "7f4331d6f4ef2dfdb5bbb106c40a81f9a580fc25b9d04eb51dc912f0fbf6c6fa"
+    },
+    {
+      "name": "Raw same-segment membership",
+      "source_commit": "905623a4a488e433160be94b60400a1ab20df00f",
+      "binary_sha256": "9da6e3f62f4143e166ba77430c51e185c22bdca05a01a5b407a442103168a857"
+    },
+    {
+      "name": "Combined with full-coverage trees",
+      "source_commit": "499f5f64a9dbb514d043025f4fe3448646043ada",
+      "binary_sha256": "70f3b983b141dd3504df919119e956c64decd463f1264527be43b16d6f1b545a"
+    }
+  ],
+  "platform": "Linux-6.18.55-x86_64-with-glibc2.39",
+  "compiler": "GNU C++ 13.3.0",
+  "cmake_build_type": "Release",
+  "lto": false,
+  "build_command": "/root/.local/bin/cmake --build build --parallel 4 --target researchify cs_search_perf_tests cs_tests",
+  "ctest": {
+    "command": "/root/.local/bin/ctest --test-dir build --output-on-failure -R '^(search_perf|engine)$'",
+    "exit_code": 0,
+    "suites_passed": 2,
+    "suites_total": 2,
+    "seconds": 5.3,
+    "search_perf": {
+      "cases_passed": 9,
+      "cases_total": 9,
+      "assertions": 2498482,
+      "seconds": 5.01
+    },
+    "engine": {
+      "tests_passed": 44,
+      "tests_total": 44,
+      "seconds": 0.29
+    }
+  },
+  "independent_read_only_review": {
+    "scope": "same-segment raw cursor monotonicity, liveness, borrowed membership lifetime, cursor budget accounting, full-coverage proof",
+    "blockers_found": false
+  },
+  "new_thread_sanitizer_run": false,
+  "performance_reports": [
+    {
+      "file": "optimization-tiny-anchor-compact.json",
+      "complete": true
+    },
+    {
+      "file": "optimization-tiny-anchor-regex.json",
+      "complete": true
+    },
+    {
+      "file": "optimization-tiny-raw-fast.json",
+      "complete": true
+    },
+    {
+      "file": "optimization-tiny-raw-wide-guard.json",
+      "complete": true
+    },
+    {
+      "file": "optimization-tiny-full-coverage-fast.json",
+      "complete": true
+    },
+    {
+      "file": "optimization-tiny-combined-large-compact-guard.json",
+      "complete": true
+    },
+    {
+      "file": "optimization-tiny-combined-large-fast-guard.json",
+      "complete": true
+    },
+    {
+      "file": "optimization-tiny-combined-million-guard.json",
+      "complete": true
+    },
+    {
+      "file": "optimization-tiny-term-recheck.json",
+      "complete": true
+    },
+    {
+      "file": "optimization-tiny-term-warm-recheck.json",
+      "complete": true
+    }
+  ],
+  "measurement_scope": "Linux x86-64 only; fresh process with uncontrolled warmed OS cache; same immutable indexes; no native Windows/macOS/ARM or cold-cache claim",
+  "surrogate": {
+    "files": 100000,
+    "lines": 800000,
+    "source_bytes": 19034450,
+    "exact_user_corpus": false
+  },
+  "index_format_changed": false,
+  "index_size_increase_bytes": 0,
+  "residual_regressions": [
+    {
+      "scope": "fresh-process compact rare-term targeted21 repeat",
+      "median_before_ms": 5.537118,
+      "median_after_ms": 5.745713,
+      "cause_isolated": false
+    },
+    {
+      "scope": "raw-only fast anchored regex7 pairs; superseded by full-coverage optimization",
+      "median_before_ms": 655.288,
+      "median_after_ms": 695.919
+    }
+  ],
+  "notes": [
+    "Original small-doc sidecar expansion was not implemented.",
+    "The stopped initial benchmark attempt produced no completed case and is not used.",
+    "The new OR fixture uses one relevant regex alternative per line to respect existing regex matching-line counts.",
+    "Warm JSONL internal wall time is not CPU time; its one literal pair is smoke-only."
+  ]
+}

@@ -1,0 +1,2605 @@
+{
+  "format": "researchify-isolated-locality-v1",
+  "complete": true,
+  "binaries": {
+    "before": {
+      "path": "/workspace/scratch/93bfa6b783da/locality-probe/rs_after",
+      "sha256": "19546b7d4e103c5514e04e17239210dcb13476cb780fb8392af6265db39a323a"
+    },
+    "after": {
+      "path": "/workspace/scratch/93bfa6b783da/locality-probe/rs_larger",
+      "sha256": "344ab76b2d6c6a51d9c07d452b4921d0f8e21d3ab2143764bae67f95aa0c5149"
+    }
+  },
+  "sources": {
+    "before": "572c2d97e6c54167e51ccb826e1dee36bf10e60dc308c6e1fa056b74cbd52842",
+    "after": "6244ed63cc178dee1b44efd39277fa1722c3a5dbf57291eec5ba242ef6be4ce9"
+  },
+  "conditions": {
+    "cache": "explicit warmup, uncontrolled warm OS cache; not cold-cache",
+    "process": "fresh target CLI process; helper startup excluded",
+    "rss": "target child high-water; can include Python pre-exec floor",
+    "build": "already constructed immutable identical index, excluded",
+    "profiling": "separate excluded calls; summed worker times not additive wall",
+    "order": "deterministic shuffle per paired repetition, seed 20261023",
+    "threads": 8,
+    "memory_mb": 256
+  },
+  "cases": [
+    {
+      "name": "million_fullscan_literal",
+      "query": "\"needle_42 = 0;\"",
+      "iterations": 7,
+      "limit": 3,
+      "snippets": 1,
+      "expected": 1,
+      "index": "/workspace/scratch/93bfa6b783da/perf-million-tiny/optimized-compact",
+      "commands": {
+        "before": [
+          "/workspace/scratch/93bfa6b783da/locality-probe/rs_after",
+          "find",
+          "\"needle_42 = 0;\"",
+          "--index",
+          "/workspace/scratch/93bfa6b783da/perf-million-tiny/optimized-compact",
+          "--json",
+          "--limit",
+          "3",
+          "--snippets",
+          "1",
+          "--threads",
+          "8",
+          "--memory-mb",
+          "256",
+          "--regex-steps",
+          "18446744073709551615"
+        ],
+        "after": [
+          "/workspace/scratch/93bfa6b783da/locality-probe/rs_larger",
+          "find",
+          "\"needle_42 = 0;\"",
+          "--index",
+          "/workspace/scratch/93bfa6b783da/perf-million-tiny/optimized-compact",
+          "--json",
+          "--limit",
+          "3",
+          "--snippets",
+          "1",
+          "--threads",
+          "8",
+          "--memory-mb",
+          "256",
+          "--regex-steps",
+          "18446744073709551615"
+        ]
+      },
+      "order": [
+        [
+          "before",
+          "after"
+        ],
+        [
+          "before",
+          "after"
+        ],
+        [
+          "after",
+          "before"
+        ],
+        [
+          "before",
+          "after"
+        ],
+        [
+          "after",
+          "before"
+        ],
+        [
+          "before",
+          "after"
+        ],
+        [
+          "after",
+          "before"
+        ]
+      ],
+      "profiles": {
+        "before": {
+          "metrics": {
+            "candidates": 1000000,
+            "profile": {
+              "candidate_seconds": 5.315595305,
+              "content_bytes": 222455767,
+              "content_open_seconds": 4.6001238309995,
+              "content_opens": 217407,
+              "content_read_seconds": 2.747069912000085,
+              "content_reads": 1000001,
+              "filtered_documents": 0,
+              "line_processing_seconds": 0.42536464299994436,
+              "matching_seconds": 0.3029996449999662,
+              "planning_seconds": 0.010876179,
+              "regex_steps": 0,
+              "snippet_seconds": 4.656e-05,
+              "verification_seconds": 0.5794067649999841,
+              "workers": 8
+            },
+            "scanned_bytes": 222455767,
+            "seconds": 5.326518014
+          },
+          "wall_seconds": 5.371525296999607,
+          "cpu_seconds": 10.805981,
+          "peak_rss_bytes": 92872704
+        },
+        "after": {
+          "metrics": {
+            "candidates": 1000000,
+            "profile": {
+              "candidate_seconds": 4.074423597,
+              "content_bytes": 222455767,
+              "content_open_seconds": 2.3338009999994944,
+              "content_opens": 127346,
+              "content_read_seconds": 2.654861212000061,
+              "content_reads": 1000001,
+              "filtered_documents": 0,
+              "line_processing_seconds": 0.40787963099991864,
+              "matching_seconds": 0.29489771599997544,
+              "planning_seconds": 0.009916157,
+              "regex_steps": 0,
+              "snippet_seconds": 7.5764e-05,
+              "verification_seconds": 0.579529945000058,
+              "workers": 8
+            },
+            "scanned_bytes": 222455767,
+            "seconds": 4.084415488
+          },
+          "wall_seconds": 4.12828226000056,
+          "cpu_seconds": 9.013503,
+          "peak_rss_bytes": 92512256
+        }
+      },
+      "excluded_correctness_checks": [
+        {
+          "flag": "--max-candidates",
+          "value": "999",
+          "exact_error_equal": true,
+          "response": {
+            "api_version": 1,
+            "error": {
+              "code": "E_BUDGET",
+              "message": "Candidate budget exhausted",
+              "retryable": false
+            },
+            "execution_complete": false,
+            "status": "error"
+          }
+        },
+        {
+          "flag": "--max-scan-bytes",
+          "value": "3000000",
+          "exact_error_equal": true,
+          "response": {
+            "api_version": 1,
+            "error": {
+              "code": "E_BUDGET",
+              "message": "Search scan-byte budget exhausted",
+              "retryable": false
+            },
+            "execution_complete": false,
+            "status": "error"
+          }
+        }
+      ],
+      "semantic_result": {
+        "api_version": 1,
+        "execution_complete": true,
+        "has_more": false,
+        "next_cursor": null,
+        "output_truncated": false,
+        "position_units": {
+          "column": "utf8_byte",
+          "column_base": 1,
+          "line_base": 1
+        },
+        "results": [
+          {
+            "content_id": "355bd632316c75b8b953cbe22638a6151ad1f3c5",
+            "matches": 1,
+            "path": "group_0/module_42.cpp",
+            "score": 2.2,
+            "snippets": [
+              {
+                "column": 26,
+                "line": 2,
+                "text": "namespace bucket42 { int needle_42 = 0;"
+              }
+            ]
+          }
+        ],
+        "returned": 1,
+        "snapshot": {
+          "freshness": "unknown",
+          "generation": "1",
+          "source": "index"
+        },
+        "status": "ok",
+        "total": 1,
+        "warnings": []
+      },
+      "samples": {
+        "before": [
+          {
+            "wall_seconds": 5.358751757998107,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 10.740437,
+            "peak_rss_bytes": 92856320,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 1000000,
+              "scanned_bytes": 222455767,
+              "seconds": 5.314591025
+            },
+            "semantic_sha256": "07c849b587a003f91b1b40700ebda8f2da9e4fa01916399bb3e57385854d73a8"
+          },
+          {
+            "wall_seconds": 5.371326473999943,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 10.92394,
+            "peak_rss_bytes": 92823552,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 1000000,
+              "scanned_bytes": 222455767,
+              "seconds": 5.3118947
+            },
+            "semantic_sha256": "07c849b587a003f91b1b40700ebda8f2da9e4fa01916399bb3e57385854d73a8"
+          },
+          {
+            "wall_seconds": 5.809773294000479,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 11.337749,
+            "peak_rss_bytes": 92758016,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 1000000,
+              "scanned_bytes": 222455767,
+              "seconds": 5.767888637
+            },
+            "semantic_sha256": "07c849b587a003f91b1b40700ebda8f2da9e4fa01916399bb3e57385854d73a8"
+          },
+          {
+            "wall_seconds": 5.461696626000048,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 11.048169999999999,
+            "peak_rss_bytes": 92905472,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 1000000,
+              "scanned_bytes": 222455767,
+              "seconds": 5.420057151
+            },
+            "semantic_sha256": "07c849b587a003f91b1b40700ebda8f2da9e4fa01916399bb3e57385854d73a8"
+          },
+          {
+            "wall_seconds": 6.248940470999514,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 11.998146,
+            "peak_rss_bytes": 92917760,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 1000000,
+              "scanned_bytes": 222455767,
+              "seconds": 6.201527197
+            },
+            "semantic_sha256": "07c849b587a003f91b1b40700ebda8f2da9e4fa01916399bb3e57385854d73a8"
+          },
+          {
+            "wall_seconds": 5.628820273999736,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 10.836677,
+            "peak_rss_bytes": 92835840,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 1000000,
+              "scanned_bytes": 222455767,
+              "seconds": 5.575311792
+            },
+            "semantic_sha256": "07c849b587a003f91b1b40700ebda8f2da9e4fa01916399bb3e57385854d73a8"
+          },
+          {
+            "wall_seconds": 5.577633913002501,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 10.965665000000001,
+            "peak_rss_bytes": 92708864,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 1000000,
+              "scanned_bytes": 222455767,
+              "seconds": 5.528710526
+            },
+            "semantic_sha256": "07c849b587a003f91b1b40700ebda8f2da9e4fa01916399bb3e57385854d73a8"
+          }
+        ],
+        "after": [
+          {
+            "wall_seconds": 4.291222941999877,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 8.506324,
+            "peak_rss_bytes": 92549120,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 1000000,
+              "scanned_bytes": 222455767,
+              "seconds": 4.249097109
+            },
+            "semantic_sha256": "07c849b587a003f91b1b40700ebda8f2da9e4fa01916399bb3e57385854d73a8"
+          },
+          {
+            "wall_seconds": 4.302439081999182,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 8.937869,
+            "peak_rss_bytes": 92614656,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 1000000,
+              "scanned_bytes": 222455767,
+              "seconds": 4.252266494
+            },
+            "semantic_sha256": "07c849b587a003f91b1b40700ebda8f2da9e4fa01916399bb3e57385854d73a8"
+          },
+          {
+            "wall_seconds": 4.401270796999597,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 8.694733,
+            "peak_rss_bytes": 92573696,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 1000000,
+              "scanned_bytes": 222455767,
+              "seconds": 4.35384819
+            },
+            "semantic_sha256": "07c849b587a003f91b1b40700ebda8f2da9e4fa01916399bb3e57385854d73a8"
+          },
+          {
+            "wall_seconds": 4.556266794003022,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 8.956227,
+            "peak_rss_bytes": 92512256,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 1000000,
+              "scanned_bytes": 222455767,
+              "seconds": 4.500314539
+            },
+            "semantic_sha256": "07c849b587a003f91b1b40700ebda8f2da9e4fa01916399bb3e57385854d73a8"
+          },
+          {
+            "wall_seconds": 4.146934242999123,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 8.566687,
+            "peak_rss_bytes": 92635136,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 1000000,
+              "scanned_bytes": 222455767,
+              "seconds": 4.106899748
+            },
+            "semantic_sha256": "07c849b587a003f91b1b40700ebda8f2da9e4fa01916399bb3e57385854d73a8"
+          },
+          {
+            "wall_seconds": 4.386965117002546,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 8.902655,
+            "peak_rss_bytes": 92495872,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 1000000,
+              "scanned_bytes": 222455767,
+              "seconds": 4.346850909
+            },
+            "semantic_sha256": "07c849b587a003f91b1b40700ebda8f2da9e4fa01916399bb3e57385854d73a8"
+          },
+          {
+            "wall_seconds": 3.856157558999257,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 8.21244,
+            "peak_rss_bytes": 92635136,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 1000000,
+              "scanned_bytes": 222455767,
+              "seconds": 3.818660957
+            },
+            "semantic_sha256": "07c849b587a003f91b1b40700ebda8f2da9e4fa01916399bb3e57385854d73a8"
+          }
+        ]
+      },
+      "tools": {
+        "before": {
+          "wall_ms": {
+            "iterations": 7,
+            "median": 5577.633913002501,
+            "p95": 6248.940470999514,
+            "min": 5358.751757998107,
+            "max": 6248.940470999514,
+            "samples": [
+              5358.751757998107,
+              5371.326473999943,
+              5809.773294000479,
+              5461.696626000048,
+              6248.940470999514,
+              5628.820273999736,
+              5577.633913002501
+            ]
+          },
+          "cpu_ms": {
+            "iterations": 7,
+            "median": 10965.665,
+            "p95": 11998.146,
+            "min": 10740.437,
+            "max": 11998.146,
+            "samples": [
+              10740.437,
+              10923.94,
+              11337.749,
+              11048.169999999998,
+              11998.146,
+              10836.677,
+              10965.665
+            ]
+          },
+          "peak_rss_bytes": {
+            "iterations": 7,
+            "median": 92835840,
+            "p95": 92917760,
+            "min": 92708864,
+            "max": 92917760,
+            "samples": [
+              92856320,
+              92823552,
+              92758016,
+              92905472,
+              92917760,
+              92835840,
+              92708864
+            ]
+          },
+          "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor"
+        },
+        "after": {
+          "wall_ms": {
+            "iterations": 7,
+            "median": 4302.439081999182,
+            "p95": 4556.266794003022,
+            "min": 3856.157558999257,
+            "max": 4556.266794003022,
+            "samples": [
+              4291.222941999877,
+              4302.439081999182,
+              4401.270796999597,
+              4556.266794003022,
+              4146.934242999123,
+              4386.965117002546,
+              3856.157558999257
+            ]
+          },
+          "cpu_ms": {
+            "iterations": 7,
+            "median": 8694.733,
+            "p95": 8956.227,
+            "min": 8212.44,
+            "max": 8956.227,
+            "samples": [
+              8506.323999999999,
+              8937.868999999999,
+              8694.733,
+              8956.227,
+              8566.687,
+              8902.654999999999,
+              8212.44
+            ]
+          },
+          "peak_rss_bytes": {
+            "iterations": 7,
+            "median": 92573696,
+            "p95": 92635136,
+            "min": 92495872,
+            "max": 92635136,
+            "samples": [
+              92549120,
+              92614656,
+              92573696,
+              92512256,
+              92635136,
+              92495872,
+              92635136
+            ]
+          },
+          "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor"
+        }
+      }
+    },
+    {
+      "name": "100k_broad_literal_compact",
+      "query": "\"return common;\"",
+      "iterations": 21,
+      "limit": 0,
+      "snippets": 0,
+      "expected": 100000,
+      "index": "/workspace/scratch/93bfa6b783da/perf-100k/optimized-compact",
+      "commands": {
+        "before": [
+          "/workspace/scratch/93bfa6b783da/locality-probe/rs_after",
+          "find",
+          "\"return common;\"",
+          "--index",
+          "/workspace/scratch/93bfa6b783da/perf-100k/optimized-compact",
+          "--json",
+          "--limit",
+          "0",
+          "--snippets",
+          "0",
+          "--threads",
+          "8",
+          "--memory-mb",
+          "256",
+          "--regex-steps",
+          "18446744073709551615"
+        ],
+        "after": [
+          "/workspace/scratch/93bfa6b783da/locality-probe/rs_larger",
+          "find",
+          "\"return common;\"",
+          "--index",
+          "/workspace/scratch/93bfa6b783da/perf-100k/optimized-compact",
+          "--json",
+          "--limit",
+          "0",
+          "--snippets",
+          "0",
+          "--threads",
+          "8",
+          "--memory-mb",
+          "256",
+          "--regex-steps",
+          "18446744073709551615"
+        ]
+      },
+      "order": [
+        [
+          "before",
+          "after"
+        ],
+        [
+          "after",
+          "before"
+        ],
+        [
+          "before",
+          "after"
+        ],
+        [
+          "after",
+          "before"
+        ],
+        [
+          "before",
+          "after"
+        ],
+        [
+          "before",
+          "after"
+        ],
+        [
+          "before",
+          "after"
+        ],
+        [
+          "before",
+          "after"
+        ],
+        [
+          "before",
+          "after"
+        ],
+        [
+          "after",
+          "before"
+        ],
+        [
+          "before",
+          "after"
+        ],
+        [
+          "after",
+          "before"
+        ],
+        [
+          "after",
+          "before"
+        ],
+        [
+          "before",
+          "after"
+        ],
+        [
+          "before",
+          "after"
+        ],
+        [
+          "after",
+          "before"
+        ],
+        [
+          "before",
+          "after"
+        ],
+        [
+          "after",
+          "before"
+        ],
+        [
+          "before",
+          "after"
+        ],
+        [
+          "after",
+          "before"
+        ],
+        [
+          "before",
+          "after"
+        ]
+      ],
+      "profiles": {
+        "before": {
+          "metrics": {
+            "candidates": 100000,
+            "profile": {
+              "candidate_seconds": 0.843052074,
+              "content_bytes": 366645610,
+              "content_open_seconds": 0.061176860000000416,
+              "content_opens": 91,
+              "content_read_seconds": 0.30263645799999944,
+              "content_reads": 100000,
+              "filtered_documents": 0,
+              "line_processing_seconds": 0.5373810379999979,
+              "matching_seconds": 0.24622576300000076,
+              "planning_seconds": 0.001753269,
+              "regex_steps": 0,
+              "snippet_seconds": 3.8e-07,
+              "verification_seconds": 0.788310794000004,
+              "workers": 8
+            },
+            "scanned_bytes": 366645610,
+            "seconds": 0.844805633
+          },
+          "wall_seconds": 0.8682412839989411,
+          "cpu_seconds": 2.363733,
+          "peak_rss_bytes": 79790080
+        },
+        "after": {
+          "metrics": {
+            "candidates": 100000,
+            "profile": {
+              "candidate_seconds": 0.643615862,
+              "content_bytes": 366645610,
+              "content_open_seconds": 0.030603922000000183,
+              "content_opens": 30,
+              "content_read_seconds": 0.2953061879999999,
+              "content_reads": 100000,
+              "filtered_documents": 0,
+              "line_processing_seconds": 0.5576428809999995,
+              "matching_seconds": 0.24636516500000005,
+              "planning_seconds": 0.001937816,
+              "regex_steps": 0,
+              "snippet_seconds": 2.4e-07,
+              "verification_seconds": 0.7865651500000026,
+              "workers": 8
+            },
+            "scanned_bytes": 366645610,
+            "seconds": 0.645553848
+          },
+          "wall_seconds": 0.6759410310005478,
+          "cpu_seconds": 2.336176,
+          "peak_rss_bytes": 78745600
+        }
+      },
+      "excluded_correctness_checks": [
+        {
+          "sort": "score",
+          "limit": 128,
+          "snippets": 2,
+          "full_hit_fields_equal": true
+        },
+        {
+          "sort": "path",
+          "limit": 128,
+          "snippets": 2,
+          "full_hit_fields_equal": true
+        },
+        {
+          "flag": "--max-candidates",
+          "value": "999",
+          "exact_error_equal": true,
+          "response": {
+            "api_version": 1,
+            "error": {
+              "code": "E_BUDGET",
+              "message": "Candidate budget exhausted",
+              "retryable": false
+            },
+            "execution_complete": false,
+            "status": "error"
+          }
+        },
+        {
+          "flag": "--max-scan-bytes",
+          "value": "3000000",
+          "exact_error_equal": true,
+          "response": {
+            "api_version": 1,
+            "error": {
+              "code": "E_BUDGET",
+              "message": "Search scan-byte budget exhausted",
+              "retryable": false
+            },
+            "execution_complete": false,
+            "status": "error"
+          }
+        }
+      ],
+      "semantic_result": {
+        "api_version": 1,
+        "execution_complete": true,
+        "has_more": false,
+        "next_cursor": null,
+        "output_truncated": false,
+        "position_units": {
+          "column": "utf8_byte",
+          "column_base": 1,
+          "line_base": 1
+        },
+        "results": [],
+        "returned": 0,
+        "snapshot": {
+          "freshness": "unknown",
+          "generation": "1",
+          "source": "index"
+        },
+        "status": "ok",
+        "total": 100000,
+        "warnings": []
+      },
+      "samples": {
+        "before": [
+          {
+            "wall_seconds": 0.8638682320015505,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 1.972502,
+            "peak_rss_bytes": 79740928,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.835596434
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.9504558690023259,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 2.11469,
+            "peak_rss_bytes": 79695872,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.919204194
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.9463295609966735,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 2.14435,
+            "peak_rss_bytes": 79736832,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.919653741
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.8306786940011079,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 2.209409,
+            "peak_rss_bytes": 79667200,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.800392741
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.806299013998796,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 2.172394,
+            "peak_rss_bytes": 79712256,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.781566399
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.7660740440005611,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 2.132041,
+            "peak_rss_bytes": 79736832,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.738138965
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.8064002559985965,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 2.1710459999999996,
+            "peak_rss_bytes": 79581184,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.778245543
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.9979534420017444,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 2.4138249999999997,
+            "peak_rss_bytes": 79605760,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.969633498
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.8966532550002739,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 2.0826510000000003,
+            "peak_rss_bytes": 79687680,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.87275081
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 1.0379984600003809,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 2.1100519999999996,
+            "peak_rss_bytes": 79790080,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 1.008260301
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 1.1996751049991872,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 2.2275020000000003,
+            "peak_rss_bytes": 79683584,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 1.166079552
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.8388235929996881,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 1.9858059999999997,
+            "peak_rss_bytes": 79675392,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.815182817
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.7072884490007709,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 2.03519,
+            "peak_rss_bytes": 79683584,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.683098902
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.7152205230013351,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 2.053771,
+            "peak_rss_bytes": 79712256,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.688939427
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.756018825002684,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 2.1249559999999996,
+            "peak_rss_bytes": 79687680,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.729138488
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.801548448001995,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 2.195826,
+            "peak_rss_bytes": 79564800,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.774473619
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.8213770690017554,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 2.147188,
+            "peak_rss_bytes": 79736832,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.796217526
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.9524881500001356,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 2.1586689999999997,
+            "peak_rss_bytes": 79663104,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.92401803
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.8805307080001512,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 1.991609,
+            "peak_rss_bytes": 79712256,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.85420476
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.9219637250025698,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 2.006027,
+            "peak_rss_bytes": 79659008,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.896581204
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.9114048890005506,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 2.0707899999999997,
+            "peak_rss_bytes": 79790080,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.881743629
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          }
+        ],
+        "after": [
+          {
+            "wall_seconds": 0.7122049400022661,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 1.876649,
+            "peak_rss_bytes": 78872576,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.681752767
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.801938821998192,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 1.97186,
+            "peak_rss_bytes": 79032320,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.774089467
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.7725164990006306,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 1.997026,
+            "peak_rss_bytes": 78950400,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.732691459
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.7865485100010119,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 2.0264439999999997,
+            "peak_rss_bytes": 78888960,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.758655914
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.5511497269981191,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 1.904401,
+            "peak_rss_bytes": 78802944,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.525295337
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.8302792229987972,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 2.319493,
+            "peak_rss_bytes": 78753792,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.802015361
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.6969041759984975,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 2.1314029999999997,
+            "peak_rss_bytes": 78876672,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.663856877
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.6462573320022784,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 1.9830299999999998,
+            "peak_rss_bytes": 78909440,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.620859048
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.8050116550002713,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 2.061959,
+            "peak_rss_bytes": 78950400,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.771839754
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.6938374769997608,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 2.017773,
+            "peak_rss_bytes": 78897152,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.666272632
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.8036689020009362,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 2.03824,
+            "peak_rss_bytes": 78954496,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.770910222
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.819463566000195,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 1.9436559999999998,
+            "peak_rss_bytes": 79003648,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.79438848
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.6510158560013224,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 1.9909689999999998,
+            "peak_rss_bytes": 78868480,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.624195878
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.6078916500009655,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 2.017213,
+            "peak_rss_bytes": 78708736,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.583578883
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.6636935530004848,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 2.07544,
+            "peak_rss_bytes": 78766080,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.631199005
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.6519982290010375,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 2.0801499999999997,
+            "peak_rss_bytes": 78876672,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.617809594
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.610555053997814,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 1.9800909999999998,
+            "peak_rss_bytes": 78761984,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.582228509
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.7767375330004143,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 2.00275,
+            "peak_rss_bytes": 78876672,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.751265795
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.7211932419995719,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 1.886622,
+            "peak_rss_bytes": 78876672,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.690004448
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.753722747998836,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 1.857428,
+            "peak_rss_bytes": 79003648,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.729257798
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.7031236700022419,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 1.886874,
+            "peak_rss_bytes": 78950400,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.67223214
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          }
+        ]
+      },
+      "tools": {
+        "before": {
+          "wall_ms": {
+            "iterations": 21,
+            "median": 863.8682320015505,
+            "p95": 1037.9984600003809,
+            "min": 707.2884490007709,
+            "max": 1199.6751049991872,
+            "samples": [
+              863.8682320015505,
+              950.4558690023259,
+              946.3295609966735,
+              830.6786940011079,
+              806.299013998796,
+              766.0740440005611,
+              806.4002559985965,
+              997.9534420017444,
+              896.6532550002739,
+              1037.9984600003809,
+              1199.6751049991872,
+              838.8235929996881,
+              707.2884490007709,
+              715.2205230013351,
+              756.018825002684,
+              801.548448001995,
+              821.3770690017554,
+              952.4881500001356,
+              880.5307080001512,
+              921.9637250025698,
+              911.4048890005506
+            ]
+          },
+          "cpu_ms": {
+            "iterations": 21,
+            "median": 2124.9559999999997,
+            "p95": 2227.5020000000004,
+            "min": 1972.502,
+            "max": 2413.825,
+            "samples": [
+              1972.502,
+              2114.69,
+              2144.3500000000004,
+              2209.409,
+              2172.3940000000002,
+              2132.041,
+              2171.0459999999994,
+              2413.825,
+              2082.6510000000003,
+              2110.0519999999997,
+              2227.5020000000004,
+              1985.8059999999998,
+              2035.19,
+              2053.7709999999997,
+              2124.9559999999997,
+              2195.826,
+              2147.188,
+              2158.669,
+              1991.609,
+              2006.027,
+              2070.7899999999995
+            ]
+          },
+          "peak_rss_bytes": {
+            "iterations": 21,
+            "median": 79687680,
+            "p95": 79790080,
+            "min": 79564800,
+            "max": 79790080,
+            "samples": [
+              79740928,
+              79695872,
+              79736832,
+              79667200,
+              79712256,
+              79736832,
+              79581184,
+              79605760,
+              79687680,
+              79790080,
+              79683584,
+              79675392,
+              79683584,
+              79712256,
+              79687680,
+              79564800,
+              79736832,
+              79663104,
+              79712256,
+              79659008,
+              79790080
+            ]
+          },
+          "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor"
+        },
+        "after": {
+          "wall_ms": {
+            "iterations": 21,
+            "median": 712.2049400022661,
+            "p95": 819.463566000195,
+            "min": 551.1497269981191,
+            "max": 830.2792229987972,
+            "samples": [
+              712.2049400022661,
+              801.938821998192,
+              772.5164990006306,
+              786.5485100010119,
+              551.1497269981191,
+              830.2792229987972,
+              696.9041759984975,
+              646.2573320022784,
+              805.0116550002713,
+              693.8374769997608,
+              803.6689020009362,
+              819.463566000195,
+              651.0158560013224,
+              607.8916500009655,
+              663.6935530004848,
+              651.9982290010375,
+              610.555053997814,
+              776.7375330004143,
+              721.1932419995719,
+              753.722747998836,
+              703.1236700022419
+            ]
+          },
+          "cpu_ms": {
+            "iterations": 21,
+            "median": 1997.026,
+            "p95": 2131.403,
+            "min": 1857.428,
+            "max": 2319.493,
+            "samples": [
+              1876.6490000000001,
+              1971.86,
+              1997.026,
+              2026.4439999999997,
+              1904.401,
+              2319.493,
+              2131.403,
+              1983.0299999999997,
+              2061.959,
+              2017.7730000000001,
+              2038.24,
+              1943.6559999999997,
+              1990.9689999999998,
+              2017.213,
+              2075.44,
+              2080.1499999999996,
+              1980.091,
+              2002.7499999999998,
+              1886.622,
+              1857.428,
+              1886.874
+            ]
+          },
+          "peak_rss_bytes": {
+            "iterations": 21,
+            "median": 78876672,
+            "p95": 79003648,
+            "min": 78708736,
+            "max": 79032320,
+            "samples": [
+              78872576,
+              79032320,
+              78950400,
+              78888960,
+              78802944,
+              78753792,
+              78876672,
+              78909440,
+              78950400,
+              78897152,
+              78954496,
+              79003648,
+              78868480,
+              78708736,
+              78766080,
+              78876672,
+              78761984,
+              78876672,
+              78876672,
+              79003648,
+              78950400
+            ]
+          },
+          "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor"
+        }
+      }
+    },
+    {
+      "name": "100k_broad_literal_fast",
+      "query": "\"return common;\"",
+      "iterations": 21,
+      "limit": 0,
+      "snippets": 0,
+      "expected": 100000,
+      "index": "/workspace/scratch/93bfa6b783da/perf-100k/optimized-fast",
+      "commands": {
+        "before": [
+          "/workspace/scratch/93bfa6b783da/locality-probe/rs_after",
+          "find",
+          "\"return common;\"",
+          "--index",
+          "/workspace/scratch/93bfa6b783da/perf-100k/optimized-fast",
+          "--json",
+          "--limit",
+          "0",
+          "--snippets",
+          "0",
+          "--threads",
+          "8",
+          "--memory-mb",
+          "256",
+          "--regex-steps",
+          "18446744073709551615"
+        ],
+        "after": [
+          "/workspace/scratch/93bfa6b783da/locality-probe/rs_larger",
+          "find",
+          "\"return common;\"",
+          "--index",
+          "/workspace/scratch/93bfa6b783da/perf-100k/optimized-fast",
+          "--json",
+          "--limit",
+          "0",
+          "--snippets",
+          "0",
+          "--threads",
+          "8",
+          "--memory-mb",
+          "256",
+          "--regex-steps",
+          "18446744073709551615"
+        ]
+      },
+      "order": [
+        [
+          "before",
+          "after"
+        ],
+        [
+          "before",
+          "after"
+        ],
+        [
+          "before",
+          "after"
+        ],
+        [
+          "after",
+          "before"
+        ],
+        [
+          "after",
+          "before"
+        ],
+        [
+          "before",
+          "after"
+        ],
+        [
+          "before",
+          "after"
+        ],
+        [
+          "after",
+          "before"
+        ],
+        [
+          "after",
+          "before"
+        ],
+        [
+          "before",
+          "after"
+        ],
+        [
+          "before",
+          "after"
+        ],
+        [
+          "before",
+          "after"
+        ],
+        [
+          "before",
+          "after"
+        ],
+        [
+          "after",
+          "before"
+        ],
+        [
+          "before",
+          "after"
+        ],
+        [
+          "after",
+          "before"
+        ],
+        [
+          "before",
+          "after"
+        ],
+        [
+          "after",
+          "before"
+        ],
+        [
+          "after",
+          "before"
+        ],
+        [
+          "after",
+          "before"
+        ],
+        [
+          "after",
+          "before"
+        ]
+      ],
+      "profiles": {
+        "before": {
+          "metrics": {
+            "candidates": 100000,
+            "profile": {
+              "candidate_seconds": 0.691884535,
+              "content_bytes": 366645610,
+              "content_open_seconds": 0.0513070910000003,
+              "content_opens": 85,
+              "content_read_seconds": 0.3104882899999987,
+              "content_reads": 100000,
+              "filtered_documents": 0,
+              "line_processing_seconds": 0.5296268519999985,
+              "matching_seconds": 0.23823319400000031,
+              "planning_seconds": 0.007063535,
+              "regex_steps": 0,
+              "snippet_seconds": 4.01e-07,
+              "verification_seconds": 0.7715810120000035,
+              "workers": 8
+            },
+            "scanned_bytes": 366645610,
+            "seconds": 0.69894838
+          },
+          "wall_seconds": 0.7275576610009011,
+          "cpu_seconds": 2.309221,
+          "peak_rss_bytes": 59834368
+        },
+        "after": {
+          "metrics": {
+            "candidates": 100000,
+            "profile": {
+              "candidate_seconds": 0.581939947,
+              "content_bytes": 366645610,
+              "content_open_seconds": 0.028883142000000125,
+              "content_opens": 30,
+              "content_read_seconds": 0.2989601759999997,
+              "content_reads": 100000,
+              "filtered_documents": 0,
+              "line_processing_seconds": 0.526082669999999,
+              "matching_seconds": 0.2772084100000004,
+              "planning_seconds": 0.004297631,
+              "regex_steps": 0,
+              "snippet_seconds": 3.6e-07,
+              "verification_seconds": 0.7703082640000041,
+              "workers": 8
+            },
+            "scanned_bytes": 366645610,
+            "seconds": 0.586237868
+          },
+          "wall_seconds": 0.6131029359967215,
+          "cpu_seconds": 2.223623,
+          "peak_rss_bytes": 58867712
+        }
+      },
+      "excluded_correctness_checks": [
+        {
+          "sort": "score",
+          "limit": 128,
+          "snippets": 2,
+          "full_hit_fields_equal": true
+        },
+        {
+          "sort": "path",
+          "limit": 128,
+          "snippets": 2,
+          "full_hit_fields_equal": true
+        },
+        {
+          "flag": "--max-candidates",
+          "value": "999",
+          "exact_error_equal": true,
+          "response": {
+            "api_version": 1,
+            "error": {
+              "code": "E_BUDGET",
+              "message": "Candidate budget exhausted",
+              "retryable": false
+            },
+            "execution_complete": false,
+            "status": "error"
+          }
+        },
+        {
+          "flag": "--max-scan-bytes",
+          "value": "3000000",
+          "exact_error_equal": true,
+          "response": {
+            "api_version": 1,
+            "error": {
+              "code": "E_BUDGET",
+              "message": "Search scan-byte budget exhausted",
+              "retryable": false
+            },
+            "execution_complete": false,
+            "status": "error"
+          }
+        }
+      ],
+      "semantic_result": {
+        "api_version": 1,
+        "execution_complete": true,
+        "has_more": false,
+        "next_cursor": null,
+        "output_truncated": false,
+        "position_units": {
+          "column": "utf8_byte",
+          "column_base": 1,
+          "line_base": 1
+        },
+        "results": [],
+        "returned": 0,
+        "snapshot": {
+          "freshness": "unknown",
+          "generation": "1",
+          "source": "index"
+        },
+        "status": "ok",
+        "total": 100000,
+        "warnings": []
+      },
+      "samples": {
+        "before": [
+          {
+            "wall_seconds": 0.6197575650003273,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 1.985961,
+            "peak_rss_bytes": 59887616,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.591936565
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.6440584690026299,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 2.0164400000000002,
+            "peak_rss_bytes": 59830272,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.619958837
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.881830987000285,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 2.052828,
+            "peak_rss_bytes": 59920384,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.847262177
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 1.034158724000008,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 2.004199,
+            "peak_rss_bytes": 59764736,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 1.000871803
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.9226119220002147,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 2.15687,
+            "peak_rss_bytes": 59879424,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.886108658
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.8753327259983052,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 2.075898,
+            "peak_rss_bytes": 59867136,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.8492391
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.6280730530015717,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 1.947964,
+            "peak_rss_bytes": 59813888,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.601210509
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.6036625069973525,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 1.9402430000000002,
+            "peak_rss_bytes": 59830272,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.578877678
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.6004981090009096,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 1.9008189999999998,
+            "peak_rss_bytes": 59772928,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.573668343
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.7351715180011524,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 2.096305,
+            "peak_rss_bytes": 59760640,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.703047013
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.6745040510031686,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 2.0275809999999996,
+            "peak_rss_bytes": 59621376,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.647727372
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.5910277380025946,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 1.927568,
+            "peak_rss_bytes": 59871232,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.563394828
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 1.078051469001366,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 2.299746,
+            "peak_rss_bytes": 59867136,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 1.046390056
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.856610714999988,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 1.9864119999999998,
+            "peak_rss_bytes": 59867136,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.819622747
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.8796914599988668,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 1.993477,
+            "peak_rss_bytes": 59830272,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.852805719
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.7214105630009726,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 1.879381,
+            "peak_rss_bytes": 59867136,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.695430084
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.678874672998063,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 2.0257829999999997,
+            "peak_rss_bytes": 59817984,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.650838158
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.7413511840022693,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 2.136172,
+            "peak_rss_bytes": 59752448,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.716347402
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.5751414940023096,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 1.882632,
+            "peak_rss_bytes": 59867136,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.537894904
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.7064850140013732,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 2.0786379999999998,
+            "peak_rss_bytes": 59867136,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.673664853
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.8113860449993808,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 2.165702,
+            "peak_rss_bytes": 59772928,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.777323029
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          }
+        ],
+        "after": [
+          {
+            "wall_seconds": 0.7364381769984902,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 2.028896,
+            "peak_rss_bytes": 58843136,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.704147093
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.6410044099975494,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 1.915641,
+            "peak_rss_bytes": 58818560,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.606622988
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.7308114260013099,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 1.933039,
+            "peak_rss_bytes": 59043840,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.702604916
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.560273851002421,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 1.9158559999999998,
+            "peak_rss_bytes": 58966016,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.534673706
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.6951902759974473,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 1.828224,
+            "peak_rss_bytes": 59162624,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.670687428
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.5515735989974928,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 1.7942869999999997,
+            "peak_rss_bytes": 59031552,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.529443431
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.488801430001331,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 1.8185010000000001,
+            "peak_rss_bytes": 58851328,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.467368283
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.47578454799804604,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 1.755716,
+            "peak_rss_bytes": 58834944,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.454188595
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.4571277110007941,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 1.798998,
+            "peak_rss_bytes": 58900480,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.434426679
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.5058604000005289,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 1.8155919999999999,
+            "peak_rss_bytes": 58785792,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.483089802
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.5268056880013319,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 1.89506,
+            "peak_rss_bytes": 58830848,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.500285535
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.5761863439984154,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 1.88619,
+            "peak_rss_bytes": 58867712,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.552777126
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.5744486560033693,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 1.8648850000000001,
+            "peak_rss_bytes": 58949632,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.551075959
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.6418299690012645,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 1.7781289999999998,
+            "peak_rss_bytes": 58916864,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.608611702
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.6827401269983966,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 1.903867,
+            "peak_rss_bytes": 59002880,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.659725253
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.6686575000021548,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 1.855222,
+            "peak_rss_bytes": 58998784,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.64575467
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.47726754099858226,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 1.827304,
+            "peak_rss_bytes": 58818560,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.453970292
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.48540342500200495,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 1.8296299999999999,
+            "peak_rss_bytes": 58847232,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.461384962
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.4548408919981739,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 1.7907,
+            "peak_rss_bytes": 58826752,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.434311722
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.5042325760005042,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 1.8870529999999999,
+            "peak_rss_bytes": 58818560,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.479982434
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          },
+          {
+            "wall_seconds": 0.5222176960014622,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 1.934803,
+            "peak_rss_bytes": 58912768,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "engine_metrics": {
+              "candidates": 100000,
+              "scanned_bytes": 366645610,
+              "seconds": 0.500277101
+            },
+            "semantic_sha256": "6a1f3d8f20988be5e3ddff68a8339f0b340925ffa11a25cd0b6dac6e02ac2d1b"
+          }
+        ]
+      },
+      "tools": {
+        "before": {
+          "wall_ms": {
+            "iterations": 21,
+            "median": 721.4105630009726,
+            "p95": 1034.158724000008,
+            "min": 575.1414940023096,
+            "max": 1078.051469001366,
+            "samples": [
+              619.7575650003273,
+              644.0584690026299,
+              881.830987000285,
+              1034.158724000008,
+              922.6119220002147,
+              875.3327259983052,
+              628.0730530015717,
+              603.6625069973525,
+              600.4981090009096,
+              735.1715180011524,
+              674.5040510031686,
+              591.0277380025946,
+              1078.051469001366,
+              856.610714999988,
+              879.6914599988668,
+              721.4105630009726,
+              678.874672998063,
+              741.3511840022693,
+              575.1414940023096,
+              706.4850140013732,
+              811.3860449993808
+            ]
+          },
+          "cpu_ms": {
+            "iterations": 21,
+            "median": 2016.4400000000003,
+            "p95": 2165.702,
+            "min": 1879.3809999999999,
+            "max": 2299.7459999999996,
+            "samples": [
+              1985.961,
+              2016.4400000000003,
+              2052.828,
+              2004.1989999999998,
+              2156.87,
+              2075.898,
+              1947.964,
+              1940.2430000000002,
+              1900.8189999999997,
+              2096.3050000000003,
+              2027.5809999999997,
+              1927.568,
+              2299.7459999999996,
+              1986.4119999999998,
+              1993.4769999999999,
+              1879.3809999999999,
+              2025.7829999999997,
+              2136.172,
+              1882.632,
+              2078.638,
+              2165.702
+            ]
+          },
+          "peak_rss_bytes": {
+            "iterations": 21,
+            "median": 59830272,
+            "p95": 59887616,
+            "min": 59621376,
+            "max": 59920384,
+            "samples": [
+              59887616,
+              59830272,
+              59920384,
+              59764736,
+              59879424,
+              59867136,
+              59813888,
+              59830272,
+              59772928,
+              59760640,
+              59621376,
+              59871232,
+              59867136,
+              59867136,
+              59830272,
+              59867136,
+              59817984,
+              59752448,
+              59867136,
+              59867136,
+              59772928
+            ]
+          },
+          "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor"
+        },
+        "after": {
+          "wall_ms": {
+            "iterations": 21,
+            "median": 551.5735989974928,
+            "p95": 730.8114260013099,
+            "min": 454.8408919981739,
+            "max": 736.4381769984902,
+            "samples": [
+              736.4381769984902,
+              641.0044099975494,
+              730.8114260013099,
+              560.273851002421,
+              695.1902759974473,
+              551.5735989974928,
+              488.801430001331,
+              475.78454799804604,
+              457.1277110007941,
+              505.8604000005289,
+              526.8056880013319,
+              576.1863439984154,
+              574.4486560033693,
+              641.8299690012645,
+              682.7401269983966,
+              668.6575000021548,
+              477.26754099858226,
+              485.40342500200495,
+              454.8408919981739,
+              504.2325760005042,
+              522.2176960014622
+            ]
+          },
+          "cpu_ms": {
+            "iterations": 21,
+            "median": 1855.222,
+            "p95": 1934.803,
+            "min": 1755.7160000000001,
+            "max": 2028.896,
+            "samples": [
+              2028.896,
+              1915.6409999999998,
+              1933.039,
+              1915.8559999999998,
+              1828.2240000000002,
+              1794.2869999999998,
+              1818.5010000000002,
+              1755.7160000000001,
+              1798.998,
+              1815.5919999999999,
+              1895.06,
+              1886.19,
+              1864.8850000000002,
+              1778.129,
+              1903.867,
+              1855.222,
+              1827.304,
+              1829.6299999999999,
+              1790.7,
+              1887.0529999999999,
+              1934.803
+            ]
+          },
+          "peak_rss_bytes": {
+            "iterations": 21,
+            "median": 58867712,
+            "p95": 59043840,
+            "min": 58785792,
+            "max": 59162624,
+            "samples": [
+              58843136,
+              58818560,
+              59043840,
+              58966016,
+              59162624,
+              59031552,
+              58851328,
+              58834944,
+              58900480,
+              58785792,
+              58830848,
+              58867712,
+              58949632,
+              58916864,
+              59002880,
+              58998784,
+              58818560,
+              58847232,
+              58826752,
+              58818560,
+              58912768
+            ]
+          },
+          "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor"
+        }
+      }
+    }
+  ]
+}

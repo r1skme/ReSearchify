@@ -1,0 +1,37 @@
+{
+  "format": "researchify-native-validation-excerpts-v1",
+  "workflow_run_id": 39972113138,
+  "job_id": 120477210016,
+  "job_name": "Windows x64 (MSVC)",
+  "source": "https://api.github.com/repos/r1skme/ReSearchify/actions/jobs/120477210016/logs",
+  "status": "completed",
+  "conclusion": "failure",
+  "ctest": {
+    "passed": 13,
+    "total": 13,
+    "wall_seconds": 45.8
+  },
+  "python": {
+    "passed": 28,
+    "wall_seconds": 0.57
+  },
+  "benchmark_step": {
+    "started_at": "2026-10-23T14:47:19Z",
+    "timeout_minutes": 70,
+    "timeout_message": "The action Native 100k tiny-file comparison (correctness gate only) has timed out after 70 minutes.",
+    "timeout_at": "2026-10-23T15:57:19Z",
+    "completed": false
+  },
+  "log_excerpts": [
+    "2026-10-23T14:43:51.6074902Z Microsoft Windows Server 2022",
+    "2026-10-23T14:43:51.6079360Z Image: windows-2022",
+    "2026-10-23T14:44:25.2731391Z -- The CXX compiler identification is MSVC 19.44.35229.0",
+    "2026-10-23T14:46:28.3231784Z 100% tests passed, 0 tests failed out of 13",
+    "2026-10-23T14:46:28.3232673Z Total Test time (real) =  45.80 sec",
+    "2026-10-23T14:46:31.4953781Z Ran 28 tests in 0.570s",
+    "2026-10-23T14:46:43.5517667Z -- The CXX compiler identification is MSVC 19.44.35229.0",
+    "2026-10-23T15:57:19.3503747Z KeyboardInterrupt",
+    "2026-10-23T15:57:19.4464144Z ##[error]The action 'Native 100k tiny-file comparison (correctness gate only)' has timed out after 70 minutes."
+  ],
+  "note": "Selected decoded log excerpts, not an unchanged full log archive. Benchmark failure is retained separately from successful build/CTest/harness validation."
+}

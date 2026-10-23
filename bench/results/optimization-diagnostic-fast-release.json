@@ -1,0 +1,149 @@
+{
+  "format": "researchify-perf-v1",
+  "executable": "/workspace/scratch/93bfa6b783da/ReSearchify/build/rs",
+  "executable_sha256": "86a12b278f1414c81beba973cb67387c34d09b91842f78de5a02af7758c05b4a",
+  "platform": "Linux-6.18.55-x86_64-with-glibc2.39",
+  "machine": "x86_64",
+  "python": "3.12.14",
+  "index": {
+    "generation": "1",
+    "files": 100000,
+    "lines": 5000000,
+    "bytes": 366645610,
+    "profile": "fast",
+    "index_bytes": 710777853
+  },
+  "index_storage": {
+    "committed_index_bytes": 710777848,
+    "transaction_scratch_bytes": 0,
+    "spill_scratch_bytes": 0,
+    "coordination_bytes": 0,
+    "literal_sidecar_bytes": 0,
+    "total_file_bytes": 710777848,
+    "measurement": "logical file sizes; transaction-* scratch, nested segment sort/literal-sort spills and reader/writer coordination separated; no deletion"
+  },
+  "conditions": {
+    "os_cache": "uncontrolled; explicit warm-up; NOT cold-cache",
+    "memory_mb": 256,
+    "search_threads": "executable default",
+    "rg_threads": "ripgrep default",
+    "standalone": "fresh target process per sample, including startup and shutdown",
+    "jsonl": "one persistent process; first request/warmups excluded from latency distribution",
+    "rss": "per process high-water mark, not allocator budget or per-request RSS; POSIX fallback can include inherited Python pre-exec memory floor",
+    "cpu": "target process CPU; JSONL reports whole-session CPU, not per-request CPU",
+    "build": "excluded; measure create/update separately with cs_bench",
+    "comparison": "count-only matching-file result; rg --count-matches forces complete occurrence scans, never -l early exit",
+    "full_rg_checks_requested": false,
+    "update_session": "not measured"
+  },
+  "queries": [
+    {
+      "name": "literal",
+      "query": "\"needle_42 = 0;\"",
+      "command": [
+        "/workspace/scratch/93bfa6b783da/ReSearchify/build/rs",
+        "find",
+        "\"needle_42 = 0;\"",
+        "--index",
+        "/workspace/scratch/93bfa6b783da/perf-100k/optimized-fast",
+        "--json",
+        "--limit",
+        "0",
+        "--snippets",
+        "0",
+        "--memory-mb",
+        "256",
+        "--regex-steps",
+        "18446744073709551615"
+      ],
+      "matching_files": 1,
+      "standalone": {
+        "wall_ms": {
+          "iterations": 1,
+          "median": 70.4080450013862,
+          "p95": 70.4080450013862,
+          "min": 70.4080450013862,
+          "max": 70.4080450013862,
+          "samples": [
+            70.4080450013862
+          ]
+        },
+        "cpu_ms": {
+          "iterations": 1,
+          "median": 69.76599999999999,
+          "p95": 69.76599999999999,
+          "min": 69.76599999999999,
+          "max": 69.76599999999999,
+          "samples": [
+            69.76599999999999
+          ]
+        },
+        "peak_rss_bytes": {
+          "iterations": 1,
+          "median": 30445568,
+          "p95": 30445568,
+          "min": 30445568,
+          "max": 30445568,
+          "samples": [
+            30445568
+          ]
+        },
+        "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor"
+      },
+      "engine_metrics": [
+        {
+          "candidates": 112,
+          "scanned_bytes": 410529,
+          "seconds": 0.056265131
+        }
+      ],
+      "rg": null,
+      "correctness": "repeated CLI/JSONL exact count consistency",
+      "jsonl": {
+        "request_wall_ms": {
+          "iterations": 1,
+          "median": 4.5826140012650285,
+          "p95": 4.5826140012650285,
+          "min": 4.5826140012650285,
+          "max": 4.5826140012650285,
+          "samples": [
+            4.5826140012650285
+          ]
+        },
+        "first_request_ms": 50.03675300031318,
+        "first_request_engine_metrics": {
+          "candidates": 112,
+          "scanned_bytes": 410529,
+          "seconds": 0.047045038
+        },
+        "engine_metrics": [
+          {
+            "candidates": 112,
+            "scanned_bytes": 410529,
+            "seconds": 0.003991561
+          }
+        ],
+        "whole_session_wall_ms": 71.54719499885687,
+        "whole_session_cpu_ms": 63.480999999999995,
+        "whole_session_peak_rss_bytes": 30453760
+      },
+      "separate_profile_sample": {
+        "candidate_seconds": 0.040532372,
+        "content_bytes": 410529,
+        "content_open_seconds": 0.00015935000000000008,
+        "content_opens": 16,
+        "content_read_seconds": 0.00031841800000000005,
+        "content_reads": 112,
+        "filtered_documents": 0,
+        "line_processing_seconds": 0.00038494200000000026,
+        "matching_seconds": 0.00031632599999999997,
+        "planning_seconds": 0.005472684,
+        "regex_steps": 0,
+        "snippet_seconds": 3.31e-07,
+        "verification_seconds": 0.0007382879999999997,
+        "workers": 1
+      }
+    }
+  ],
+  "ripgrep": null
+}

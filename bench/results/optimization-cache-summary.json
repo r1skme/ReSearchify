@@ -1,0 +1,984 @@
+{
+  "format": "researchify-cache-evidence-summary-v1",
+  "complete": true,
+  "host": {
+    "platform": "Linux-6.18.55-x86_64-with-glibc2.39",
+    "machine": "x86_64",
+    "python": "3.12.14",
+    "logical_cpus": 9
+  },
+  "binaries": {
+    "baseline": {
+      "path": "/workspace/scratch/93bfa6b783da/ReSearchify-baseline/build/rs",
+      "sha256": "b0a2c90c2dcaa3a71993751ec895807f32e8959e7439397971880564087e9154"
+    },
+    "current": {
+      "path": "/workspace/scratch/93bfa6b783da/rs-final-integrated",
+      "sha256": "701c8a34f6578e212336e80628bdd711df6413d6c8f1e0edf7d8b58f8a4b1293"
+    },
+    "rg": {
+      "path": "/opt/codex/codex-path/rg",
+      "sha256": "e62198eb19b136b88c330af83647b5a962cb99b6b1f066758568f12de1974849"
+    }
+  },
+  "source_revisions": {
+    "baseline": "eb858348169157686e70104af6b64f9539a39fe8",
+    "current": "228220743f205c370964fcb4475c8daee1f4b3b7"
+  },
+  "corpus": {
+    "format": "researchify-cache-corpus-v1",
+    "kind": "synthetic-surrogate",
+    "files": 100000,
+    "lines": 5000000,
+    "bytes": 366645610,
+    "path_and_content_sha256": "2ec655297c4dd2c2d779ecdb191123bdf0278c6dc0724820d4b21a271c659520",
+    "digest_order": "numeric module number",
+    "description": "Owned generated fixture, not a user corpus",
+    "augmentation": null
+  },
+  "conditions": {
+    "cache_scope": "scoped source/index file data pages only; metadata is touched by setup/probes and not evicted; binaries, shared libraries and device caches are uncontrolled",
+    "cold": "owned-file posix_fadvise DONTNEED then PROT_NONE mincore; verified only if all observed ranges have zero resident pages",
+    "observation_window": "ranges observed sequentially; another process or readahead could repopulate earlier ranges before target launch",
+    "warm": "one identical fresh-process query replay immediately before each warm measurement",
+    "process": "fresh target and isolated resource helper per sample; helper and cache setup excluded from target timing",
+    "rss": "POSIX high-water can include inherited Python pre-exec floor; resource helper never loads fixture inventories",
+    "comparison": "RS count-only; rg occurrence counts for term/literal and matching-line counts for regex; rg emits per-file counts, included in target timing; untimed full path/count equivalence first",
+    "index_build": "excluded, indexes must be constructed separately",
+    "memory_mb": 256,
+    "threading": "each executable's default",
+    "p95": "nearest rank; with 7 repetitions p95 is the maximum"
+  },
+  "rows": [
+    {
+      "query": {
+        "name": "term",
+        "query": "needle_42",
+        "rg": "\\bneedle_42\\b"
+      },
+      "mode": "cold",
+      "tools": {
+        "baseline": {
+          "wall_ms": {
+            "iterations": 7,
+            "median": 16.50677299767267,
+            "p95": 17.546711998875253,
+            "min": 13.048738001089077,
+            "max": 17.546711998875253
+          },
+          "cpu_ms": {
+            "iterations": 7,
+            "median": 6.653999999999999,
+            "p95": 9.450999999999999,
+            "min": 5.8,
+            "max": 9.450999999999999
+          },
+          "peak_rss_bytes": {
+            "iterations": 7,
+            "median": 16121856,
+            "p95": 16121856,
+            "min": 16121856,
+            "max": 16121856
+          },
+          "input_block_operations_median": 1440,
+          "before_resident_pages_median": 0,
+          "after_resident_pages_median": 180,
+          "pages_checked": 123558,
+          "labels": {
+            "verified-cold-file-data-pages": 7
+          },
+          "candidates": [
+            1
+          ],
+          "scanned_bytes": [
+            0
+          ]
+        },
+        "current": {
+          "wall_ms": {
+            "iterations": 7,
+            "median": 13.470432000758592,
+            "p95": 59.09416000213241,
+            "min": 11.017892000381835,
+            "max": 59.09416000213241
+          },
+          "cpu_ms": {
+            "iterations": 7,
+            "median": 6.483999999999999,
+            "p95": 8.409999999999998,
+            "min": 5.261,
+            "max": 8.409999999999998
+          },
+          "peak_rss_bytes": {
+            "iterations": 7,
+            "median": 16121856,
+            "p95": 16121856,
+            "min": 16121856,
+            "max": 16121856
+          },
+          "input_block_operations_median": 1512,
+          "before_resident_pages_median": 0,
+          "after_resident_pages_median": 189,
+          "pages_checked": 127584,
+          "labels": {
+            "verified-cold-file-data-pages": 7
+          },
+          "candidates": [
+            1
+          ],
+          "scanned_bytes": [
+            0
+          ]
+        },
+        "rg": {
+          "wall_ms": {
+            "iterations": 7,
+            "median": 2374.6285870001884,
+            "p95": 2983.7586040011956,
+            "min": 2146.7691409998224,
+            "max": 2983.7586040011956
+          },
+          "cpu_ms": {
+            "iterations": 7,
+            "median": 1968.776,
+            "p95": 2284.7490000000003,
+            "min": 1750.786,
+            "max": 2284.7490000000003
+          },
+          "peak_rss_bytes": {
+            "iterations": 7,
+            "median": 16121856,
+            "p95": 16121856,
+            "min": 16121856,
+            "max": 16121856
+          },
+          "input_block_operations_median": 800000,
+          "before_resident_pages_median": 0,
+          "after_resident_pages_median": 100000,
+          "pages_checked": 100000,
+          "labels": {
+            "verified-cold-file-data-pages": 7
+          }
+        }
+      },
+      "p50_ratio_baseline_over_current": 1.2254078411696883,
+      "median_of_paired_baseline_over_current_ratios": 1.1708588485214606,
+      "p50_ratio_rg_over_current": 176.28451610657032
+    },
+    {
+      "query": {
+        "name": "term",
+        "query": "needle_42",
+        "rg": "\\bneedle_42\\b"
+      },
+      "mode": "warm",
+      "tools": {
+        "baseline": {
+          "wall_ms": {
+            "iterations": 7,
+            "median": 5.606235994491726,
+            "p95": 7.549754001956899,
+            "min": 4.965800006175414,
+            "max": 7.549754001956899
+          },
+          "cpu_ms": {
+            "iterations": 7,
+            "median": 5.378,
+            "p95": 7.3069999999999995,
+            "min": 4.776,
+            "max": 7.3069999999999995
+          },
+          "peak_rss_bytes": {
+            "iterations": 7,
+            "median": 16121856,
+            "p95": 16121856,
+            "min": 16121856,
+            "max": 16121856
+          },
+          "input_block_operations_median": 0,
+          "before_resident_pages_median": 180,
+          "after_resident_pages_median": 180,
+          "pages_checked": 123558,
+          "labels": {
+            "warm-query-replay": 7
+          },
+          "candidates": [
+            1
+          ],
+          "scanned_bytes": [
+            0
+          ]
+        },
+        "current": {
+          "wall_ms": {
+            "iterations": 7,
+            "median": 5.3737859998364,
+            "p95": 7.517545993323438,
+            "min": 5.157868996320758,
+            "max": 7.517545993323438
+          },
+          "cpu_ms": {
+            "iterations": 7,
+            "median": 5.123,
+            "p95": 7.236,
+            "min": 4.938,
+            "max": 7.236
+          },
+          "peak_rss_bytes": {
+            "iterations": 7,
+            "median": 16121856,
+            "p95": 16121856,
+            "min": 16121856,
+            "max": 16121856
+          },
+          "input_block_operations_median": 0,
+          "before_resident_pages_median": 189,
+          "after_resident_pages_median": 189,
+          "pages_checked": 127584,
+          "labels": {
+            "warm-query-replay": 7
+          },
+          "candidates": [
+            1
+          ],
+          "scanned_bytes": [
+            0
+          ]
+        },
+        "rg": {
+          "wall_ms": {
+            "iterations": 7,
+            "median": 102.62359799526166,
+            "p95": 204.80585400218843,
+            "min": 91.60611699917354,
+            "max": 204.80585400218843
+          },
+          "cpu_ms": {
+            "iterations": 7,
+            "median": 775.3149999999999,
+            "p95": 987.108,
+            "min": 695.754,
+            "max": 987.108
+          },
+          "peak_rss_bytes": {
+            "iterations": 7,
+            "median": 16121856,
+            "p95": 16121856,
+            "min": 16121856,
+            "max": 16121856
+          },
+          "input_block_operations_median": 0,
+          "before_resident_pages_median": 100000,
+          "after_resident_pages_median": 100000,
+          "pages_checked": 100000,
+          "labels": {
+            "warm-query-replay": 7
+          }
+        }
+      },
+      "p50_ratio_baseline_over_current": 1.0432562805185028,
+      "median_of_paired_baseline_over_current_ratios": 1.0042843779954345,
+      "p50_ratio_rg_over_current": 19.097075692702674
+    },
+    {
+      "query": {
+        "name": "literal",
+        "query": "\"needle_42 = 0;\"",
+        "rg": "needle_42 = 0;",
+        "fixed": true
+      },
+      "mode": "cold",
+      "tools": {
+        "baseline": {
+          "wall_ms": {
+            "iterations": 7,
+            "median": 5600.987680998514,
+            "p95": 6423.921158006124,
+            "min": 5316.336936004518,
+            "max": 6423.921158006124
+          },
+          "cpu_ms": {
+            "iterations": 7,
+            "median": 3401.64,
+            "p95": 3924.38,
+            "min": 3347.407,
+            "max": 3924.38
+          },
+          "peak_rss_bytes": {
+            "iterations": 7,
+            "median": 59441152,
+            "p95": 59502592,
+            "min": 59420672,
+            "max": 59502592
+          },
+          "input_block_operations_median": 741048,
+          "before_resident_pages_median": 0,
+          "after_resident_pages_median": 92631,
+          "pages_checked": 123558,
+          "labels": {
+            "verified-cold-file-data-pages": 7
+          },
+          "candidates": [
+            100000
+          ],
+          "scanned_bytes": [
+            366645610
+          ]
+        },
+        "current": {
+          "wall_ms": {
+            "iterations": 7,
+            "median": 430.27204099780647,
+            "p95": 461.25834499980556,
+            "min": 371.85906499507837,
+            "max": 461.25834499980556
+          },
+          "cpu_ms": {
+            "iterations": 7,
+            "median": 263.67799999999994,
+            "p95": 278.65099999999995,
+            "min": 240.28,
+            "max": 278.65099999999995
+          },
+          "peak_rss_bytes": {
+            "iterations": 7,
+            "median": 77066240,
+            "p95": 77099008,
+            "min": 77049856,
+            "max": 77099008
+          },
+          "input_block_operations_median": 62216,
+          "before_resident_pages_median": 0,
+          "after_resident_pages_median": 7777,
+          "pages_checked": 127584,
+          "labels": {
+            "verified-cold-file-data-pages": 7
+          },
+          "candidates": [
+            100000
+          ],
+          "scanned_bytes": [
+            54884
+          ]
+        },
+        "rg": {
+          "wall_ms": {
+            "iterations": 7,
+            "median": 2345.3342920038267,
+            "p95": 2798.797048999404,
+            "min": 2253.5707550050574,
+            "max": 2798.797048999404
+          },
+          "cpu_ms": {
+            "iterations": 7,
+            "median": 1907.491,
+            "p95": 2496.963,
+            "min": 1841.353,
+            "max": 2496.963
+          },
+          "peak_rss_bytes": {
+            "iterations": 7,
+            "median": 16121856,
+            "p95": 16121856,
+            "min": 16121856,
+            "max": 16121856
+          },
+          "input_block_operations_median": 800000,
+          "before_resident_pages_median": 0,
+          "after_resident_pages_median": 100000,
+          "pages_checked": 100000,
+          "labels": {
+            "verified-cold-file-data-pages": 7
+          }
+        }
+      },
+      "p50_ratio_baseline_over_current": 13.01731729537841,
+      "median_of_paired_baseline_over_current_ratios": 13.365066206984574,
+      "p50_ratio_rg_over_current": 5.450817316795592
+    },
+    {
+      "query": {
+        "name": "literal",
+        "query": "\"needle_42 = 0;\"",
+        "rg": "needle_42 = 0;",
+        "fixed": true
+      },
+      "mode": "warm",
+      "tools": {
+        "baseline": {
+          "wall_ms": {
+            "iterations": 7,
+            "median": 2963.777852994099,
+            "p95": 3267.455269000493,
+            "min": 2855.769854002574,
+            "max": 3267.455269000493
+          },
+          "cpu_ms": {
+            "iterations": 7,
+            "median": 2963.234,
+            "p95": 3266.9749999999995,
+            "min": 2855.123,
+            "max": 3266.9749999999995
+          },
+          "peak_rss_bytes": {
+            "iterations": 7,
+            "median": 59445248,
+            "p95": 59502592,
+            "min": 59416576,
+            "max": 59502592
+          },
+          "input_block_operations_median": 0,
+          "before_resident_pages_median": 92631,
+          "after_resident_pages_median": 92631,
+          "pages_checked": 123558,
+          "labels": {
+            "warm-query-replay": 7
+          },
+          "candidates": [
+            100000
+          ],
+          "scanned_bytes": [
+            366645610
+          ]
+        },
+        "current": {
+          "wall_ms": {
+            "iterations": 7,
+            "median": 219.72690099937608,
+            "p95": 297.464294002566,
+            "min": 204.32922700274503,
+            "max": 297.464294002566
+          },
+          "cpu_ms": {
+            "iterations": 7,
+            "median": 219.41699999999997,
+            "p95": 297.091,
+            "min": 203.97500000000002,
+            "max": 297.091
+          },
+          "peak_rss_bytes": {
+            "iterations": 7,
+            "median": 77049856,
+            "p95": 77139968,
+            "min": 77041664,
+            "max": 77139968
+          },
+          "input_block_operations_median": 0,
+          "before_resident_pages_median": 7777,
+          "after_resident_pages_median": 7777,
+          "pages_checked": 127584,
+          "labels": {
+            "warm-query-replay": 7
+          },
+          "candidates": [
+            100000
+          ],
+          "scanned_bytes": [
+            54884
+          ]
+        },
+        "rg": {
+          "wall_ms": {
+            "iterations": 7,
+            "median": 95.96435500134248,
+            "p95": 123.01388000196312,
+            "min": 93.38350400503259,
+            "max": 123.01388000196312
+          },
+          "cpu_ms": {
+            "iterations": 7,
+            "median": 699.5649999999999,
+            "p95": 834.276,
+            "min": 684.391,
+            "max": 834.276
+          },
+          "peak_rss_bytes": {
+            "iterations": 7,
+            "median": 16121856,
+            "p95": 16121856,
+            "min": 16121856,
+            "max": 16121856
+          },
+          "input_block_operations_median": 0,
+          "before_resident_pages_median": 100000,
+          "after_resident_pages_median": 100000,
+          "pages_checked": 100000,
+          "labels": {
+            "warm-query-replay": 7
+          }
+        }
+      },
+      "p50_ratio_baseline_over_current": 13.488461538000367,
+      "median_of_paired_baseline_over_current_ratios": 13.417148359147628,
+      "p50_ratio_rg_over_current": 0.43674376949236166
+    },
+    {
+      "query": {
+        "name": "broad_regex",
+        "query": "/needle_[0-9]+/",
+        "rg": "needle_[0-9]+"
+      },
+      "mode": "cold",
+      "tools": {
+        "baseline": {
+          "wall_ms": {
+            "iterations": 7,
+            "median": 15462.056693002523,
+            "p95": 16277.686888999597,
+            "min": 15005.412768994574,
+            "max": 16277.686888999597
+          },
+          "cpu_ms": {
+            "iterations": 7,
+            "median": 12955.939999999999,
+            "p95": 13657.992999999999,
+            "min": 12569.614000000001,
+            "max": 13657.992999999999
+          },
+          "peak_rss_bytes": {
+            "iterations": 7,
+            "median": 59482112,
+            "p95": 59502592,
+            "min": 59432960,
+            "max": 59502592
+          },
+          "input_block_operations_median": 741048,
+          "before_resident_pages_median": 0,
+          "after_resident_pages_median": 92631,
+          "pages_checked": 123558,
+          "labels": {
+            "verified-cold-file-data-pages": 7
+          },
+          "candidates": [
+            100000
+          ],
+          "scanned_bytes": [
+            366645610
+          ]
+        },
+        "current": {
+          "wall_ms": {
+            "iterations": 7,
+            "median": 4635.946816000796,
+            "p95": 4731.858170998748,
+            "min": 4338.719222003419,
+            "max": 4731.858170998748
+          },
+          "cpu_ms": {
+            "iterations": 7,
+            "median": 2395.1549999999997,
+            "p95": 2479.75,
+            "min": 2244.5719999999997,
+            "max": 2479.75
+          },
+          "peak_rss_bytes": {
+            "iterations": 7,
+            "median": 76951552,
+            "p95": 77004800,
+            "min": 76918784,
+            "max": 77004800
+          },
+          "input_block_operations_median": 773216,
+          "before_resident_pages_median": 0,
+          "after_resident_pages_median": 96652,
+          "pages_checked": 127584,
+          "labels": {
+            "verified-cold-file-data-pages": 7
+          },
+          "candidates": [
+            100000
+          ],
+          "scanned_bytes": [
+            366645610
+          ]
+        },
+        "rg": {
+          "wall_ms": {
+            "iterations": 7,
+            "median": 2539.5995599974412,
+            "p95": 3011.8502210025326,
+            "min": 2316.1873889985145,
+            "max": 3011.8502210025326
+          },
+          "cpu_ms": {
+            "iterations": 7,
+            "median": 2963.933,
+            "p95": 3622.484,
+            "min": 2674.975,
+            "max": 3622.484
+          },
+          "peak_rss_bytes": {
+            "iterations": 7,
+            "median": 16121856,
+            "p95": 16121856,
+            "min": 16121856,
+            "max": 16121856
+          },
+          "input_block_operations_median": 800000,
+          "before_resident_pages_median": 0,
+          "after_resident_pages_median": 100000,
+          "pages_checked": 100000,
+          "labels": {
+            "verified-cold-file-data-pages": 7
+          }
+        }
+      },
+      "p50_ratio_baseline_over_current": 3.335253251749096,
+      "median_of_paired_baseline_over_current_ratios": 3.4469623531043396,
+      "p50_ratio_rg_over_current": 0.5478060169353343
+    },
+    {
+      "query": {
+        "name": "broad_regex",
+        "query": "/needle_[0-9]+/",
+        "rg": "needle_[0-9]+"
+      },
+      "mode": "warm",
+      "tools": {
+        "baseline": {
+          "wall_ms": {
+            "iterations": 7,
+            "median": 12436.925743000756,
+            "p95": 12703.99827700021,
+            "min": 11539.831171001424,
+            "max": 12703.99827700021
+          },
+          "cpu_ms": {
+            "iterations": 7,
+            "median": 12434.669,
+            "p95": 12701.591,
+            "min": 11533.692000000001,
+            "max": 12701.591
+          },
+          "peak_rss_bytes": {
+            "iterations": 7,
+            "median": 59478016,
+            "p95": 59502592,
+            "min": 59404288,
+            "max": 59502592
+          },
+          "input_block_operations_median": 0,
+          "before_resident_pages_median": 92631,
+          "after_resident_pages_median": 92631,
+          "pages_checked": 123558,
+          "labels": {
+            "warm-query-replay": 7
+          },
+          "candidates": [
+            100000
+          ],
+          "scanned_bytes": [
+            366645610
+          ]
+        },
+        "current": {
+          "wall_ms": {
+            "iterations": 7,
+            "median": 1886.600190999161,
+            "p95": 2055.5182620009873,
+            "min": 1855.3621559985913,
+            "max": 2055.5182620009873
+          },
+          "cpu_ms": {
+            "iterations": 7,
+            "median": 1886.085,
+            "p95": 2055.089,
+            "min": 1855.003,
+            "max": 2055.089
+          },
+          "peak_rss_bytes": {
+            "iterations": 7,
+            "median": 76947456,
+            "p95": 76967936,
+            "min": 76910592,
+            "max": 76967936
+          },
+          "input_block_operations_median": 0,
+          "before_resident_pages_median": 96652,
+          "after_resident_pages_median": 96652,
+          "pages_checked": 127584,
+          "labels": {
+            "warm-query-replay": 7
+          },
+          "candidates": [
+            100000
+          ],
+          "scanned_bytes": [
+            366645610
+          ]
+        },
+        "rg": {
+          "wall_ms": {
+            "iterations": 7,
+            "median": 730.2076609994401,
+            "p95": 976.979138002207,
+            "min": 425.2208879988757,
+            "max": 976.979138002207
+          },
+          "cpu_ms": {
+            "iterations": 7,
+            "median": 1823.039,
+            "p95": 2129.19,
+            "min": 1355.702,
+            "max": 2129.19
+          },
+          "peak_rss_bytes": {
+            "iterations": 7,
+            "median": 16121856,
+            "p95": 16121856,
+            "min": 15990784,
+            "max": 16121856
+          },
+          "input_block_operations_median": 0,
+          "before_resident_pages_median": 100000,
+          "after_resident_pages_median": 100000,
+          "pages_checked": 100000,
+          "labels": {
+            "warm-query-replay": 7
+          }
+        }
+      },
+      "p50_ratio_baseline_over_current": 6.5922423851839245,
+      "median_of_paired_baseline_over_current_ratios": 6.281481563564235,
+      "p50_ratio_rg_over_current": 0.38704950019787465
+    }
+  ],
+  "verification": {
+    "main": {
+      "timed_targets": 126,
+      "zero_residency_verified_cold": 63,
+      "warm_zero_os_input_blocks": 63,
+      "full_path_count_cases": 3,
+      "end_identity_and_hash_checks_passed": true
+    },
+    "smoke": {
+      "timed_targets": 18,
+      "zero_residency_verified_cold": 9,
+      "warm_zero_os_input_blocks": 9,
+      "full_path_count_cases": 3,
+      "end_identity_and_hash_checks_passed": true
+    }
+  },
+  "artifacts": {
+    "optimization-cache-compact.json": {
+      "sha256": "f32a5192003e478a50e1e714df1b5424d2afa52e94a8b942803debdd88ddd543",
+      "bytes": 932310,
+      "original_path": "/tmp/researchify-cache-gate-1892ph6m/main/results/results.json"
+    },
+    "optimization-cache-smoke.json": {
+      "sha256": "870e6f77472351b579114ce0363b3d4a9739513739fcc8b95e03b653cbfa52c4",
+      "bytes": 152924,
+      "original_path": "/tmp/researchify-cache-gate-1892ph6m/smoke/results/results.json"
+    },
+    "optimization-cache-setup.json": {
+      "sha256": "58ee023bd94028fbffc58238446d59ba2569ac11597e36ab48da7603c1c3d7d5",
+      "bytes": 10542
+    },
+    "optimization-cache-inventories.tar.gz": {
+      "sha256": "4bff33ed5eec3ef925734c6910da4308d2bbc998765e06bc61087fc1b990ace9",
+      "bytes": 6195982,
+      "entries": [
+        {
+          "entry": "main/results/baseline-inventory.json",
+          "original_path": "/tmp/researchify-cache-gate-1892ph6m/main/results/baseline-inventory.json",
+          "sha256": "d5154a1c15bd1962d2b6d3e3dbe3a813141df2d64caa36865b65ccdd83997adb",
+          "bytes": 434024
+        },
+        {
+          "entry": "main/results/broad_regex-oracle.json.gz",
+          "original_path": "/tmp/researchify-cache-gate-1892ph6m/main/results/broad_regex-oracle.json.gz",
+          "sha256": "261222fca7b15a2fe025badcbd9a0d82cfefd183345bedfc9e10dc63b60f18d8",
+          "bytes": 234787
+        },
+        {
+          "entry": "main/results/current-inventory.json",
+          "original_path": "/tmp/researchify-cache-gate-1892ph6m/main/results/current-inventory.json",
+          "sha256": "e5401fcd4a9b2d443e6b8d03b365f7a60b1c14ce66e6ba32d5b9d57f3979d79e",
+          "bytes": 439751
+        },
+        {
+          "entry": "main/results/literal-oracle.json.gz",
+          "original_path": "/tmp/researchify-cache-gate-1892ph6m/main/results/literal-oracle.json.gz",
+          "sha256": "f8e1a60413e2827bd4b9ee84b45ad4726133aba9154739e89fbb6fd1c64f3692",
+          "bytes": 48
+        },
+        {
+          "entry": "main/results/source-inventory.json",
+          "original_path": "/tmp/researchify-cache-gate-1892ph6m/main/results/source-inventory.json",
+          "sha256": "6172a995047165fa3200c95e21ceaa4f013ebf9f4e9b332fddc69728be7046ab",
+          "bytes": 40875328
+        },
+        {
+          "entry": "main/results/term-oracle.json.gz",
+          "original_path": "/tmp/researchify-cache-gate-1892ph6m/main/results/term-oracle.json.gz",
+          "sha256": "f8e1a60413e2827bd4b9ee84b45ad4726133aba9154739e89fbb6fd1c64f3692",
+          "bytes": 48
+        },
+        {
+          "entry": "main/fixture/cache-fixture.json",
+          "original_path": "/tmp/researchify-cache-gate-1892ph6m/main/fixture/cache-fixture.json",
+          "sha256": "e3391c755624cbae2d3b37e7b09245b2818b2ac79a228ccaaec5d6433b696c1f",
+          "bytes": 452
+        },
+        {
+          "entry": "main/fixture/fixture.json",
+          "original_path": "/tmp/researchify-cache-gate-1892ph6m/main/fixture/fixture.json",
+          "sha256": "ed74306b7ec0896c09f6b817c0b3506be6d5ad15a31b0748e72c7f8a34c58b1c",
+          "bytes": 367
+        },
+        {
+          "entry": "main/fixture/benchmark.meta",
+          "original_path": "/tmp/researchify-cache-gate-1892ph6m/main/fixture/benchmark.meta",
+          "sha256": "36a9c53da63a66450a2dfe4f0d455806caccfc252cdc8eb1c2f6d9379e24d1c5",
+          "bytes": 30
+        },
+        {
+          "entry": "main/preparation.json",
+          "original_path": "/tmp/researchify-cache-gate-1892ph6m/main/preparation.json",
+          "sha256": "be85662e1fdba7edad8900a70fa2b1ac908795e9871c36ccfc8f0df978b6b648",
+          "bytes": 4426
+        },
+        {
+          "entry": "main/cache.log",
+          "original_path": "/tmp/researchify-cache-gate-1892ph6m/main/cache.log",
+          "sha256": "683c64e0e175b9bb46d42f9daba7d2b26eaa829659372cc965f9589a51a4b7bf",
+          "bytes": 12360
+        },
+        {
+          "entry": "smoke/results/baseline-inventory.json",
+          "original_path": "/tmp/researchify-cache-gate-1892ph6m/smoke/results/baseline-inventory.json",
+          "sha256": "17833d742388c868ae0439c4163444bdbdb8346d5fbc491dffa9ac646bb8f0f4",
+          "bytes": 30522
+        },
+        {
+          "entry": "smoke/results/broad_regex-oracle.json.gz",
+          "original_path": "/tmp/researchify-cache-gate-1892ph6m/smoke/results/broad_regex-oracle.json.gz",
+          "sha256": "e00be69de7dd39b417795461a6c2780d29fe04a29ff11362004a5fcd4a8ad4cb",
+          "bytes": 197
+        },
+        {
+          "entry": "smoke/results/current-inventory.json",
+          "original_path": "/tmp/researchify-cache-gate-1892ph6m/smoke/results/current-inventory.json",
+          "sha256": "0c7950e46c1da0858c963890d193f010ece56e1b968e8dcada4491ec0e124325",
+          "bytes": 30447
+        },
+        {
+          "entry": "smoke/results/literal-oracle.json.gz",
+          "original_path": "/tmp/researchify-cache-gate-1892ph6m/smoke/results/literal-oracle.json.gz",
+          "sha256": "f8e1a60413e2827bd4b9ee84b45ad4726133aba9154739e89fbb6fd1c64f3692",
+          "bytes": 48
+        },
+        {
+          "entry": "smoke/results/source-inventory.json",
+          "original_path": "/tmp/researchify-cache-gate-1892ph6m/smoke/results/source-inventory.json",
+          "sha256": "025e963b97c392ce9cd2c52c105acabafffcd3e1d392940ee9aa77644b2ed4d2",
+          "bytes": 25711
+        },
+        {
+          "entry": "smoke/results/term-oracle.json.gz",
+          "original_path": "/tmp/researchify-cache-gate-1892ph6m/smoke/results/term-oracle.json.gz",
+          "sha256": "35d3cc84efe4dd525a8356c47646f7309e5daece5fe6b993065dfbd5209e5c67",
+          "bytes": 48
+        },
+        {
+          "entry": "smoke/fixture/cache-fixture.json",
+          "original_path": "/tmp/researchify-cache-gate-1892ph6m/smoke/fixture/cache-fixture.json",
+          "sha256": "8a4d495808974b6ab79dff1307e654130f80afa1f6188109b1456a2f04d66f18",
+          "bytes": 447
+        },
+        {
+          "entry": "smoke/fixture/fixture.json",
+          "original_path": "/tmp/researchify-cache-gate-1892ph6m/smoke/fixture/fixture.json",
+          "sha256": "ca68efa596fa13a39dbfd2af756d96e5f1bbeba19157c493a56d8bf53abaca97",
+          "bytes": 716
+        },
+        {
+          "entry": "smoke/fixture/benchmark.meta",
+          "original_path": "/tmp/researchify-cache-gate-1892ph6m/smoke/fixture/benchmark.meta",
+          "sha256": "30f25dd5ad16088f85cd9a28392cdf0a5033528c4826232e2fc10e7e31b97313",
+          "bytes": 25
+        },
+        {
+          "entry": "smoke/preparation.json",
+          "original_path": "/tmp/researchify-cache-gate-1892ph6m/smoke/preparation.json",
+          "sha256": "46c9372d4357b8c889c005b8a5dec25cd62496825e4be2507bb99849f86b597a",
+          "bytes": 5531
+        },
+        {
+          "entry": "smoke/cache.log",
+          "original_path": "/tmp/researchify-cache-gate-1892ph6m/smoke/cache.log",
+          "sha256": "06d268a02c61fd1335409e9bac5d521ec3ee7c762f59eefba7998852b8f13c45",
+          "bytes": 11371
+        },
+        {
+          "entry": "prepare_cache_fixture.py",
+          "original_path": "/tmp/researchify-cache-gate-1892ph6m/prepare_cache_fixture.py",
+          "sha256": "4c5edda14c0982b0efb8f769b1692d00c64e264af322244d965093b9980c0673",
+          "bytes": 7462
+        },
+        {
+          "entry": "drivers/cache_benchmark.py",
+          "original_path": "/workspace/scratch/93bfa6b783da/ReSearchify-cache-benchmark/scripts/cache_benchmark.py",
+          "sha256": "58fcc908532719307d03304e0309a1b419fa325435863004f0a1c7fb9d31165c",
+          "bytes": 23884
+        },
+        {
+          "entry": "drivers/perf_benchmark.py",
+          "original_path": "/workspace/scratch/93bfa6b783da/ReSearchify-cache-benchmark/scripts/perf_benchmark.py",
+          "sha256": "8d7f54c48fb99057ccc17648da418a78edaa19a77ccf34bcbe7ea9150cf3b10e",
+          "bytes": 27498
+        },
+        {
+          "entry": "drivers/tiny_comparison.py",
+          "original_path": "/workspace/scratch/93bfa6b783da/ReSearchify-cache-benchmark/scripts/tiny_comparison.py",
+          "sha256": "a52c61a6d47ab4e31af381712b24b51cdd5ab0b22f9c4b6824e2859cec00e70c",
+          "bytes": 23446
+        },
+        {
+          "entry": "drivers/compare_sessions.py",
+          "original_path": "/workspace/scratch/93bfa6b783da/ReSearchify-cache-benchmark/scripts/compare_sessions.py",
+          "sha256": "0fd96c915fdc4b88734daa31e091be8bd74825ad9b2cac3fb037f448fc658bf2",
+          "bytes": 13322
+        }
+      ]
+    }
+  },
+  "indexes": {
+    "baseline": {
+      "api_version": 1,
+      "bytes": 366645610,
+      "execution_complete": true,
+      "files": 100000,
+      "generation": "1",
+      "index_bytes": 504071122,
+      "lines": 5000000,
+      "profile": "compact",
+      "recovered": false,
+      "retained_generations": 1,
+      "root": "/tmp/researchify-cache-gate-1892ph6m/main/fixture/source",
+      "segments": 16,
+      "status": "ok",
+      "tokens": 47800000,
+      "warnings": []
+    },
+    "current": {
+      "api_version": 1,
+      "bytes": 366645610,
+      "execution_complete": true,
+      "files": 100000,
+      "generation": "1",
+      "index_bytes": 520504919,
+      "lines": 5000000,
+      "profile": "compact",
+      "recovered": false,
+      "retained_generations": 1,
+      "root": "/tmp/researchify-cache-gate-1892ph6m/main/fixture/source",
+      "segments": 16,
+      "status": "ok",
+      "tokens": 47800000,
+      "warnings": []
+    }
+  },
+  "review": "Independent read-only recomputation confirmed all raw wall/CPU/RSS distributions and proof labels for main and smoke; no native targets were launched for review.",
+  "index_growth_percent": 3.2602139425872423
+}

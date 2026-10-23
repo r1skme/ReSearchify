@@ -1,0 +1,26 @@
+{
+  "format": "researchify-native-validation-excerpts-v1",
+  "workflow_run_id": 39975881618,
+  "job_id": 120490220517,
+  "job_name": "macOS arm64 (Clang)",
+  "source": "https://api.github.com/repos/r1skme/ReSearchify/actions/jobs/120490220517/logs",
+  "status": "completed",
+  "conclusion": "success",
+  "ctest": {
+    "passed": 13,
+    "total": 13,
+    "wall_seconds": 13.67
+  },
+  "python": {
+    "passed": 40,
+    "wall_seconds": 0.387
+  },
+  "log_excerpts": [
+    "2026-10-23T15:09:52.8244490Z Image: macos-15-arm64",
+    "2026-10-23T15:09:52.8245800Z Included Software: https://github.com/actions/runner-images/blob/macos-15-arm64/20260907.0337/images/macos/macos-15-arm64-Readme.md",
+    "2026-10-23T15:10:45.9167550Z 100% tests passed out of 13",
+    "2026-10-23T15:10:45.9168030Z Total Test time (real) =  13.67 sec",
+    "2026-10-23T15:10:47.1383080Z Ran 40 tests in 0.387s"
+  ],
+  "note": "Selected decoded log excerpts, not an unchanged full log archive."
+}

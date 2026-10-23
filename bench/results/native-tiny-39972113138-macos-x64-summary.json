@@ -1,0 +1,1388 @@
+{
+  "format": "researchify-native-comparison-v1",
+  "complete": true,
+  "platform": "macOS-15.7.9-x86_64-i386-64bit",
+  "machine": "x86_64",
+  "logical_cpus": 4,
+  "python": "3.12.10",
+  "compiler": "Apple clang version 17.0.0 (clang-1700.0.13.5)\nTarget: x86_64-apple-darwin24.6.0\nThread model: posix\nInstalledDir: /Applications/Xcode_16.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin",
+  "ripgrep": "ripgrep 15.2.0\n\nfeatures:+pcre2\nsimd(compile):+SSE2,+SSSE3,-AVX2\nsimd(runtime):+SSE2,+SSSE3,+AVX2\n\nPCRE2 10.45 is available (JIT is available)",
+  "binaries": {
+    "original": {
+      "commit": "eb858348169157686e70104af6b64f9539a39fe8",
+      "path": "/Users/runner/work/ReSearchify/ReSearchify/native-baselines/original/build/rs",
+      "sha256": "704977ab84d923128e4b5d6be18bf08a48200c864f6b606726e637b057df0ce2",
+      "mach_o_arch": "x86_64"
+    },
+    "previous": {
+      "commit": "dbcddf76708b614c26e212fa27b48efa33ddfd58",
+      "path": "/Users/runner/work/ReSearchify/ReSearchify/native-baselines/previous/build/rs",
+      "sha256": "46b17292b65b902531700e5ad1082717665e829b2684ccd3d48f1b7b6044383f",
+      "mach_o_arch": "x86_64"
+    },
+    "current": {
+      "commit": "0babf2521230df09791fd2e61ab04dc90af53854",
+      "path": "/Users/runner/work/ReSearchify/ReSearchify/build/rs",
+      "sha256": "060bd0657d2d3987cf68e58b67237152cc28fca87fd650583682cb5f5046b877",
+      "mach_o_arch": "x86_64"
+    }
+  },
+  "generator_sha256": "abe64180794cf5b31ac39d9505a9f46bf2547ad62735a2c864fd14e54b40fe70",
+  "conditions": {
+    "cache": "Uncontrolled OS cache, explicit excluded warmups; NOT cold-cache",
+    "host": "Native GitHub runner; not a reproduction on a user's Mac",
+    "build": "One separate index-create sample per writer/profile; compilation and generation excluded",
+    "memory_mb": 256,
+    "index_threads": 3,
+    "search_threads": "Executable default",
+    "gates": "Correctness/completion only; no timing threshold on shared runners",
+    "rss": "Timed child RSS may include the Python pre-exec floor; JSONL has no per-reader CPU/RSS claim",
+    "correctness": "Full matching paths/counts vs rg outside timing; exact count-only responses inside drivers"
+  },
+  "builds": [
+    {
+      "writer": "original",
+      "profile": "compact",
+      "command": [
+        "/Users/runner/work/ReSearchify/ReSearchify/native-baselines/original/build/rs",
+        "create",
+        "--root",
+        "/Users/runner/work/ReSearchify/ReSearchify/native-perf/fixture/source",
+        "--index",
+        "/Users/runner/work/ReSearchify/ReSearchify/native-perf/original-compact",
+        "--profile",
+        "compact",
+        "--threads",
+        "3",
+        "--memory-mb",
+        "256",
+        "--json"
+      ],
+      "sample": {
+        "wall_seconds": 16.30579077799996,
+        "returncode": 0,
+        "stdout": "{\"added\":20000,\"api_version\":1,\"bytes\":72893610,\"changed\":0,\"execution_complete\":true,\"files\":20000,\"generation\":\"1\",\"global_scan\":true,\"hashed\":20000,\"lines\":1000000,\"memory_budget_bytes\":268435456,\"removed\":0,\"seconds\":16.291651560999998,\"segments\":3,\"skipped\":0,\"status\":\"ok\",\"tokenized\":20000,\"unchanged\":0,\"warnings\":[],\"workers\":3}\n",
+        "stderr": "",
+        "cpu_seconds": 23.649316,
+        "peak_rss_bytes": 13819904,
+        "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor"
+      },
+      "storage": {
+        "committed_index_bytes": 100478489,
+        "transaction_scratch_bytes": 0,
+        "spill_scratch_bytes": 0,
+        "coordination_bytes": 0,
+        "literal_sidecar_bytes": 0,
+        "total_file_bytes": 100478489,
+        "measurement": "logical file sizes; transaction-* scratch, nested segment sort/literal-sort spills and reader/writer coordination separated; no deletion"
+      }
+    },
+    {
+      "writer": "current",
+      "profile": "compact",
+      "command": [
+        "/Users/runner/work/ReSearchify/ReSearchify/build/rs",
+        "create",
+        "--root",
+        "/Users/runner/work/ReSearchify/ReSearchify/native-perf/fixture/source",
+        "--index",
+        "/Users/runner/work/ReSearchify/ReSearchify/native-perf/current-compact",
+        "--profile",
+        "compact",
+        "--threads",
+        "3",
+        "--memory-mb",
+        "256",
+        "--json"
+      ],
+      "sample": {
+        "wall_seconds": 13.70081695500005,
+        "returncode": 0,
+        "stdout": "{\"added\":20000,\"api_version\":1,\"bytes\":72893610,\"changed\":0,\"execution_complete\":true,\"files\":20000,\"generation\":\"1\",\"global_scan\":true,\"hashed\":20000,\"lines\":1000000,\"memory_budget_bytes\":268435456,\"removed\":0,\"seconds\":13.685654953,\"segments\":3,\"skipped\":0,\"status\":\"ok\",\"tokenized\":20000,\"unchanged\":0,\"warnings\":[],\"workers\":3}\n",
+        "stderr": "",
+        "cpu_seconds": 23.304282,
+        "peak_rss_bytes": 13647872,
+        "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor"
+      },
+      "storage": {
+        "committed_index_bytes": 103765431,
+        "transaction_scratch_bytes": 0,
+        "spill_scratch_bytes": 0,
+        "coordination_bytes": 0,
+        "literal_sidecar_bytes": 3283461,
+        "total_file_bytes": 103765431,
+        "measurement": "logical file sizes; transaction-* scratch, nested segment sort/literal-sort spills and reader/writer coordination separated; no deletion"
+      }
+    },
+    {
+      "writer": "current",
+      "profile": "fast",
+      "command": [
+        "/Users/runner/work/ReSearchify/ReSearchify/build/rs",
+        "create",
+        "--root",
+        "/Users/runner/work/ReSearchify/ReSearchify/native-perf/fixture/source",
+        "--index",
+        "/Users/runner/work/ReSearchify/ReSearchify/native-perf/current-fast",
+        "--profile",
+        "fast",
+        "--threads",
+        "3",
+        "--memory-mb",
+        "256",
+        "--json"
+      ],
+      "sample": {
+        "wall_seconds": 28.70104827099999,
+        "returncode": 0,
+        "stdout": "{\"added\":20000,\"api_version\":1,\"bytes\":72893610,\"changed\":0,\"execution_complete\":true,\"files\":20000,\"generation\":\"1\",\"global_scan\":true,\"hashed\":20000,\"lines\":1000000,\"memory_budget_bytes\":268435456,\"removed\":0,\"seconds\":28.683647456999999,\"segments\":3,\"skipped\":0,\"status\":\"ok\",\"tokenized\":20000,\"unchanged\":0,\"warnings\":[],\"workers\":3}\n",
+        "stderr": "",
+        "cpu_seconds": 47.807485,
+        "peak_rss_bytes": 19755008,
+        "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor"
+      },
+      "storage": {
+        "committed_index_bytes": 140435773,
+        "transaction_scratch_bytes": 0,
+        "spill_scratch_bytes": 0,
+        "coordination_bytes": 0,
+        "literal_sidecar_bytes": 0,
+        "total_file_bytes": 140435773,
+        "measurement": "logical file sizes; transaction-* scratch, nested segment sort/literal-sort spills and reader/writer coordination separated; no deletion"
+      }
+    },
+    {
+      "writer": "original",
+      "profile": "fast",
+      "command": [
+        "/Users/runner/work/ReSearchify/ReSearchify/native-baselines/original/build/rs",
+        "create",
+        "--root",
+        "/Users/runner/work/ReSearchify/ReSearchify/native-perf/fixture/source",
+        "--index",
+        "/Users/runner/work/ReSearchify/ReSearchify/native-perf/original-fast",
+        "--profile",
+        "fast",
+        "--threads",
+        "3",
+        "--memory-mb",
+        "256",
+        "--json"
+      ],
+      "sample": {
+        "wall_seconds": 30.34412371799999,
+        "returncode": 0,
+        "stdout": "{\"added\":20000,\"api_version\":1,\"bytes\":72893610,\"changed\":0,\"execution_complete\":true,\"files\":20000,\"generation\":\"1\",\"global_scan\":true,\"hashed\":20000,\"lines\":1000000,\"memory_budget_bytes\":268435456,\"removed\":0,\"seconds\":30.324345498,\"segments\":3,\"skipped\":0,\"status\":\"ok\",\"tokenized\":20000,\"unchanged\":0,\"warnings\":[],\"workers\":3}\n",
+        "stderr": "",
+        "cpu_seconds": 51.854031,
+        "peak_rss_bytes": 19623936,
+        "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor"
+      },
+      "storage": {
+        "committed_index_bytes": 140451672,
+        "transaction_scratch_bytes": 0,
+        "spill_scratch_bytes": 0,
+        "coordination_bytes": 0,
+        "literal_sidecar_bytes": 0,
+        "total_file_bytes": 140451672,
+        "measurement": "logical file sizes; transaction-* scratch, nested segment sort/literal-sort spills and reader/writer coordination separated; no deletion"
+      }
+    }
+  ],
+  "measurements": [
+    {
+      "report": "original-compact.json",
+      "query": "term",
+      "matching_files": 1,
+      "binaries": {
+        "baseline": {
+          "path": "/Users/runner/work/ReSearchify/ReSearchify/native-baselines/original/build/rs",
+          "sha256": "704977ab84d923128e4b5d6be18bf08a48200c864f6b606726e637b057df0ce2"
+        },
+        "current": {
+          "path": "/Users/runner/work/ReSearchify/ReSearchify/build/rs",
+          "sha256": "060bd0657d2d3987cf68e58b67237152cc28fca87fd650583682cb5f5046b877"
+        }
+      },
+      "tools": {
+        "baseline": {
+          "wall_ms": {
+            "iterations": 21,
+            "median": 15.403399999968315,
+            "p95": 19.157325999913155,
+            "min": 12.650968000116336,
+            "max": 22.524169000007532
+          },
+          "cpu_ms": {
+            "iterations": 21,
+            "median": 12.181999999999999,
+            "p95": 15.925000000000002,
+            "min": 10.168,
+            "max": 18.418999999999997
+          },
+          "peak_rss_bytes": {
+            "iterations": 21,
+            "median": 1286144,
+            "p95": 1286144,
+            "min": 1286144,
+            "max": 1286144
+          }
+        },
+        "current": {
+          "wall_ms": {
+            "iterations": 21,
+            "median": 14.793920999863985,
+            "p95": 18.42039199982537,
+            "min": 12.111275000052046,
+            "max": 45.49152300000969
+          },
+          "cpu_ms": {
+            "iterations": 21,
+            "median": 11.422999999999998,
+            "p95": 15.009,
+            "min": 9.62,
+            "max": 38.638999999999996
+          },
+          "peak_rss_bytes": {
+            "iterations": 21,
+            "median": 1323008,
+            "p95": 1323008,
+            "min": 1323008,
+            "max": 1323008
+          }
+        },
+        "rg": {
+          "wall_ms": {
+            "iterations": 21,
+            "median": 290.3607830000965,
+            "p95": 367.0830500000193,
+            "min": 216.7076549999365,
+            "max": 459.2058329999418
+          },
+          "cpu_ms": {
+            "iterations": 21,
+            "median": 1070.2469999999998,
+            "p95": 1282.2179999999998,
+            "min": 753.4289999999999,
+            "max": 1661.7359999999999
+          },
+          "peak_rss_bytes": {
+            "iterations": 21,
+            "median": 11231232,
+            "p95": 14229504,
+            "min": 9326592,
+            "max": 16556032
+          }
+        }
+      },
+      "counters": {
+        "baseline": {
+          "candidates": [
+            1
+          ],
+          "scanned_bytes": [
+            0
+          ]
+        },
+        "current": {
+          "candidates": [
+            1
+          ],
+          "scanned_bytes": [
+            0
+          ]
+        }
+      }
+    },
+    {
+      "report": "original-compact.json",
+      "query": "literal",
+      "matching_files": 1,
+      "binaries": {
+        "baseline": {
+          "path": "/Users/runner/work/ReSearchify/ReSearchify/native-baselines/original/build/rs",
+          "sha256": "704977ab84d923128e4b5d6be18bf08a48200c864f6b606726e637b057df0ce2"
+        },
+        "current": {
+          "path": "/Users/runner/work/ReSearchify/ReSearchify/build/rs",
+          "sha256": "060bd0657d2d3987cf68e58b67237152cc28fca87fd650583682cb5f5046b877"
+        }
+      },
+      "tools": {
+        "baseline": {
+          "wall_ms": {
+            "iterations": 21,
+            "median": 1489.8445389999324,
+            "p95": 1966.6831760000605,
+            "min": 1360.4401459999735,
+            "max": 2295.548125999858
+          },
+          "cpu_ms": {
+            "iterations": 21,
+            "median": 1485.8519999999999,
+            "p95": 1959.849,
+            "min": 1356.6000000000001,
+            "max": 2291.197
+          },
+          "peak_rss_bytes": {
+            "iterations": 21,
+            "median": 14639104,
+            "p95": 14692352,
+            "min": 14528512,
+            "max": 14716928
+          }
+        },
+        "current": {
+          "wall_ms": {
+            "iterations": 21,
+            "median": 240.28893200011225,
+            "p95": 424.44120300001487,
+            "min": 204.72322300020096,
+            "max": 510.81372399994507
+          },
+          "cpu_ms": {
+            "iterations": 21,
+            "median": 236.41899999999998,
+            "p95": 420.184,
+            "min": 200.934,
+            "max": 498.552
+          },
+          "peak_rss_bytes": {
+            "iterations": 21,
+            "median": 22495232,
+            "p95": 22712320,
+            "min": 22495232,
+            "max": 22732800
+          }
+        },
+        "rg": {
+          "wall_ms": {
+            "iterations": 21,
+            "median": 272.9923189999681,
+            "p95": 351.2201449998429,
+            "min": 197.2333860001072,
+            "max": 840.8379750001131
+          },
+          "cpu_ms": {
+            "iterations": 21,
+            "median": 974.4679999999998,
+            "p95": 1218.652,
+            "min": 691.126,
+            "max": 2968.654
+          },
+          "peak_rss_bytes": {
+            "iterations": 21,
+            "median": 9113600,
+            "p95": 13488128,
+            "min": 8007680,
+            "max": 14282752
+          }
+        }
+      },
+      "counters": {
+        "baseline": {
+          "candidates": [
+            20000
+          ],
+          "scanned_bytes": [
+            72893610
+          ]
+        },
+        "current": {
+          "candidates": [
+            20000
+          ],
+          "scanned_bytes": [
+            7148
+          ]
+        }
+      }
+    },
+    {
+      "report": "original-compact.json",
+      "query": "no_match",
+      "matching_files": 0,
+      "binaries": {
+        "baseline": {
+          "path": "/Users/runner/work/ReSearchify/ReSearchify/native-baselines/original/build/rs",
+          "sha256": "704977ab84d923128e4b5d6be18bf08a48200c864f6b606726e637b057df0ce2"
+        },
+        "current": {
+          "path": "/Users/runner/work/ReSearchify/ReSearchify/build/rs",
+          "sha256": "060bd0657d2d3987cf68e58b67237152cc28fca87fd650583682cb5f5046b877"
+        }
+      },
+      "tools": {
+        "baseline": {
+          "wall_ms": {
+            "iterations": 21,
+            "median": 1269.592719000002,
+            "p95": 1599.4396759999745,
+            "min": 1132.6425690001543,
+            "max": 1853.850735999913
+          },
+          "cpu_ms": {
+            "iterations": 21,
+            "median": 1245.5789999999997,
+            "p95": 1596.1879999999999,
+            "min": 1129.6119999999999,
+            "max": 1838.8439999999998
+          },
+          "peak_rss_bytes": {
+            "iterations": 21,
+            "median": 14630912,
+            "p95": 14688256,
+            "min": 14462976,
+            "max": 14692352
+          }
+        },
+        "current": {
+          "wall_ms": {
+            "iterations": 21,
+            "median": 204.1870470000049,
+            "p95": 282.8585730001123,
+            "min": 190.26157899997997,
+            "max": 313.8857909998478
+          },
+          "cpu_ms": {
+            "iterations": 21,
+            "median": 200.683,
+            "p95": 277.462,
+            "min": 186.62699999999998,
+            "max": 308.405
+          },
+          "peak_rss_bytes": {
+            "iterations": 21,
+            "median": 22315008,
+            "p95": 22401024,
+            "min": 22315008,
+            "max": 22405120
+          }
+        },
+        "rg": {
+          "wall_ms": {
+            "iterations": 21,
+            "median": 235.00709700010702,
+            "p95": 330.7137369999964,
+            "min": 163.38030499991874,
+            "max": 360.30010400008905
+          },
+          "cpu_ms": {
+            "iterations": 21,
+            "median": 834.799,
+            "p95": 1154.185,
+            "min": 609.6089999999999,
+            "max": 1155.4099999999999
+          },
+          "peak_rss_bytes": {
+            "iterations": 21,
+            "median": 10919936,
+            "p95": 14249984,
+            "min": 8142848,
+            "max": 15278080
+          }
+        }
+      },
+      "counters": {
+        "baseline": {
+          "candidates": [
+            20000
+          ],
+          "scanned_bytes": [
+            72893610
+          ]
+        },
+        "current": {
+          "candidates": [
+            20000
+          ],
+          "scanned_bytes": [
+            0
+          ]
+        }
+      }
+    },
+    {
+      "report": "original-compact.json",
+      "query": "broad_literal",
+      "matching_files": 20000,
+      "binaries": {
+        "baseline": {
+          "path": "/Users/runner/work/ReSearchify/ReSearchify/native-baselines/original/build/rs",
+          "sha256": "704977ab84d923128e4b5d6be18bf08a48200c864f6b606726e637b057df0ce2"
+        },
+        "current": {
+          "path": "/Users/runner/work/ReSearchify/ReSearchify/build/rs",
+          "sha256": "060bd0657d2d3987cf68e58b67237152cc28fca87fd650583682cb5f5046b877"
+        }
+      },
+      "tools": {
+        "baseline": {
+          "wall_ms": {
+            "iterations": 21,
+            "median": 1580.4890659999273,
+            "p95": 1666.9334420000723,
+            "min": 1368.13026599998,
+            "max": 1779.0970230000767
+          },
+          "cpu_ms": {
+            "iterations": 21,
+            "median": 1571.9379999999999,
+            "p95": 1663.0620000000001,
+            "min": 1363.5410000000002,
+            "max": 1771.375
+          },
+          "peak_rss_bytes": {
+            "iterations": 21,
+            "median": 14647296,
+            "p95": 14704640,
+            "min": 14528512,
+            "max": 14712832
+          }
+        },
+        "current": {
+          "wall_ms": {
+            "iterations": 21,
+            "median": 447.87755499987725,
+            "p95": 522.6756100000784,
+            "min": 351.34245399990505,
+            "max": 526.068387000123
+          },
+          "cpu_ms": {
+            "iterations": 21,
+            "median": 812.995,
+            "p95": 854.4300000000001,
+            "min": 672.018,
+            "max": 855.413
+          },
+          "peak_rss_bytes": {
+            "iterations": 21,
+            "median": 23019520,
+            "p95": 23048192,
+            "min": 23007232,
+            "max": 23056384
+          }
+        },
+        "rg": {
+          "wall_ms": {
+            "iterations": 21,
+            "median": 763.3006329999716,
+            "p95": 1009.9510239999745,
+            "min": 636.4252609998857,
+            "max": 1116.9046570000773
+          },
+          "cpu_ms": {
+            "iterations": 21,
+            "median": 2727.6450000000004,
+            "p95": 3319.9100000000003,
+            "min": 2388.541,
+            "max": 3480.727
+          },
+          "peak_rss_bytes": {
+            "iterations": 21,
+            "median": 9961472,
+            "p95": 15826944,
+            "min": 7585792,
+            "max": 16379904
+          }
+        }
+      },
+      "counters": {
+        "baseline": {
+          "candidates": [
+            20000
+          ],
+          "scanned_bytes": [
+            72893610
+          ]
+        },
+        "current": {
+          "candidates": [
+            20000
+          ],
+          "scanned_bytes": [
+            72893610
+          ]
+        }
+      }
+    },
+    {
+      "report": "original-compact.json",
+      "query": "broad_regex",
+      "matching_files": 20000,
+      "binaries": {
+        "baseline": {
+          "path": "/Users/runner/work/ReSearchify/ReSearchify/native-baselines/original/build/rs",
+          "sha256": "704977ab84d923128e4b5d6be18bf08a48200c864f6b606726e637b057df0ce2"
+        },
+        "current": {
+          "path": "/Users/runner/work/ReSearchify/ReSearchify/build/rs",
+          "sha256": "060bd0657d2d3987cf68e58b67237152cc28fca87fd650583682cb5f5046b877"
+        }
+      },
+      "tools": {
+        "baseline": {
+          "wall_ms": {
+            "iterations": 21,
+            "median": 4933.239520999905,
+            "p95": 6862.514034000014,
+            "min": 3453.3670739999707,
+            "max": 6907.983300000069
+          },
+          "cpu_ms": {
+            "iterations": 21,
+            "median": 4928.152,
+            "p95": 6847.705,
+            "min": 3451.0,
+            "max": 6903.465999999999
+          },
+          "peak_rss_bytes": {
+            "iterations": 21,
+            "median": 14696448,
+            "p95": 14712832,
+            "min": 14635008,
+            "max": 14712832
+          }
+        },
+        "current": {
+          "wall_ms": {
+            "iterations": 21,
+            "median": 1033.7454470000011,
+            "p95": 1155.3546369998458,
+            "min": 752.414712000018,
+            "max": 1162.87582200016
+          },
+          "cpu_ms": {
+            "iterations": 21,
+            "median": 1028.9329999999998,
+            "p95": 1149.585,
+            "min": 748.1519999999999,
+            "max": 1156.5339999999999
+          },
+          "peak_rss_bytes": {
+            "iterations": 21,
+            "median": 22482944,
+            "p95": 22552576,
+            "min": 22376448,
+            "max": 22585344
+          }
+        },
+        "rg": {
+          "wall_ms": {
+            "iterations": 21,
+            "median": 751.351239999849,
+            "p95": 1143.4930030000032,
+            "min": 520.6419369999367,
+            "max": 1146.44300499981
+          },
+          "cpu_ms": {
+            "iterations": 21,
+            "median": 2704.9880000000003,
+            "p95": 3759.6059999999998,
+            "min": 1858.441,
+            "max": 3955.709
+          },
+          "peak_rss_bytes": {
+            "iterations": 21,
+            "median": 10903552,
+            "p95": 13570048,
+            "min": 8298496,
+            "max": 14839808
+          }
+        }
+      },
+      "counters": {
+        "baseline": {
+          "candidates": [
+            20000
+          ],
+          "scanned_bytes": [
+            72893610
+          ]
+        },
+        "current": {
+          "candidates": [
+            20000
+          ],
+          "scanned_bytes": [
+            72893610
+          ]
+        }
+      }
+    },
+    {
+      "report": "original-fast.json",
+      "query": "term",
+      "matching_files": 1,
+      "binaries": {
+        "baseline": {
+          "path": "/Users/runner/work/ReSearchify/ReSearchify/native-baselines/original/build/rs",
+          "sha256": "704977ab84d923128e4b5d6be18bf08a48200c864f6b606726e637b057df0ce2"
+        },
+        "current": {
+          "path": "/Users/runner/work/ReSearchify/ReSearchify/build/rs",
+          "sha256": "060bd0657d2d3987cf68e58b67237152cc28fca87fd650583682cb5f5046b877"
+        }
+      },
+      "tools": {
+        "baseline": {
+          "wall_ms": {
+            "iterations": 21,
+            "median": 16.916477999984636,
+            "p95": 19.20068699996591,
+            "min": 12.42111900000964,
+            "max": 19.402488000196172
+          },
+          "cpu_ms": {
+            "iterations": 21,
+            "median": 13.898000000000001,
+            "p95": 15.575,
+            "min": 9.964999999999998,
+            "max": 16.625999999999998
+          },
+          "peak_rss_bytes": {
+            "iterations": 21,
+            "median": 1282048,
+            "p95": 1282048,
+            "min": 1282048,
+            "max": 1372160
+          }
+        },
+        "current": {
+          "wall_ms": {
+            "iterations": 21,
+            "median": 17.350699999951757,
+            "p95": 18.94318200015732,
+            "min": 13.462403999938033,
+            "max": 19.071096000061516
+          },
+          "cpu_ms": {
+            "iterations": 21,
+            "median": 14.043,
+            "p95": 15.678999999999998,
+            "min": 10.439,
+            "max": 15.944999999999997
+          },
+          "peak_rss_bytes": {
+            "iterations": 21,
+            "median": 1323008,
+            "p95": 1323008,
+            "min": 1323008,
+            "max": 1331200
+          }
+        },
+        "rg": {
+          "wall_ms": {
+            "iterations": 21,
+            "median": 332.28966599995147,
+            "p95": 476.8247330000577,
+            "min": 222.36497099993358,
+            "max": 477.17308800019964
+          },
+          "cpu_ms": {
+            "iterations": 21,
+            "median": 1189.521,
+            "p95": 1507.231,
+            "min": 823.604,
+            "max": 1727.603
+          },
+          "peak_rss_bytes": {
+            "iterations": 21,
+            "median": 9510912,
+            "p95": 14417920,
+            "min": 8949760,
+            "max": 14630912
+          }
+        }
+      },
+      "counters": {
+        "baseline": {
+          "candidates": [
+            1
+          ],
+          "scanned_bytes": [
+            0
+          ]
+        },
+        "current": {
+          "candidates": [
+            1
+          ],
+          "scanned_bytes": [
+            0
+          ]
+        }
+      }
+    },
+    {
+      "report": "original-fast.json",
+      "query": "literal",
+      "matching_files": 1,
+      "binaries": {
+        "baseline": {
+          "path": "/Users/runner/work/ReSearchify/ReSearchify/native-baselines/original/build/rs",
+          "sha256": "704977ab84d923128e4b5d6be18bf08a48200c864f6b606726e637b057df0ce2"
+        },
+        "current": {
+          "path": "/Users/runner/work/ReSearchify/ReSearchify/build/rs",
+          "sha256": "060bd0657d2d3987cf68e58b67237152cc28fca87fd650583682cb5f5046b877"
+        }
+      },
+      "tools": {
+        "baseline": {
+          "wall_ms": {
+            "iterations": 21,
+            "median": 67.70119099996919,
+            "p95": 79.88493099992411,
+            "min": 46.937655000192535,
+            "max": 96.1841150001419
+          },
+          "cpu_ms": {
+            "iterations": 21,
+            "median": 64.053,
+            "p95": 76.13000000000001,
+            "min": 44.446,
+            "max": 91.04499999999999
+          },
+          "peak_rss_bytes": {
+            "iterations": 21,
+            "median": 3350528,
+            "p95": 3469312,
+            "min": 3350528,
+            "max": 3526656
+          }
+        },
+        "current": {
+          "wall_ms": {
+            "iterations": 21,
+            "median": 24.963685000102487,
+            "p95": 29.779084999972838,
+            "min": 16.851580999855287,
+            "max": 30.112275999954363
+          },
+          "cpu_ms": {
+            "iterations": 21,
+            "median": 21.8,
+            "p95": 24.953999999999997,
+            "min": 14.437999999999999,
+            "max": 26.343
+          },
+          "peak_rss_bytes": {
+            "iterations": 21,
+            "median": 1855488,
+            "p95": 1904640,
+            "min": 1855488,
+            "max": 1916928
+          }
+        },
+        "rg": {
+          "wall_ms": {
+            "iterations": 21,
+            "median": 339.3533309999839,
+            "p95": 435.6703160001416,
+            "min": 269.70684100001563,
+            "max": 550.4378299999644
+          },
+          "cpu_ms": {
+            "iterations": 21,
+            "median": 1236.864,
+            "p95": 1541.8899999999999,
+            "min": 914.3129999999999,
+            "max": 1555.21
+          },
+          "peak_rss_bytes": {
+            "iterations": 21,
+            "median": 10211328,
+            "p95": 14299136,
+            "min": 7548928,
+            "max": 16625664
+          }
+        }
+      },
+      "counters": {
+        "baseline": {
+          "candidates": [
+            200
+          ],
+          "scanned_bytes": [
+            728961
+          ]
+        },
+        "current": {
+          "candidates": [
+            12
+          ],
+          "scanned_bytes": [
+            43329
+          ]
+        }
+      }
+    },
+    {
+      "report": "original-fast.json",
+      "query": "no_match",
+      "matching_files": 0,
+      "binaries": {
+        "baseline": {
+          "path": "/Users/runner/work/ReSearchify/ReSearchify/native-baselines/original/build/rs",
+          "sha256": "704977ab84d923128e4b5d6be18bf08a48200c864f6b606726e637b057df0ce2"
+        },
+        "current": {
+          "path": "/Users/runner/work/ReSearchify/ReSearchify/build/rs",
+          "sha256": "060bd0657d2d3987cf68e58b67237152cc28fca87fd650583682cb5f5046b877"
+        }
+      },
+      "tools": {
+        "baseline": {
+          "wall_ms": {
+            "iterations": 21,
+            "median": 14.17566899999656,
+            "p95": 18.26536099997611,
+            "min": 11.382471999922927,
+            "max": 19.496091000064553
+          },
+          "cpu_ms": {
+            "iterations": 21,
+            "median": 11.649999999999999,
+            "p95": 14.342999999999998,
+            "min": 9.144,
+            "max": 15.593
+          },
+          "peak_rss_bytes": {
+            "iterations": 21,
+            "median": 1294336,
+            "p95": 1294336,
+            "min": 1294336,
+            "max": 1294336
+          }
+        },
+        "current": {
+          "wall_ms": {
+            "iterations": 21,
+            "median": 14.157737000005,
+            "p95": 19.86327200006599,
+            "min": 11.81242799998472,
+            "max": 43.71213599984003
+          },
+          "cpu_ms": {
+            "iterations": 21,
+            "median": 11.349,
+            "p95": 16.225,
+            "min": 9.583,
+            "max": 39.854
+          },
+          "peak_rss_bytes": {
+            "iterations": 21,
+            "median": 1339392,
+            "p95": 1339392,
+            "min": 1339392,
+            "max": 1339392
+          }
+        },
+        "rg": {
+          "wall_ms": {
+            "iterations": 21,
+            "median": 281.6193650000969,
+            "p95": 383.5090410000248,
+            "min": 227.70261899995603,
+            "max": 409.6601249998457
+          },
+          "cpu_ms": {
+            "iterations": 21,
+            "median": 1024.286,
+            "p95": 1300.02,
+            "min": 727.02,
+            "max": 1563.525
+          },
+          "peak_rss_bytes": {
+            "iterations": 21,
+            "median": 11268096,
+            "p95": 16162816,
+            "min": 7864320,
+            "max": 16195584
+          }
+        }
+      },
+      "counters": {
+        "baseline": {
+          "candidates": [
+            0
+          ],
+          "scanned_bytes": [
+            0
+          ]
+        },
+        "current": {
+          "candidates": [
+            0
+          ],
+          "scanned_bytes": [
+            0
+          ]
+        }
+      }
+    },
+    {
+      "report": "previous-compact.json",
+      "query": "literal",
+      "matching_files": 1,
+      "binaries": {
+        "baseline": {
+          "path": "/Users/runner/work/ReSearchify/ReSearchify/native-baselines/previous/build/rs",
+          "sha256": "46b17292b65b902531700e5ad1082717665e829b2684ccd3d48f1b7b6044383f"
+        },
+        "current": {
+          "path": "/Users/runner/work/ReSearchify/ReSearchify/build/rs",
+          "sha256": "060bd0657d2d3987cf68e58b67237152cc28fca87fd650583682cb5f5046b877"
+        }
+      },
+      "tools": {
+        "baseline": {
+          "wall_ms": {
+            "iterations": 21,
+            "median": 289.75627899990286,
+            "p95": 364.92139999995743,
+            "min": 229.1535310000654,
+            "max": 365.2968900000815
+          },
+          "cpu_ms": {
+            "iterations": 21,
+            "median": 285.228,
+            "p95": 357.347,
+            "min": 225.36299999999997,
+            "max": 359.97999999999996
+          },
+          "peak_rss_bytes": {
+            "iterations": 21,
+            "median": 22773760,
+            "p95": 22949888,
+            "min": 22773760,
+            "max": 23040000
+          }
+        },
+        "current": {
+          "wall_ms": {
+            "iterations": 21,
+            "median": 213.29520599988427,
+            "p95": 297.8262189999441,
+            "min": 193.3268479999697,
+            "max": 300.6993379999585
+          },
+          "cpu_ms": {
+            "iterations": 21,
+            "median": 209.039,
+            "p95": 292.439,
+            "min": 189.73999999999998,
+            "max": 294.78700000000003
+          },
+          "peak_rss_bytes": {
+            "iterations": 21,
+            "median": 22495232,
+            "p95": 22646784,
+            "min": 22495232,
+            "max": 22654976
+          }
+        }
+      },
+      "counters": {
+        "baseline": {
+          "candidates": [
+            20000
+          ],
+          "scanned_bytes": [
+            7148
+          ]
+        },
+        "current": {
+          "candidates": [
+            20000
+          ],
+          "scanned_bytes": [
+            7148
+          ]
+        }
+      }
+    },
+    {
+      "report": "previous-compact.json",
+      "query": "broad_regex",
+      "matching_files": 20000,
+      "binaries": {
+        "baseline": {
+          "path": "/Users/runner/work/ReSearchify/ReSearchify/native-baselines/previous/build/rs",
+          "sha256": "46b17292b65b902531700e5ad1082717665e829b2684ccd3d48f1b7b6044383f"
+        },
+        "current": {
+          "path": "/Users/runner/work/ReSearchify/ReSearchify/build/rs",
+          "sha256": "060bd0657d2d3987cf68e58b67237152cc28fca87fd650583682cb5f5046b877"
+        }
+      },
+      "tools": {
+        "baseline": {
+          "wall_ms": {
+            "iterations": 21,
+            "median": 1067.4439800000073,
+            "p95": 1195.1191440000457,
+            "min": 938.8713249998091,
+            "max": 1195.683401999986
+          },
+          "cpu_ms": {
+            "iterations": 21,
+            "median": 1062.321,
+            "p95": 1189.683,
+            "min": 934.5369999999999,
+            "max": 1189.7069999999999
+          },
+          "peak_rss_bytes": {
+            "iterations": 21,
+            "median": 22528000,
+            "p95": 22585344,
+            "min": 22368256,
+            "max": 22638592
+          }
+        },
+        "current": {
+          "wall_ms": {
+            "iterations": 21,
+            "median": 1013.3689130000221,
+            "p95": 1104.0008390000366,
+            "min": 902.7207029998863,
+            "max": 1212.578490000169
+          },
+          "cpu_ms": {
+            "iterations": 21,
+            "median": 1007.7579999999999,
+            "p95": 1093.8080000000002,
+            "min": 900.1539999999999,
+            "max": 1167.639
+          },
+          "peak_rss_bytes": {
+            "iterations": 21,
+            "median": 22376448,
+            "p95": 22614016,
+            "min": 22376448,
+            "max": 22618112
+          }
+        }
+      },
+      "counters": {
+        "baseline": {
+          "candidates": [
+            20000
+          ],
+          "scanned_bytes": [
+            72893610
+          ]
+        },
+        "current": {
+          "candidates": [
+            20000
+          ],
+          "scanned_bytes": [
+            72893610
+          ]
+        }
+      }
+    },
+    {
+      "report": "previous-jsonl-compact.json",
+      "query": "term",
+      "matching_files": 1,
+      "binaries": {
+        "baseline": {
+          "path": "/Users/runner/work/ReSearchify/ReSearchify/native-baselines/previous/build/rs",
+          "sha256": "46b17292b65b902531700e5ad1082717665e829b2684ccd3d48f1b7b6044383f"
+        },
+        "current": {
+          "path": "/Users/runner/work/ReSearchify/ReSearchify/build/rs",
+          "sha256": "060bd0657d2d3987cf68e58b67237152cc28fca87fd650583682cb5f5046b877"
+        }
+      },
+      "tools": {
+        "baseline": {
+          "request_wall_ms": {
+            "iterations": 201,
+            "median": 0.3781499999604421,
+            "p95": 0.49018400000022666,
+            "min": 0.2830999999332562,
+            "max": 0.8753750000778382
+          },
+          "engine_wall_ms": {
+            "iterations": 201,
+            "median": 0.062741,
+            "p95": 0.08916199999999999,
+            "min": 0.040795,
+            "max": 0.243202
+          }
+        },
+        "current": {
+          "request_wall_ms": {
+            "iterations": 201,
+            "median": 0.375037999901906,
+            "p95": 0.5595599998287071,
+            "min": 0.2756889998636325,
+            "max": 0.9780519999367243
+          },
+          "engine_wall_ms": {
+            "iterations": 201,
+            "median": 0.056805999999999995,
+            "p95": 0.08609,
+            "min": 0.036263000000000004,
+            "max": 0.23729
+          }
+        }
+      }
+    },
+    {
+      "report": "previous-jsonl-compact.json",
+      "query": "literal",
+      "matching_files": 1,
+      "binaries": {
+        "baseline": {
+          "path": "/Users/runner/work/ReSearchify/ReSearchify/native-baselines/previous/build/rs",
+          "sha256": "46b17292b65b902531700e5ad1082717665e829b2684ccd3d48f1b7b6044383f"
+        },
+        "current": {
+          "path": "/Users/runner/work/ReSearchify/ReSearchify/build/rs",
+          "sha256": "060bd0657d2d3987cf68e58b67237152cc28fca87fd650583682cb5f5046b877"
+        }
+      },
+      "tools": {
+        "baseline": {
+          "request_wall_ms": {
+            "iterations": 21,
+            "median": 86.0394499998165,
+            "p95": 100.58755900013239,
+            "min": 73.1777430000875,
+            "max": 103.81315299991911
+          },
+          "engine_wall_ms": {
+            "iterations": 21,
+            "median": 84.063639,
+            "p95": 98.473298,
+            "min": 71.220123,
+            "max": 100.988721
+          }
+        },
+        "current": {
+          "request_wall_ms": {
+            "iterations": 21,
+            "median": 45.62944999997853,
+            "p95": 54.01995500005796,
+            "min": 40.23571799984893,
+            "max": 58.86519799992129
+          },
+          "engine_wall_ms": {
+            "iterations": 21,
+            "median": 43.704688,
+            "p95": 51.695233,
+            "min": 38.408311,
+            "max": 56.826148
+          }
+        }
+      }
+    },
+    {
+      "report": "previous-jsonl-fast.json",
+      "query": "term",
+      "matching_files": 1,
+      "binaries": {
+        "baseline": {
+          "path": "/Users/runner/work/ReSearchify/ReSearchify/native-baselines/previous/build/rs",
+          "sha256": "46b17292b65b902531700e5ad1082717665e829b2684ccd3d48f1b7b6044383f"
+        },
+        "current": {
+          "path": "/Users/runner/work/ReSearchify/ReSearchify/build/rs",
+          "sha256": "060bd0657d2d3987cf68e58b67237152cc28fca87fd650583682cb5f5046b877"
+        }
+      },
+      "tools": {
+        "baseline": {
+          "request_wall_ms": {
+            "iterations": 201,
+            "median": 0.29356799996094196,
+            "p95": 0.3979260000050999,
+            "min": 0.2718640000693995,
+            "max": 0.5163609998817265
+          },
+          "engine_wall_ms": {
+            "iterations": 201,
+            "median": 0.04229,
+            "p95": 0.067938,
+            "min": 0.038606,
+            "max": 0.086591
+          }
+        },
+        "current": {
+          "request_wall_ms": {
+            "iterations": 201,
+            "median": 0.29151900002943876,
+            "p95": 0.4034809999211575,
+            "min": 0.268041000026642,
+            "max": 0.5560459999287559
+          },
+          "engine_wall_ms": {
+            "iterations": 201,
+            "median": 0.038057,
+            "p95": 0.06062,
+            "min": 0.03463,
+            "max": 0.127346
+          }
+        }
+      }
+    },
+    {
+      "report": "previous-jsonl-fast.json",
+      "query": "literal",
+      "matching_files": 1,
+      "binaries": {
+        "baseline": {
+          "path": "/Users/runner/work/ReSearchify/ReSearchify/native-baselines/previous/build/rs",
+          "sha256": "46b17292b65b902531700e5ad1082717665e829b2684ccd3d48f1b7b6044383f"
+        },
+        "current": {
+          "path": "/Users/runner/work/ReSearchify/ReSearchify/build/rs",
+          "sha256": "060bd0657d2d3987cf68e58b67237152cc28fca87fd650583682cb5f5046b877"
+        }
+      },
+      "tools": {
+        "baseline": {
+          "request_wall_ms": {
+            "iterations": 21,
+            "median": 1.411568000094121,
+            "p95": 1.7033960000389925,
+            "min": 1.153297000200837,
+            "max": 2.0032630000059726
+          },
+          "engine_wall_ms": {
+            "iterations": 21,
+            "median": 1.057507,
+            "p95": 1.280211,
+            "min": 0.857827,
+            "max": 1.490526
+          }
+        },
+        "current": {
+          "request_wall_ms": {
+            "iterations": 21,
+            "median": 1.3604900000245834,
+            "p95": 1.6717270000299322,
+            "min": 1.0903249999500986,
+            "max": 1.6739899999720365
+          },
+          "engine_wall_ms": {
+            "iterations": 21,
+            "median": 0.959633,
+            "p95": 1.2409050000000001,
+            "min": 0.80337,
+            "max": 1.2488899999999998
+          }
+        }
+      }
+    }
+  ],
+  "correctness": {
+    "passed_full_path_count_checks": 24,
+    "report": "correctness.json"
+  }
+}

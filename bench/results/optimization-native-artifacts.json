@@ -1,0 +1,86 @@
+{
+  "format": "researchify-native-artifacts-v1",
+  "workflow_run": 39961942957,
+  "pull_request": 2,
+  "head": "c5a22f0b9b4bae421f3334dce621640a8e65a96d",
+  "artifacts": [
+    {
+      "arch": "arm64",
+      "id": 12505083128,
+      "file": "optimization-native-macos-arm64-c5a22f0.zip",
+      "bytes": 216610,
+      "sha256": "5d7748fa5b7a194585f681453b5af19231d304d0a2c1192640bbb12f1609d5f6",
+      "summary": {
+        "cache": "Uncontrolled OS cache, explicit excluded warmups; NOT cold-cache",
+        "host": "Native GitHub runner; not a reproduction on a user's Mac",
+        "build": "One separate index-create sample per writer/profile; compilation and generation excluded",
+        "memory_mb": 256,
+        "index_threads": 3,
+        "search_threads": "Executable default",
+        "gates": "Correctness/completion only; no timing threshold on shared runners",
+        "rss": "Timed child RSS may include the Python pre-exec floor; JSONL has no per-reader CPU/RSS claim",
+        "correctness": "Full matching paths/counts vs rg outside timing; exact count-only responses inside drivers"
+      },
+      "binaries": {
+        "original": {
+          "commit": "eb858348169157686e70104af6b64f9539a39fe8",
+          "path": "/Users/runner/work/ReSearchify/ReSearchify/native-baselines/original/build/rs",
+          "sha256": "c2b2f09d2f5717ee5581b24e20eaff9ba50daeb1e4c81c07dbf9688ef4c46241",
+          "mach_o_arch": "arm64"
+        },
+        "previous": {
+          "commit": "dbcddf76708b614c26e212fa27b48efa33ddfd58",
+          "path": "/Users/runner/work/ReSearchify/ReSearchify/native-baselines/previous/build/rs",
+          "sha256": "3f169c9496cfa2c44943ed15e2ec7a70b85e39361181be15ddf68d12d84f310b",
+          "mach_o_arch": "arm64"
+        },
+        "current": {
+          "commit": "ade04cb1853a790e60068c6a6c7788714a8f4f77",
+          "path": "/Users/runner/work/ReSearchify/ReSearchify/build/rs",
+          "sha256": "1ad98cfe3e37399f3f254613f6d52c2e901a2d82ef4eed57ae070230f5f7acba",
+          "mach_o_arch": "arm64"
+        }
+      },
+      "platform": "macOS-15.7.9-arm64-arm-64bit"
+    },
+    {
+      "arch": "x64",
+      "id": 12506131956,
+      "file": "optimization-native-macos-x64-c5a22f0.zip",
+      "bytes": 228341,
+      "sha256": "0e4230fceb3e50b5c446b8500b1eb37bb4417ce966dc196606d291d5009d0683",
+      "summary": {
+        "cache": "Uncontrolled OS cache, explicit excluded warmups; NOT cold-cache",
+        "host": "Native GitHub runner; not a reproduction on a user's Mac",
+        "build": "One separate index-create sample per writer/profile; compilation and generation excluded",
+        "memory_mb": 256,
+        "index_threads": 3,
+        "search_threads": "Executable default",
+        "gates": "Correctness/completion only; no timing threshold on shared runners",
+        "rss": "Timed child RSS may include the Python pre-exec floor; JSONL has no per-reader CPU/RSS claim",
+        "correctness": "Full matching paths/counts vs rg outside timing; exact count-only responses inside drivers"
+      },
+      "binaries": {
+        "original": {
+          "commit": "eb858348169157686e70104af6b64f9539a39fe8",
+          "path": "/Users/runner/work/ReSearchify/ReSearchify/native-baselines/original/build/rs",
+          "sha256": "704977ab84d923128e4b5d6be18bf08a48200c864f6b606726e637b057df0ce2",
+          "mach_o_arch": "x86_64"
+        },
+        "previous": {
+          "commit": "dbcddf76708b614c26e212fa27b48efa33ddfd58",
+          "path": "/Users/runner/work/ReSearchify/ReSearchify/native-baselines/previous/build/rs",
+          "sha256": "46b17292b65b902531700e5ad1082717665e829b2684ccd3d48f1b7b6044383f",
+          "mach_o_arch": "x86_64"
+        },
+        "current": {
+          "commit": "ade04cb1853a790e60068c6a6c7788714a8f4f77",
+          "path": "/Users/runner/work/ReSearchify/ReSearchify/build/rs",
+          "sha256": "557f6c083d283d4e7871c0f9c1e141e3f59db9d1cd250a36d1b71c634b0b3c0d",
+          "mach_o_arch": "x86_64"
+        }
+      },
+      "platform": "macOS-15.7.9-x86_64-i386-64bit"
+    }
+  ]
+}

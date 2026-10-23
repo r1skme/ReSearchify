@@ -1,0 +1,3559 @@
+{
+  "format": "researchify-nfa-initial-validation-v1",
+  "complete": true,
+  "before_source_commit": "456a5cf88c15330eaf8ae8c752e351e09e0f5ceb",
+  "after_source_commit": "a7df68610eb88e3a3a5b3de39403ad68c1b48bea",
+  "before_binary": {
+    "sha256": "444681365d904f513be7669bb9eb77ed4501ef1800f481f83714ca316fa9486f",
+    "bytes": 1131216,
+    "elf_text_bytes": 933028
+  },
+  "v1_rejected_binary": {
+    "sha256": "28aca1170c1064b518b5944b93bde54a349345e98f38f997eeb39d33c9e8f285",
+    "bytes": 1131592,
+    "elf_text_bytes": 933604,
+    "implementation_merged": false
+  },
+  "after_binary": {
+    "sha256": "701c8a34f6578e212336e80628bdd711df6413d6c8f1e0edf7d8b58f8a4b1293",
+    "bytes": 1131968,
+    "elf_text_bytes": 934936
+  },
+  "build": {
+    "platform": "Linux x86-64",
+    "compiler": "GCC 13.3.0",
+    "standard": "C++20",
+    "type": "Release",
+    "flags": "-O3 -DNDEBUG",
+    "lto": false
+  },
+  "ctest": {
+    "tests": 13,
+    "passed": 13,
+    "failed": 0,
+    "wall_seconds": 4.24,
+    "command": "ctest --test-dir build --output-on-failure --parallel 4"
+  },
+  "differential_probe": {
+    "source": "bench/regex_budget_probe.cpp",
+    "rows": 937118,
+    "comparison": "cmp returned zero; outputs byte-for-byte identical",
+    "before_output_sha256": "659ed249ab5b74ba0981a2271d3d44373e3b94d8e1f01f4e8a3c5be96bc38ec9",
+    "after_output_sha256": "659ed249ab5b74ba0981a2271d3d44373e3b94d8e1f01f4e8a3c5be96bc38ec9",
+    "output_bytes": 48211008,
+    "patterns": 28,
+    "fixed_inputs": 15,
+    "random_inputs": 24,
+    "random_seed": 20261023,
+    "checks": [
+      "public strict API",
+      "internal validated API on valid inputs only",
+      "all start byte offsets and out-of-range offsets",
+      "invalid UTF-8 rejected",
+      "matches including byte offsets",
+      "remaining budget on success and E_BUDGET",
+      "error code and message",
+      "nullable and assertion patterns",
+      "Unicode and overlapping alternative origins",
+      "reused workspaces",
+      "forced epoch wrap every 31 calls"
+    ],
+    "budget_cases": "0..128 for first four fixed inputs; 0..16 otherwise; 31/32/63/64/127/128/255/256/1024/1000000 and exact success cost-1/cost/cost+1",
+    "reproduce": "Compile the same source with -std=c++20 -O2 -I include and before/after libresearchify_core.a -pthread; run both and cmp complete stdout files."
+  },
+  "additional_unit_tests": {
+    "group": "regex_initial_rejection_budget",
+    "cases": [
+      "(a|b): 3 initial closure pops, 2 consuming threads",
+      "(a?)*b: 7 closure pops including duplicate epsilon-loop ID, 2 consuming threads",
+      "empty and ASCII/CRLF/NUL/Unicode no-match inputs",
+      "every valid UTF-8 start and budget boundary",
+      "exact remaining budget and E_BUDGET",
+      "workspace reuse and forced epoch wrap",
+      "public invalid UTF-8 input rejected"
+    ]
+  },
+  "profile_diagnostics_excluded_from_distributions": {
+    "before_real_cpython": {
+      "format": "researchify-external-diagnostics-v1",
+      "complete": true,
+      "purpose": "Native smoke and stage-profile diagnostics excluded from latency distributions",
+      "fixture_manifest_sha256": "5539e8d9a04e1d3f1fe9b70a8ba927b6a54541e09eea8f032d0c0b2a0fda43ef",
+      "binaries": {
+        "baseline": {
+          "path": "/workspace/scratch/93bfa6b783da/ReSearchify-baseline/build/rs",
+          "sha256": "b0a2c90c2dcaa3a71993751ec895807f32e8959e7439397971880564087e9154"
+        },
+        "current": {
+          "path": "/workspace/scratch/93bfa6b783da/rs-final-tiny",
+          "sha256": "444681365d904f513be7669bb9eb77ed4501ef1800f481f83714ca316fa9486f"
+        }
+      },
+      "builds": [
+        {
+          "profile": "compact",
+          "command": [
+            "/workspace/scratch/93bfa6b783da/rs-final-tiny",
+            "create",
+            "/workspace/scratch/93bfa6b783da/perf-real-cpython/source",
+            "/workspace/scratch/93bfa6b783da/perf-real-cpython-diagnostic/current-compact",
+            "--json",
+            "--profile",
+            "compact",
+            "--threads",
+            "8",
+            "--memory-mb",
+            "256",
+            "--max-file-bytes",
+            "1073741824",
+            "--max-line-bytes",
+            "1048576"
+          ],
+          "engine_report": {
+            "added": 1005,
+            "api_version": 1,
+            "bytes": 27501615,
+            "changed": 0,
+            "execution_complete": true,
+            "files": 1005,
+            "generation": "1",
+            "global_scan": true,
+            "hashed": 1005,
+            "lines": 834893,
+            "memory_budget_bytes": 268435456,
+            "removed": 0,
+            "seconds": 0.261583838,
+            "segments": 8,
+            "skipped": 0,
+            "status": "ok",
+            "tokenized": 1005,
+            "unchanged": 0,
+            "warnings": [],
+            "workers": 8
+          },
+          "sample": {
+            "wall_seconds": 0.26729705100296997,
+            "cpu_seconds": 1.466005,
+            "peak_rss_bytes": 40984576,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor"
+          },
+          "storage": {
+            "committed_index_bytes": 39039646,
+            "transaction_scratch_bytes": 0,
+            "spill_scratch_bytes": 0,
+            "coordination_bytes": 0,
+            "literal_sidecar_bytes": 60475,
+            "total_file_bytes": 39039646,
+            "measurement": "logical file sizes; transaction-* scratch, nested segment sort/literal-sort spills and reader/writer coordination separated; no deletion"
+          }
+        },
+        {
+          "profile": "fast",
+          "command": [
+            "/workspace/scratch/93bfa6b783da/rs-final-tiny",
+            "create",
+            "/workspace/scratch/93bfa6b783da/perf-real-cpython/source",
+            "/workspace/scratch/93bfa6b783da/perf-real-cpython-diagnostic/current-fast",
+            "--json",
+            "--profile",
+            "fast",
+            "--threads",
+            "8",
+            "--memory-mb",
+            "256",
+            "--max-file-bytes",
+            "1073741824",
+            "--max-line-bytes",
+            "1048576"
+          ],
+          "engine_report": {
+            "added": 1005,
+            "api_version": 1,
+            "bytes": 27501615,
+            "changed": 0,
+            "execution_complete": true,
+            "files": 1005,
+            "generation": "1",
+            "global_scan": true,
+            "hashed": 1005,
+            "lines": 834893,
+            "memory_budget_bytes": 268435456,
+            "removed": 0,
+            "seconds": 0.595109416,
+            "segments": 8,
+            "skipped": 0,
+            "status": "ok",
+            "tokenized": 1005,
+            "unchanged": 0,
+            "warnings": [],
+            "workers": 8
+          },
+          "sample": {
+            "wall_seconds": 0.5985258109940332,
+            "cpu_seconds": 3.810311,
+            "peak_rss_bytes": 55201792,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor"
+          },
+          "storage": {
+            "committed_index_bytes": 68788648,
+            "transaction_scratch_bytes": 0,
+            "spill_scratch_bytes": 0,
+            "coordination_bytes": 0,
+            "literal_sidecar_bytes": 0,
+            "total_file_bytes": 68788648,
+            "measurement": "logical file sizes; transaction-* scratch, nested segment sort/literal-sort spills and reader/writer coordination separated; no deletion"
+          }
+        }
+      ],
+      "oracles": [
+        {
+          "case": "selective_term",
+          "command": [
+            "rg",
+            "--no-config",
+            "--no-ignore",
+            "--hidden",
+            "--text",
+            "--color",
+            "never",
+            "--case-sensitive",
+            "--with-filename",
+            "--null",
+            "--threads",
+            "8",
+            "--count-matches",
+            "--fixed-strings",
+            "--word-regexp",
+            "--regexp",
+            "PyImport_ImportModuleLevelObject",
+            "."
+          ],
+          "files": 6,
+          "matches": 8,
+          "path_count_sha256": "a122050317306397cf1783d7c592ce456cbbd0923be3c866b46554fecfa67ae9"
+        },
+        {
+          "case": "common_term",
+          "command": [
+            "rg",
+            "--no-config",
+            "--no-ignore",
+            "--hidden",
+            "--text",
+            "--color",
+            "never",
+            "--case-sensitive",
+            "--with-filename",
+            "--null",
+            "--threads",
+            "8",
+            "--count-matches",
+            "--fixed-strings",
+            "--word-regexp",
+            "--regexp",
+            "return",
+            "."
+          ],
+          "files": 728,
+          "matches": 45893,
+          "path_count_sha256": "b1d0831becd371124357709de5acd47523b1cc600b03272d055eab84b3834813"
+        },
+        {
+          "case": "selective_literal",
+          "command": [
+            "rg",
+            "--no-config",
+            "--no-ignore",
+            "--hidden",
+            "--text",
+            "--color",
+            "never",
+            "--case-sensitive",
+            "--with-filename",
+            "--null",
+            "--threads",
+            "8",
+            "--count-matches",
+            "--fixed-strings",
+            "--regexp",
+            "PyImport_ImportModuleLevelObject(",
+            "."
+          ],
+          "files": 5,
+          "matches": 7,
+          "path_count_sha256": "f2e459b225112c55dce62adf24f9c8f9d335399b7a44e1e5f37f9be9d01a8cff"
+        },
+        {
+          "case": "common_literal",
+          "command": [
+            "rg",
+            "--no-config",
+            "--no-ignore",
+            "--hidden",
+            "--text",
+            "--color",
+            "never",
+            "--case-sensitive",
+            "--with-filename",
+            "--null",
+            "--threads",
+            "8",
+            "--count-matches",
+            "--fixed-strings",
+            "--regexp",
+            "return ",
+            "."
+          ],
+          "files": 722,
+          "matches": 44912,
+          "path_count_sha256": "3aa31c97fc875a047e675d72b69cfa78df5187306411c75652057b49ce7a7add"
+        },
+        {
+          "case": "negative_literal",
+          "command": [
+            "rg",
+            "--no-config",
+            "--no-ignore",
+            "--hidden",
+            "--text",
+            "--color",
+            "never",
+            "--case-sensitive",
+            "--with-filename",
+            "--null",
+            "--threads",
+            "8",
+            "--count-matches",
+            "--fixed-strings",
+            "--regexp",
+            "researchify_absent_6e9ae0ce70a44e78bdf088c197fb7134",
+            "."
+          ],
+          "files": 0,
+          "matches": 0,
+          "path_count_sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+        },
+        {
+          "case": "selective_regex",
+          "command": [
+            "rg",
+            "--no-config",
+            "--no-ignore",
+            "--hidden",
+            "--text",
+            "--color",
+            "never",
+            "--case-sensitive",
+            "--with-filename",
+            "--null",
+            "--threads",
+            "8",
+            "--count",
+            "--regexp",
+            "PyImport_[A-Za-z0-9_]+",
+            "."
+          ],
+          "files": 77,
+          "matches": 488,
+          "path_count_sha256": "bf0f5b2bf88456ee5c8110955b777bdf28f33d5a946eb0be4c1f6eb33b96541b"
+        },
+        {
+          "case": "wide_regex",
+          "command": [
+            "rg",
+            "--no-config",
+            "--no-ignore",
+            "--hidden",
+            "--text",
+            "--color",
+            "never",
+            "--case-sensitive",
+            "--with-filename",
+            "--null",
+            "--threads",
+            "8",
+            "--count",
+            "--regexp",
+            "(return|if|while)[ \\t]",
+            "."
+          ],
+          "files": 934,
+          "matches": 111106,
+          "path_count_sha256": "d3c0e0aece36c18cfb5e5108d75c4d8b2c634114f589a9702e79fee7237ac325"
+        }
+      ],
+      "cases": [
+        {
+          "profile": "compact",
+          "case": "selective_term",
+          "profile_command": [
+            "/workspace/scratch/93bfa6b783da/rs-final-tiny",
+            "find",
+            "PyImport_ImportModuleLevelObject",
+            "--index",
+            "/workspace/scratch/93bfa6b783da/perf-real-cpython-diagnostic/current-compact",
+            "--json",
+            "--limit",
+            "0",
+            "--snippets",
+            "0",
+            "--memory-mb",
+            "256",
+            "--max-output-bytes",
+            "1048576",
+            "--regex-steps",
+            "18446744073709551615",
+            "--profile"
+          ],
+          "profile_response": {
+            "api_version": 1,
+            "execution_complete": true,
+            "has_more": false,
+            "metrics": {
+              "candidates": 6,
+              "profile": {
+                "candidate_seconds": 0.000137326,
+                "content_bytes": 0,
+                "content_open_seconds": 0,
+                "content_opens": 0,
+                "content_read_seconds": 0,
+                "content_reads": 0,
+                "filtered_documents": 0,
+                "line_processing_seconds": 0,
+                "matching_seconds": 0,
+                "planning_seconds": 0.000902007,
+                "regex_steps": 0,
+                "snippet_seconds": 9.1e-08,
+                "verification_seconds": 0,
+                "workers": 1
+              },
+              "scanned_bytes": 0,
+              "seconds": 0.001039384
+            },
+            "next_cursor": null,
+            "output_truncated": false,
+            "position_units": {
+              "column": "utf8_byte",
+              "column_base": 1,
+              "line_base": 1
+            },
+            "results": [],
+            "returned": 0,
+            "snapshot": {
+              "freshness": "unknown",
+              "generation": "1",
+              "source": "index"
+            },
+            "status": "ok",
+            "total": 6,
+            "warnings": []
+          },
+          "profile_sample": {
+            "wall_seconds": 0.004891857999609783,
+            "cpu_seconds": 0.004648,
+            "peak_rss_bytes": 15728640,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor"
+          },
+          "full_counts": {
+            "baseline": {
+              "pages": 1,
+              "matching_files": 6,
+              "matches": 8,
+              "path_count_sha256": "a122050317306397cf1783d7c592ce456cbbd0923be3c866b46554fecfa67ae9",
+              "service_command": [
+                "/workspace/scratch/93bfa6b783da/ReSearchify-baseline/build/rs",
+                "serve",
+                "--stdio",
+                "--index",
+                "/workspace/scratch/93bfa6b783da/perf-real-cpython-diagnostic/current-compact"
+              ],
+              "initial_request": {
+                "command": "find",
+                "query": "PyImport_ImportModuleLevelObject",
+                "memory_mb": 1024,
+                "limit": 10000,
+                "snippets": 0,
+                "sort": "path",
+                "fields": [
+                  "path",
+                  "matches"
+                ],
+                "regex_steps": 18446744073709551615,
+                "max_output_bytes": 1048576
+              },
+              "memory_mb": 1024,
+              "page_limit": 10000,
+              "max_output_bytes": 1048576
+            },
+            "current": {
+              "pages": 1,
+              "matching_files": 6,
+              "matches": 8,
+              "path_count_sha256": "a122050317306397cf1783d7c592ce456cbbd0923be3c866b46554fecfa67ae9",
+              "service_command": [
+                "/workspace/scratch/93bfa6b783da/rs-final-tiny",
+                "serve",
+                "--stdio",
+                "--index",
+                "/workspace/scratch/93bfa6b783da/perf-real-cpython-diagnostic/current-compact"
+              ],
+              "initial_request": {
+                "command": "find",
+                "query": "PyImport_ImportModuleLevelObject",
+                "memory_mb": 1024,
+                "limit": 10000,
+                "snippets": 0,
+                "sort": "path",
+                "fields": [
+                  "path",
+                  "matches"
+                ],
+                "regex_steps": 18446744073709551615,
+                "max_output_bytes": 1048576
+              },
+              "memory_mb": 1024,
+              "page_limit": 10000,
+              "max_output_bytes": 1048576
+            }
+          },
+          "snippets": {
+            "baseline": {
+              "files_checked": 6,
+              "paths": [
+                "Include/import.h",
+                "Include/internal/pycore_import.h",
+                "PC/python3dll.c",
+                "Python/bltinmodule.c",
+                "Python/ceval.c",
+                "Python/import.c"
+              ],
+              "request": {
+                "id": 1,
+                "command": "find",
+                "query": "PyImport_ImportModuleLevelObject",
+                "limit": 6,
+                "snippets": 3,
+                "snippet_bytes": 240,
+                "sort": "path",
+                "memory_mb": 1024,
+                "max_output_bytes": 1048576,
+                "regex_steps": 18446744073709551615,
+                "path": [
+                  "Include/import.h",
+                  "Include/internal/pycore_import.h",
+                  "PC/python3dll.c",
+                  "Python/bltinmodule.c",
+                  "Python/ceval.c",
+                  "Python/import.c"
+                ]
+              },
+              "method": "Independent source-byte matcher on first 16 sorted matching files; LF/CR/BOM and UTF-8 clipping accounted for; regex matching lines, term/literal occurrences",
+              "status": "passed",
+              "results_sha256": "67ee2c2c0c5ac632b52f43ac2ce8621fb22e293b2f53d99ce9a74d6ab8a72997"
+            },
+            "current": {
+              "files_checked": 6,
+              "paths": [
+                "Include/import.h",
+                "Include/internal/pycore_import.h",
+                "PC/python3dll.c",
+                "Python/bltinmodule.c",
+                "Python/ceval.c",
+                "Python/import.c"
+              ],
+              "request": {
+                "id": 1,
+                "command": "find",
+                "query": "PyImport_ImportModuleLevelObject",
+                "limit": 6,
+                "snippets": 3,
+                "snippet_bytes": 240,
+                "sort": "path",
+                "memory_mb": 1024,
+                "max_output_bytes": 1048576,
+                "regex_steps": 18446744073709551615,
+                "path": [
+                  "Include/import.h",
+                  "Include/internal/pycore_import.h",
+                  "PC/python3dll.c",
+                  "Python/bltinmodule.c",
+                  "Python/ceval.c",
+                  "Python/import.c"
+                ]
+              },
+              "method": "Independent source-byte matcher on first 16 sorted matching files; LF/CR/BOM and UTF-8 clipping accounted for; regex matching lines, term/literal occurrences",
+              "status": "passed",
+              "results_sha256": "67ee2c2c0c5ac632b52f43ac2ce8621fb22e293b2f53d99ce9a74d6ab8a72997"
+            }
+          },
+          "same_snapshot_ranked_sha256": "aa987b056a77bc8cd5e56deb49973fe1f90116d757b50e24b71c087df027b482",
+          "validated": true
+        },
+        {
+          "profile": "compact",
+          "case": "common_term",
+          "profile_command": [
+            "/workspace/scratch/93bfa6b783da/rs-final-tiny",
+            "find",
+            "return",
+            "--index",
+            "/workspace/scratch/93bfa6b783da/perf-real-cpython-diagnostic/current-compact",
+            "--json",
+            "--limit",
+            "0",
+            "--snippets",
+            "0",
+            "--memory-mb",
+            "256",
+            "--max-output-bytes",
+            "1048576",
+            "--regex-steps",
+            "18446744073709551615",
+            "--profile"
+          ],
+          "profile_response": {
+            "api_version": 1,
+            "execution_complete": true,
+            "has_more": false,
+            "metrics": {
+              "candidates": 728,
+              "profile": {
+                "candidate_seconds": 0.013878215,
+                "content_bytes": 0,
+                "content_open_seconds": 0,
+                "content_opens": 0,
+                "content_read_seconds": 0,
+                "content_reads": 0,
+                "filtered_documents": 0,
+                "line_processing_seconds": 0,
+                "matching_seconds": 0,
+                "planning_seconds": 0.002281712,
+                "regex_steps": 0,
+                "snippet_seconds": 2.9e-07,
+                "verification_seconds": 0,
+                "workers": 1
+              },
+              "scanned_bytes": 0,
+              "seconds": 0.016160167
+            },
+            "next_cursor": null,
+            "output_truncated": false,
+            "position_units": {
+              "column": "utf8_byte",
+              "column_base": 1,
+              "line_base": 1
+            },
+            "results": [],
+            "returned": 0,
+            "snapshot": {
+              "freshness": "unknown",
+              "generation": "1",
+              "source": "index"
+            },
+            "status": "ok",
+            "total": 728,
+            "warnings": []
+          },
+          "profile_sample": {
+            "wall_seconds": 0.022375881002517417,
+            "cpu_seconds": 0.022125,
+            "peak_rss_bytes": 15728640,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor"
+          },
+          "full_counts": {
+            "baseline": {
+              "pages": 1,
+              "matching_files": 728,
+              "matches": 45893,
+              "path_count_sha256": "b1d0831becd371124357709de5acd47523b1cc600b03272d055eab84b3834813",
+              "service_command": [
+                "/workspace/scratch/93bfa6b783da/ReSearchify-baseline/build/rs",
+                "serve",
+                "--stdio",
+                "--index",
+                "/workspace/scratch/93bfa6b783da/perf-real-cpython-diagnostic/current-compact"
+              ],
+              "initial_request": {
+                "command": "find",
+                "query": "return",
+                "memory_mb": 1024,
+                "limit": 10000,
+                "snippets": 0,
+                "sort": "path",
+                "fields": [
+                  "path",
+                  "matches"
+                ],
+                "regex_steps": 18446744073709551615,
+                "max_output_bytes": 1048576
+              },
+              "memory_mb": 1024,
+              "page_limit": 10000,
+              "max_output_bytes": 1048576
+            },
+            "current": {
+              "pages": 1,
+              "matching_files": 728,
+              "matches": 45893,
+              "path_count_sha256": "b1d0831becd371124357709de5acd47523b1cc600b03272d055eab84b3834813",
+              "service_command": [
+                "/workspace/scratch/93bfa6b783da/rs-final-tiny",
+                "serve",
+                "--stdio",
+                "--index",
+                "/workspace/scratch/93bfa6b783da/perf-real-cpython-diagnostic/current-compact"
+              ],
+              "initial_request": {
+                "command": "find",
+                "query": "return",
+                "memory_mb": 1024,
+                "limit": 10000,
+                "snippets": 0,
+                "sort": "path",
+                "fields": [
+                  "path",
+                  "matches"
+                ],
+                "regex_steps": 18446744073709551615,
+                "max_output_bytes": 1048576
+              },
+              "memory_mb": 1024,
+              "page_limit": 10000,
+              "max_output_bytes": 1048576
+            }
+          },
+          "snippets": {
+            "baseline": {
+              "files_checked": 16,
+              "paths": [
+                "Android/testbed/app/src/main/c/main_activity.c",
+                "Doc/includes/newtypes/custom.c",
+                "Doc/includes/newtypes/custom2.c",
+                "Doc/includes/newtypes/custom3.c",
+                "Doc/includes/newtypes/custom4.c",
+                "Doc/includes/newtypes/sublist.c",
+                "Doc/includes/run-func.c",
+                "Include/abstract.h",
+                "Include/boolobject.h",
+                "Include/ceval.h",
+                "Include/codecs.h",
+                "Include/cpython/abstract.h",
+                "Include/cpython/bytearrayobject.h",
+                "Include/cpython/bytesobject.h",
+                "Include/cpython/cellobject.h",
+                "Include/cpython/ceval.h"
+              ],
+              "request": {
+                "id": 1,
+                "command": "find",
+                "query": "return",
+                "limit": 16,
+                "snippets": 3,
+                "snippet_bytes": 240,
+                "sort": "path",
+                "memory_mb": 1024,
+                "max_output_bytes": 1048576,
+                "regex_steps": 18446744073709551615,
+                "path": [
+                  "Android/testbed/app/src/main/c/main_activity.c",
+                  "Doc/includes/newtypes/custom.c",
+                  "Doc/includes/newtypes/custom2.c",
+                  "Doc/includes/newtypes/custom3.c",
+                  "Doc/includes/newtypes/custom4.c",
+                  "Doc/includes/newtypes/sublist.c",
+                  "Doc/includes/run-func.c",
+                  "Include/abstract.h",
+                  "Include/boolobject.h",
+                  "Include/ceval.h",
+                  "Include/codecs.h",
+                  "Include/cpython/abstract.h",
+                  "Include/cpython/bytearrayobject.h",
+                  "Include/cpython/bytesobject.h",
+                  "Include/cpython/cellobject.h",
+                  "Include/cpython/ceval.h"
+                ]
+              },
+              "method": "Independent source-byte matcher on first 16 sorted matching files; LF/CR/BOM and UTF-8 clipping accounted for; regex matching lines, term/literal occurrences",
+              "status": "passed",
+              "results_sha256": "dc8483a16436820189f8c9162acd76d3335ef865fe92236a2d4fb0233736fe6a"
+            },
+            "current": {
+              "files_checked": 16,
+              "paths": [
+                "Android/testbed/app/src/main/c/main_activity.c",
+                "Doc/includes/newtypes/custom.c",
+                "Doc/includes/newtypes/custom2.c",
+                "Doc/includes/newtypes/custom3.c",
+                "Doc/includes/newtypes/custom4.c",
+                "Doc/includes/newtypes/sublist.c",
+                "Doc/includes/run-func.c",
+                "Include/abstract.h",
+                "Include/boolobject.h",
+                "Include/ceval.h",
+                "Include/codecs.h",
+                "Include/cpython/abstract.h",
+                "Include/cpython/bytearrayobject.h",
+                "Include/cpython/bytesobject.h",
+                "Include/cpython/cellobject.h",
+                "Include/cpython/ceval.h"
+              ],
+              "request": {
+                "id": 1,
+                "command": "find",
+                "query": "return",
+                "limit": 16,
+                "snippets": 3,
+                "snippet_bytes": 240,
+                "sort": "path",
+                "memory_mb": 1024,
+                "max_output_bytes": 1048576,
+                "regex_steps": 18446744073709551615,
+                "path": [
+                  "Android/testbed/app/src/main/c/main_activity.c",
+                  "Doc/includes/newtypes/custom.c",
+                  "Doc/includes/newtypes/custom2.c",
+                  "Doc/includes/newtypes/custom3.c",
+                  "Doc/includes/newtypes/custom4.c",
+                  "Doc/includes/newtypes/sublist.c",
+                  "Doc/includes/run-func.c",
+                  "Include/abstract.h",
+                  "Include/boolobject.h",
+                  "Include/ceval.h",
+                  "Include/codecs.h",
+                  "Include/cpython/abstract.h",
+                  "Include/cpython/bytearrayobject.h",
+                  "Include/cpython/bytesobject.h",
+                  "Include/cpython/cellobject.h",
+                  "Include/cpython/ceval.h"
+                ]
+              },
+              "method": "Independent source-byte matcher on first 16 sorted matching files; LF/CR/BOM and UTF-8 clipping accounted for; regex matching lines, term/literal occurrences",
+              "status": "passed",
+              "results_sha256": "dc8483a16436820189f8c9162acd76d3335ef865fe92236a2d4fb0233736fe6a"
+            }
+          },
+          "same_snapshot_ranked_sha256": "bb83bcebf08503adf4a3cf1bf13ef05bdadb7c0e2a404cf571385289dfee7ec1",
+          "validated": true
+        },
+        {
+          "profile": "compact",
+          "case": "selective_literal",
+          "profile_command": [
+            "/workspace/scratch/93bfa6b783da/rs-final-tiny",
+            "find",
+            "\"PyImport_ImportModuleLevelObject(\"",
+            "--index",
+            "/workspace/scratch/93bfa6b783da/perf-real-cpython-diagnostic/current-compact",
+            "--json",
+            "--limit",
+            "0",
+            "--snippets",
+            "0",
+            "--memory-mb",
+            "256",
+            "--max-output-bytes",
+            "1048576",
+            "--regex-steps",
+            "18446744073709551615",
+            "--profile"
+          ],
+          "profile_response": {
+            "api_version": 1,
+            "execution_complete": true,
+            "has_more": false,
+            "metrics": {
+              "candidates": 1005,
+              "profile": {
+                "candidate_seconds": 0.244423986,
+                "content_bytes": 26613214,
+                "content_open_seconds": 0.026962979999999994,
+                "content_opens": 64,
+                "content_read_seconds": 0.025703921000000005,
+                "content_reads": 876,
+                "filtered_documents": 354,
+                "line_processing_seconds": 0.2790801349999975,
+                "matching_seconds": 0.05830254600000236,
+                "planning_seconds": 4.877e-06,
+                "regex_steps": 0,
+                "snippet_seconds": 3.6e-07,
+                "verification_seconds": 0.055042636,
+                "workers": 8
+              },
+              "scanned_bytes": 26613214,
+              "seconds": 0.244429043
+            },
+            "next_cursor": null,
+            "output_truncated": false,
+            "position_units": {
+              "column": "utf8_byte",
+              "column_base": 1,
+              "line_base": 1
+            },
+            "results": [],
+            "returned": 0,
+            "snapshot": {
+              "freshness": "unknown",
+              "generation": "1",
+              "source": "index"
+            },
+            "status": "ok",
+            "total": 5,
+            "warnings": []
+          },
+          "profile_sample": {
+            "wall_seconds": 0.25997509800072294,
+            "cpu_seconds": 0.400381,
+            "peak_rss_bytes": 15728640,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor"
+          },
+          "full_counts": {
+            "baseline": {
+              "pages": 1,
+              "matching_files": 5,
+              "matches": 7,
+              "path_count_sha256": "f2e459b225112c55dce62adf24f9c8f9d335399b7a44e1e5f37f9be9d01a8cff",
+              "service_command": [
+                "/workspace/scratch/93bfa6b783da/ReSearchify-baseline/build/rs",
+                "serve",
+                "--stdio",
+                "--index",
+                "/workspace/scratch/93bfa6b783da/perf-real-cpython-diagnostic/current-compact"
+              ],
+              "initial_request": {
+                "command": "find",
+                "query": "\"PyImport_ImportModuleLevelObject(\"",
+                "memory_mb": 1024,
+                "limit": 10000,
+                "snippets": 0,
+                "sort": "path",
+                "fields": [
+                  "path",
+                  "matches"
+                ],
+                "regex_steps": 18446744073709551615,
+                "max_output_bytes": 1048576
+              },
+              "memory_mb": 1024,
+              "page_limit": 10000,
+              "max_output_bytes": 1048576
+            },
+            "current": {
+              "pages": 1,
+              "matching_files": 5,
+              "matches": 7,
+              "path_count_sha256": "f2e459b225112c55dce62adf24f9c8f9d335399b7a44e1e5f37f9be9d01a8cff",
+              "service_command": [
+                "/workspace/scratch/93bfa6b783da/rs-final-tiny",
+                "serve",
+                "--stdio",
+                "--index",
+                "/workspace/scratch/93bfa6b783da/perf-real-cpython-diagnostic/current-compact"
+              ],
+              "initial_request": {
+                "command": "find",
+                "query": "\"PyImport_ImportModuleLevelObject(\"",
+                "memory_mb": 1024,
+                "limit": 10000,
+                "snippets": 0,
+                "sort": "path",
+                "fields": [
+                  "path",
+                  "matches"
+                ],
+                "regex_steps": 18446744073709551615,
+                "max_output_bytes": 1048576
+              },
+              "memory_mb": 1024,
+              "page_limit": 10000,
+              "max_output_bytes": 1048576
+            }
+          },
+          "snippets": {
+            "baseline": {
+              "files_checked": 5,
+              "paths": [
+                "Include/import.h",
+                "Include/internal/pycore_import.h",
+                "Python/bltinmodule.c",
+                "Python/ceval.c",
+                "Python/import.c"
+              ],
+              "request": {
+                "id": 1,
+                "command": "find",
+                "query": "\"PyImport_ImportModuleLevelObject(\"",
+                "limit": 5,
+                "snippets": 3,
+                "snippet_bytes": 240,
+                "sort": "path",
+                "memory_mb": 1024,
+                "max_output_bytes": 1048576,
+                "regex_steps": 18446744073709551615,
+                "path": [
+                  "Include/import.h",
+                  "Include/internal/pycore_import.h",
+                  "Python/bltinmodule.c",
+                  "Python/ceval.c",
+                  "Python/import.c"
+                ]
+              },
+              "method": "Independent source-byte matcher on first 16 sorted matching files; LF/CR/BOM and UTF-8 clipping accounted for; regex matching lines, term/literal occurrences",
+              "status": "passed",
+              "results_sha256": "4df9bebe27422aa37d1e3f90c15a8da1dde5019c71bae42494367298c484ffcc"
+            },
+            "current": {
+              "files_checked": 5,
+              "paths": [
+                "Include/import.h",
+                "Include/internal/pycore_import.h",
+                "Python/bltinmodule.c",
+                "Python/ceval.c",
+                "Python/import.c"
+              ],
+              "request": {
+                "id": 1,
+                "command": "find",
+                "query": "\"PyImport_ImportModuleLevelObject(\"",
+                "limit": 5,
+                "snippets": 3,
+                "snippet_bytes": 240,
+                "sort": "path",
+                "memory_mb": 1024,
+                "max_output_bytes": 1048576,
+                "regex_steps": 18446744073709551615,
+                "path": [
+                  "Include/import.h",
+                  "Include/internal/pycore_import.h",
+                  "Python/bltinmodule.c",
+                  "Python/ceval.c",
+                  "Python/import.c"
+                ]
+              },
+              "method": "Independent source-byte matcher on first 16 sorted matching files; LF/CR/BOM and UTF-8 clipping accounted for; regex matching lines, term/literal occurrences",
+              "status": "passed",
+              "results_sha256": "4df9bebe27422aa37d1e3f90c15a8da1dde5019c71bae42494367298c484ffcc"
+            }
+          },
+          "same_snapshot_ranked_sha256": "3e2cc47de717413a66d2b2b41d364890205281361596362aa6a7b258127a415d",
+          "validated": true
+        },
+        {
+          "profile": "compact",
+          "case": "common_literal",
+          "profile_command": [
+            "/workspace/scratch/93bfa6b783da/rs-final-tiny",
+            "find",
+            "\"return \"",
+            "--index",
+            "/workspace/scratch/93bfa6b783da/perf-real-cpython-diagnostic/current-compact",
+            "--json",
+            "--limit",
+            "0",
+            "--snippets",
+            "0",
+            "--memory-mb",
+            "256",
+            "--max-output-bytes",
+            "1048576",
+            "--regex-steps",
+            "18446744073709551615",
+            "--profile"
+          ],
+          "profile_response": {
+            "api_version": 1,
+            "execution_complete": true,
+            "has_more": false,
+            "metrics": {
+              "candidates": 1005,
+              "profile": {
+                "candidate_seconds": 0.06700755,
+                "content_bytes": 27278185,
+                "content_open_seconds": 0.06439199600000002,
+                "content_opens": 64,
+                "content_read_seconds": 0.006595326000000001,
+                "content_reads": 1097,
+                "filtered_documents": 133,
+                "line_processing_seconds": 0.07568933099999994,
+                "matching_seconds": 0.0462084460000001,
+                "planning_seconds": 4.596e-06,
+                "regex_steps": 0,
+                "snippet_seconds": 3.71e-07,
+                "verification_seconds": 0.058776081000000015,
+                "workers": 8
+              },
+              "scanned_bytes": 27278185,
+              "seconds": 0.067012336
+            },
+            "next_cursor": null,
+            "output_truncated": false,
+            "position_units": {
+              "column": "utf8_byte",
+              "column_base": 1,
+              "line_base": 1
+            },
+            "results": [],
+            "returned": 0,
+            "snapshot": {
+              "freshness": "unknown",
+              "generation": "1",
+              "source": "index"
+            },
+            "status": "ok",
+            "total": 722,
+            "warnings": []
+          },
+          "profile_sample": {
+            "wall_seconds": 0.07447157699789386,
+            "cpu_seconds": 0.213313,
+            "peak_rss_bytes": 15728640,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor"
+          },
+          "full_counts": {
+            "baseline": {
+              "pages": 1,
+              "matching_files": 722,
+              "matches": 44912,
+              "path_count_sha256": "3aa31c97fc875a047e675d72b69cfa78df5187306411c75652057b49ce7a7add",
+              "service_command": [
+                "/workspace/scratch/93bfa6b783da/ReSearchify-baseline/build/rs",
+                "serve",
+                "--stdio",
+                "--index",
+                "/workspace/scratch/93bfa6b783da/perf-real-cpython-diagnostic/current-compact"
+              ],
+              "initial_request": {
+                "command": "find",
+                "query": "\"return \"",
+                "memory_mb": 1024,
+                "limit": 10000,
+                "snippets": 0,
+                "sort": "path",
+                "fields": [
+                  "path",
+                  "matches"
+                ],
+                "regex_steps": 18446744073709551615,
+                "max_output_bytes": 1048576
+              },
+              "memory_mb": 1024,
+              "page_limit": 10000,
+              "max_output_bytes": 1048576
+            },
+            "current": {
+              "pages": 1,
+              "matching_files": 722,
+              "matches": 44912,
+              "path_count_sha256": "3aa31c97fc875a047e675d72b69cfa78df5187306411c75652057b49ce7a7add",
+              "service_command": [
+                "/workspace/scratch/93bfa6b783da/rs-final-tiny",
+                "serve",
+                "--stdio",
+                "--index",
+                "/workspace/scratch/93bfa6b783da/perf-real-cpython-diagnostic/current-compact"
+              ],
+              "initial_request": {
+                "command": "find",
+                "query": "\"return \"",
+                "memory_mb": 1024,
+                "limit": 10000,
+                "snippets": 0,
+                "sort": "path",
+                "fields": [
+                  "path",
+                  "matches"
+                ],
+                "regex_steps": 18446744073709551615,
+                "max_output_bytes": 1048576
+              },
+              "memory_mb": 1024,
+              "page_limit": 10000,
+              "max_output_bytes": 1048576
+            }
+          },
+          "snippets": {
+            "baseline": {
+              "files_checked": 16,
+              "paths": [
+                "Android/testbed/app/src/main/c/main_activity.c",
+                "Doc/includes/newtypes/custom.c",
+                "Doc/includes/newtypes/custom2.c",
+                "Doc/includes/newtypes/custom3.c",
+                "Doc/includes/newtypes/custom4.c",
+                "Doc/includes/newtypes/sublist.c",
+                "Doc/includes/run-func.c",
+                "Include/abstract.h",
+                "Include/boolobject.h",
+                "Include/ceval.h",
+                "Include/codecs.h",
+                "Include/cpython/abstract.h",
+                "Include/cpython/bytearrayobject.h",
+                "Include/cpython/bytesobject.h",
+                "Include/cpython/cellobject.h",
+                "Include/cpython/ceval.h"
+              ],
+              "request": {
+                "id": 1,
+                "command": "find",
+                "query": "\"return \"",
+                "limit": 16,
+                "snippets": 3,
+                "snippet_bytes": 240,
+                "sort": "path",
+                "memory_mb": 1024,
+                "max_output_bytes": 1048576,
+                "regex_steps": 18446744073709551615,
+                "path": [
+                  "Android/testbed/app/src/main/c/main_activity.c",
+                  "Doc/includes/newtypes/custom.c",
+                  "Doc/includes/newtypes/custom2.c",
+                  "Doc/includes/newtypes/custom3.c",
+                  "Doc/includes/newtypes/custom4.c",
+                  "Doc/includes/newtypes/sublist.c",
+                  "Doc/includes/run-func.c",
+                  "Include/abstract.h",
+                  "Include/boolobject.h",
+                  "Include/ceval.h",
+                  "Include/codecs.h",
+                  "Include/cpython/abstract.h",
+                  "Include/cpython/bytearrayobject.h",
+                  "Include/cpython/bytesobject.h",
+                  "Include/cpython/cellobject.h",
+                  "Include/cpython/ceval.h"
+                ]
+              },
+              "method": "Independent source-byte matcher on first 16 sorted matching files; LF/CR/BOM and UTF-8 clipping accounted for; regex matching lines, term/literal occurrences",
+              "status": "passed",
+              "results_sha256": "cc5f4ab962b93dde8621895e93c242cd3934714d4f1c78dabbfc6c50f585db76"
+            },
+            "current": {
+              "files_checked": 16,
+              "paths": [
+                "Android/testbed/app/src/main/c/main_activity.c",
+                "Doc/includes/newtypes/custom.c",
+                "Doc/includes/newtypes/custom2.c",
+                "Doc/includes/newtypes/custom3.c",
+                "Doc/includes/newtypes/custom4.c",
+                "Doc/includes/newtypes/sublist.c",
+                "Doc/includes/run-func.c",
+                "Include/abstract.h",
+                "Include/boolobject.h",
+                "Include/ceval.h",
+                "Include/codecs.h",
+                "Include/cpython/abstract.h",
+                "Include/cpython/bytearrayobject.h",
+                "Include/cpython/bytesobject.h",
+                "Include/cpython/cellobject.h",
+                "Include/cpython/ceval.h"
+              ],
+              "request": {
+                "id": 1,
+                "command": "find",
+                "query": "\"return \"",
+                "limit": 16,
+                "snippets": 3,
+                "snippet_bytes": 240,
+                "sort": "path",
+                "memory_mb": 1024,
+                "max_output_bytes": 1048576,
+                "regex_steps": 18446744073709551615,
+                "path": [
+                  "Android/testbed/app/src/main/c/main_activity.c",
+                  "Doc/includes/newtypes/custom.c",
+                  "Doc/includes/newtypes/custom2.c",
+                  "Doc/includes/newtypes/custom3.c",
+                  "Doc/includes/newtypes/custom4.c",
+                  "Doc/includes/newtypes/sublist.c",
+                  "Doc/includes/run-func.c",
+                  "Include/abstract.h",
+                  "Include/boolobject.h",
+                  "Include/ceval.h",
+                  "Include/codecs.h",
+                  "Include/cpython/abstract.h",
+                  "Include/cpython/bytearrayobject.h",
+                  "Include/cpython/bytesobject.h",
+                  "Include/cpython/cellobject.h",
+                  "Include/cpython/ceval.h"
+                ]
+              },
+              "method": "Independent source-byte matcher on first 16 sorted matching files; LF/CR/BOM and UTF-8 clipping accounted for; regex matching lines, term/literal occurrences",
+              "status": "passed",
+              "results_sha256": "cc5f4ab962b93dde8621895e93c242cd3934714d4f1c78dabbfc6c50f585db76"
+            }
+          },
+          "same_snapshot_ranked_sha256": "ac31e4b891ca25c924def36ac57f3ed0ab94744770ff14e3b9f3ef730d883e39",
+          "validated": true
+        },
+        {
+          "profile": "compact",
+          "case": "negative_literal",
+          "profile_command": [
+            "/workspace/scratch/93bfa6b783da/rs-final-tiny",
+            "find",
+            "\"researchify_absent_6e9ae0ce70a44e78bdf088c197fb7134\"",
+            "--index",
+            "/workspace/scratch/93bfa6b783da/perf-real-cpython-diagnostic/current-compact",
+            "--json",
+            "--limit",
+            "0",
+            "--snippets",
+            "0",
+            "--memory-mb",
+            "256",
+            "--max-output-bytes",
+            "1048576",
+            "--regex-steps",
+            "18446744073709551615",
+            "--profile"
+          ],
+          "profile_response": {
+            "api_version": 1,
+            "execution_complete": true,
+            "has_more": false,
+            "metrics": {
+              "candidates": 1005,
+              "profile": {
+                "candidate_seconds": 0.05188252,
+                "content_bytes": 26606300,
+                "content_open_seconds": 0.048730121999999994,
+                "content_opens": 64,
+                "content_read_seconds": 0.005403849999999999,
+                "content_reads": 874,
+                "filtered_documents": 356,
+                "line_processing_seconds": 0.060541398000000045,
+                "matching_seconds": 0.029586425999999943,
+                "planning_seconds": 4.607e-06,
+                "regex_steps": 0,
+                "snippet_seconds": 3.3e-07,
+                "verification_seconds": 0.053521914000000004,
+                "workers": 8
+              },
+              "scanned_bytes": 26606300,
+              "seconds": 0.051887307
+            },
+            "next_cursor": null,
+            "output_truncated": false,
+            "position_units": {
+              "column": "utf8_byte",
+              "column_base": 1,
+              "line_base": 1
+            },
+            "results": [],
+            "returned": 0,
+            "snapshot": {
+              "freshness": "unknown",
+              "generation": "1",
+              "source": "index"
+            },
+            "status": "ok",
+            "total": 0,
+            "warnings": []
+          },
+          "profile_sample": {
+            "wall_seconds": 0.057433349000348244,
+            "cpu_seconds": 0.170411,
+            "peak_rss_bytes": 15728640,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor"
+          },
+          "full_counts": {
+            "baseline": {
+              "pages": 1,
+              "matching_files": 0,
+              "matches": 0,
+              "path_count_sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+              "service_command": [
+                "/workspace/scratch/93bfa6b783da/ReSearchify-baseline/build/rs",
+                "serve",
+                "--stdio",
+                "--index",
+                "/workspace/scratch/93bfa6b783da/perf-real-cpython-diagnostic/current-compact"
+              ],
+              "initial_request": {
+                "command": "find",
+                "query": "\"researchify_absent_6e9ae0ce70a44e78bdf088c197fb7134\"",
+                "memory_mb": 1024,
+                "limit": 10000,
+                "snippets": 0,
+                "sort": "path",
+                "fields": [
+                  "path",
+                  "matches"
+                ],
+                "regex_steps": 18446744073709551615,
+                "max_output_bytes": 1048576
+              },
+              "memory_mb": 1024,
+              "page_limit": 10000,
+              "max_output_bytes": 1048576
+            },
+            "current": {
+              "pages": 1,
+              "matching_files": 0,
+              "matches": 0,
+              "path_count_sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+              "service_command": [
+                "/workspace/scratch/93bfa6b783da/rs-final-tiny",
+                "serve",
+                "--stdio",
+                "--index",
+                "/workspace/scratch/93bfa6b783da/perf-real-cpython-diagnostic/current-compact"
+              ],
+              "initial_request": {
+                "command": "find",
+                "query": "\"researchify_absent_6e9ae0ce70a44e78bdf088c197fb7134\"",
+                "memory_mb": 1024,
+                "limit": 10000,
+                "snippets": 0,
+                "sort": "path",
+                "fields": [
+                  "path",
+                  "matches"
+                ],
+                "regex_steps": 18446744073709551615,
+                "max_output_bytes": 1048576
+              },
+              "memory_mb": 1024,
+              "page_limit": 10000,
+              "max_output_bytes": 1048576
+            }
+          },
+          "snippets": {
+            "baseline": {
+              "files_checked": 0,
+              "status": "passed: empty result set"
+            },
+            "current": {
+              "files_checked": 0,
+              "status": "passed: empty result set"
+            }
+          },
+          "same_snapshot_ranked_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "validated": true
+        },
+        {
+          "profile": "compact",
+          "case": "selective_regex",
+          "profile_command": [
+            "/workspace/scratch/93bfa6b783da/rs-final-tiny",
+            "find",
+            "/PyImport_[A-Za-z0-9_]+/",
+            "--index",
+            "/workspace/scratch/93bfa6b783da/perf-real-cpython-diagnostic/current-compact",
+            "--json",
+            "--limit",
+            "0",
+            "--snippets",
+            "0",
+            "--memory-mb",
+            "256",
+            "--max-output-bytes",
+            "1048576",
+            "--regex-steps",
+            "18446744073709551615",
+            "--profile"
+          ],
+          "profile_response": {
+            "api_version": 1,
+            "execution_complete": true,
+            "has_more": false,
+            "metrics": {
+              "candidates": 1005,
+              "profile": {
+                "candidate_seconds": 0.188377754,
+                "content_bytes": 27069243,
+                "content_open_seconds": 0.00040725499999999943,
+                "content_opens": 8,
+                "content_read_seconds": 0.005781923000000004,
+                "content_reads": 1014,
+                "filtered_documents": 216,
+                "line_processing_seconds": 0.06100366599999977,
+                "matching_seconds": 0.04250985500000013,
+                "planning_seconds": 5.208e-06,
+                "regex_steps": 54144980,
+                "snippet_seconds": 5.41e-07,
+                "verification_seconds": 0.05641283200000003,
+                "workers": 1
+              },
+              "scanned_bytes": 27069243,
+              "seconds": 0.188383152
+            },
+            "next_cursor": null,
+            "output_truncated": false,
+            "position_units": {
+              "column": "utf8_byte",
+              "column_base": 1,
+              "line_base": 1
+            },
+            "results": [],
+            "returned": 0,
+            "snapshot": {
+              "freshness": "unknown",
+              "generation": "1",
+              "source": "index"
+            },
+            "status": "ok",
+            "total": 77,
+            "warnings": []
+          },
+          "profile_sample": {
+            "wall_seconds": 0.19297977699898183,
+            "cpu_seconds": 0.192696,
+            "peak_rss_bytes": 15728640,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor"
+          },
+          "full_counts": {
+            "baseline": {
+              "pages": 1,
+              "matching_files": 77,
+              "matches": 488,
+              "path_count_sha256": "bf0f5b2bf88456ee5c8110955b777bdf28f33d5a946eb0be4c1f6eb33b96541b",
+              "service_command": [
+                "/workspace/scratch/93bfa6b783da/ReSearchify-baseline/build/rs",
+                "serve",
+                "--stdio",
+                "--index",
+                "/workspace/scratch/93bfa6b783da/perf-real-cpython-diagnostic/current-compact"
+              ],
+              "initial_request": {
+                "command": "find",
+                "query": "/PyImport_[A-Za-z0-9_]+/",
+                "memory_mb": 1024,
+                "limit": 10000,
+                "snippets": 0,
+                "sort": "path",
+                "fields": [
+                  "path",
+                  "matches"
+                ],
+                "regex_steps": 18446744073709551615,
+                "max_output_bytes": 1048576
+              },
+              "memory_mb": 1024,
+              "page_limit": 10000,
+              "max_output_bytes": 1048576
+            },
+            "current": {
+              "pages": 1,
+              "matching_files": 77,
+              "matches": 488,
+              "path_count_sha256": "bf0f5b2bf88456ee5c8110955b777bdf28f33d5a946eb0be4c1f6eb33b96541b",
+              "service_command": [
+                "/workspace/scratch/93bfa6b783da/rs-final-tiny",
+                "serve",
+                "--stdio",
+                "--index",
+                "/workspace/scratch/93bfa6b783da/perf-real-cpython-diagnostic/current-compact"
+              ],
+              "initial_request": {
+                "command": "find",
+                "query": "/PyImport_[A-Za-z0-9_]+/",
+                "memory_mb": 1024,
+                "limit": 10000,
+                "snippets": 0,
+                "sort": "path",
+                "fields": [
+                  "path",
+                  "matches"
+                ],
+                "regex_steps": 18446744073709551615,
+                "max_output_bytes": 1048576
+              },
+              "memory_mb": 1024,
+              "page_limit": 10000,
+              "max_output_bytes": 1048576
+            }
+          },
+          "snippets": {
+            "baseline": {
+              "files_checked": 16,
+              "paths": [
+                "Doc/includes/run-func.c",
+                "Include/cpython/import.h",
+                "Include/import.h",
+                "Include/internal/pycore_import.h",
+                "Include/internal/pycore_importdl.h",
+                "Include/moduleobject.h",
+                "Modules/_asynciomodule.c",
+                "Modules/_ctypes/callbacks.c",
+                "Modules/_cursesmodule.c",
+                "Modules/_datetimemodule.c",
+                "Modules/_decimal/_decimal.c",
+                "Modules/_elementtree.c",
+                "Modules/_interpchannelsmodule.c",
+                "Modules/_interpqueuesmodule.c",
+                "Modules/_interpretersmodule.c",
+                "Modules/_json.c"
+              ],
+              "request": {
+                "id": 1,
+                "command": "find",
+                "query": "/PyImport_[A-Za-z0-9_]+/",
+                "limit": 16,
+                "snippets": 3,
+                "snippet_bytes": 240,
+                "sort": "path",
+                "memory_mb": 1024,
+                "max_output_bytes": 1048576,
+                "regex_steps": 18446744073709551615,
+                "path": [
+                  "Doc/includes/run-func.c",
+                  "Include/cpython/import.h",
+                  "Include/import.h",
+                  "Include/internal/pycore_import.h",
+                  "Include/internal/pycore_importdl.h",
+                  "Include/moduleobject.h",
+                  "Modules/_asynciomodule.c",
+                  "Modules/_ctypes/callbacks.c",
+                  "Modules/_cursesmodule.c",
+                  "Modules/_datetimemodule.c",
+                  "Modules/_decimal/_decimal.c",
+                  "Modules/_elementtree.c",
+                  "Modules/_interpchannelsmodule.c",
+                  "Modules/_interpqueuesmodule.c",
+                  "Modules/_interpretersmodule.c",
+                  "Modules/_json.c"
+                ]
+              },
+              "method": "Independent source-byte matcher on first 16 sorted matching files; LF/CR/BOM and UTF-8 clipping accounted for; regex matching lines, term/literal occurrences",
+              "status": "passed",
+              "results_sha256": "a32062a18544f6eae6f3c2c3d978724fb696686cc548a3224e4d4d304ce9fe6c"
+            },
+            "current": {
+              "files_checked": 16,
+              "paths": [
+                "Doc/includes/run-func.c",
+                "Include/cpython/import.h",
+                "Include/import.h",
+                "Include/internal/pycore_import.h",
+                "Include/internal/pycore_importdl.h",
+                "Include/moduleobject.h",
+                "Modules/_asynciomodule.c",
+                "Modules/_ctypes/callbacks.c",
+                "Modules/_cursesmodule.c",
+                "Modules/_datetimemodule.c",
+                "Modules/_decimal/_decimal.c",
+                "Modules/_elementtree.c",
+                "Modules/_interpchannelsmodule.c",
+                "Modules/_interpqueuesmodule.c",
+                "Modules/_interpretersmodule.c",
+                "Modules/_json.c"
+              ],
+              "request": {
+                "id": 1,
+                "command": "find",
+                "query": "/PyImport_[A-Za-z0-9_]+/",
+                "limit": 16,
+                "snippets": 3,
+                "snippet_bytes": 240,
+                "sort": "path",
+                "memory_mb": 1024,
+                "max_output_bytes": 1048576,
+                "regex_steps": 18446744073709551615,
+                "path": [
+                  "Doc/includes/run-func.c",
+                  "Include/cpython/import.h",
+                  "Include/import.h",
+                  "Include/internal/pycore_import.h",
+                  "Include/internal/pycore_importdl.h",
+                  "Include/moduleobject.h",
+                  "Modules/_asynciomodule.c",
+                  "Modules/_ctypes/callbacks.c",
+                  "Modules/_cursesmodule.c",
+                  "Modules/_datetimemodule.c",
+                  "Modules/_decimal/_decimal.c",
+                  "Modules/_elementtree.c",
+                  "Modules/_interpchannelsmodule.c",
+                  "Modules/_interpqueuesmodule.c",
+                  "Modules/_interpretersmodule.c",
+                  "Modules/_json.c"
+                ]
+              },
+              "method": "Independent source-byte matcher on first 16 sorted matching files; LF/CR/BOM and UTF-8 clipping accounted for; regex matching lines, term/literal occurrences",
+              "status": "passed",
+              "results_sha256": "a32062a18544f6eae6f3c2c3d978724fb696686cc548a3224e4d4d304ce9fe6c"
+            }
+          },
+          "same_snapshot_ranked_sha256": "e2f3148b0fd0a56d71a6fbb2261587ecae5c28fd098995120765cd96e8f6ac9c",
+          "validated": true
+        },
+        {
+          "profile": "compact",
+          "case": "wide_regex",
+          "profile_command": [
+            "/workspace/scratch/93bfa6b783da/rs-final-tiny",
+            "find",
+            "/(return|if|while)[ \\t]/",
+            "--index",
+            "/workspace/scratch/93bfa6b783da/perf-real-cpython-diagnostic/current-compact",
+            "--json",
+            "--limit",
+            "0",
+            "--snippets",
+            "0",
+            "--memory-mb",
+            "256",
+            "--max-output-bytes",
+            "1048576",
+            "--regex-steps",
+            "18446744073709551615",
+            "--profile"
+          ],
+          "profile_response": {
+            "api_version": 1,
+            "execution_complete": true,
+            "has_more": false,
+            "metrics": {
+              "candidates": 1005,
+              "profile": {
+                "candidate_seconds": 0.924719953,
+                "content_bytes": 27501615,
+                "content_open_seconds": 0.0006591230000000007,
+                "content_opens": 8,
+                "content_read_seconds": 0.006924571999999995,
+                "content_reads": 1230,
+                "filtered_documents": 0,
+                "line_processing_seconds": 0.05194667600000185,
+                "matching_seconds": 0.7963455959999981,
+                "planning_seconds": 5.919e-06,
+                "regex_steps": 252594506,
+                "snippet_seconds": 4.71e-07,
+                "verification_seconds": 0.04986859200000002,
+                "workers": 1
+              },
+              "scanned_bytes": 27501615,
+              "seconds": 0.924726182
+            },
+            "next_cursor": null,
+            "output_truncated": false,
+            "position_units": {
+              "column": "utf8_byte",
+              "column_base": 1,
+              "line_base": 1
+            },
+            "results": [],
+            "returned": 0,
+            "snapshot": {
+              "freshness": "unknown",
+              "generation": "1",
+              "source": "index"
+            },
+            "status": "ok",
+            "total": 934,
+            "warnings": []
+          },
+          "profile_sample": {
+            "wall_seconds": 0.9300023899995722,
+            "cpu_seconds": 0.9287529999999999,
+            "peak_rss_bytes": 15728640,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor"
+          },
+          "full_counts": {
+            "baseline": {
+              "pages": 1,
+              "matching_files": 934,
+              "matches": 111106,
+              "path_count_sha256": "d3c0e0aece36c18cfb5e5108d75c4d8b2c634114f589a9702e79fee7237ac325",
+              "service_command": [
+                "/workspace/scratch/93bfa6b783da/ReSearchify-baseline/build/rs",
+                "serve",
+                "--stdio",
+                "--index",
+                "/workspace/scratch/93bfa6b783da/perf-real-cpython-diagnostic/current-compact"
+              ],
+              "initial_request": {
+                "command": "find",
+                "query": "/(return|if|while)[ \\t]/",
+                "memory_mb": 1024,
+                "limit": 10000,
+                "snippets": 0,
+                "sort": "path",
+                "fields": [
+                  "path",
+                  "matches"
+                ],
+                "regex_steps": 18446744073709551615,
+                "max_output_bytes": 1048576
+              },
+              "memory_mb": 1024,
+              "page_limit": 10000,
+              "max_output_bytes": 1048576
+            },
+            "current": {
+              "pages": 1,
+              "matching_files": 934,
+              "matches": 111106,
+              "path_count_sha256": "d3c0e0aece36c18cfb5e5108d75c4d8b2c634114f589a9702e79fee7237ac325",
+              "service_command": [
+                "/workspace/scratch/93bfa6b783da/rs-final-tiny",
+                "serve",
+                "--stdio",
+                "--index",
+                "/workspace/scratch/93bfa6b783da/perf-real-cpython-diagnostic/current-compact"
+              ],
+              "initial_request": {
+                "command": "find",
+                "query": "/(return|if|while)[ \\t]/",
+                "memory_mb": 1024,
+                "limit": 10000,
+                "snippets": 0,
+                "sort": "path",
+                "fields": [
+                  "path",
+                  "matches"
+                ],
+                "regex_steps": 18446744073709551615,
+                "max_output_bytes": 1048576
+              },
+              "memory_mb": 1024,
+              "page_limit": 10000,
+              "max_output_bytes": 1048576
+            }
+          },
+          "snippets": {
+            "baseline": {
+              "files_checked": 16,
+              "paths": [
+                "Android/testbed/app/src/main/c/main_activity.c",
+                "Doc/includes/newtypes/custom.c",
+                "Doc/includes/newtypes/custom2.c",
+                "Doc/includes/newtypes/custom3.c",
+                "Doc/includes/newtypes/custom4.c",
+                "Doc/includes/newtypes/sublist.c",
+                "Doc/includes/run-func.c",
+                "Include/Python.h",
+                "Include/abstract.h",
+                "Include/bltinmodule.h",
+                "Include/boolobject.h",
+                "Include/bytearrayobject.h",
+                "Include/bytesobject.h",
+                "Include/ceval.h",
+                "Include/codecs.h",
+                "Include/compile.h"
+              ],
+              "request": {
+                "id": 1,
+                "command": "find",
+                "query": "/(return|if|while)[ \\t]/",
+                "limit": 16,
+                "snippets": 3,
+                "snippet_bytes": 240,
+                "sort": "path",
+                "memory_mb": 1024,
+                "max_output_bytes": 1048576,
+                "regex_steps": 18446744073709551615,
+                "path": [
+                  "Android/testbed/app/src/main/c/main_activity.c",
+                  "Doc/includes/newtypes/custom.c",
+                  "Doc/includes/newtypes/custom2.c",
+                  "Doc/includes/newtypes/custom3.c",
+                  "Doc/includes/newtypes/custom4.c",
+                  "Doc/includes/newtypes/sublist.c",
+                  "Doc/includes/run-func.c",
+                  "Include/Python.h",
+                  "Include/abstract.h",
+                  "Include/bltinmodule.h",
+                  "Include/boolobject.h",
+                  "Include/bytearrayobject.h",
+                  "Include/bytesobject.h",
+                  "Include/ceval.h",
+                  "Include/codecs.h",
+                  "Include/compile.h"
+                ]
+              },
+              "method": "Independent source-byte matcher on first 16 sorted matching files; LF/CR/BOM and UTF-8 clipping accounted for; regex matching lines, term/literal occurrences",
+              "status": "passed",
+              "results_sha256": "34f11e17659c4f27bbabe9371ed79533f366e4aaf0563dd80d41e3332b68e5a3"
+            },
+            "current": {
+              "files_checked": 16,
+              "paths": [
+                "Android/testbed/app/src/main/c/main_activity.c",
+                "Doc/includes/newtypes/custom.c",
+                "Doc/includes/newtypes/custom2.c",
+                "Doc/includes/newtypes/custom3.c",
+                "Doc/includes/newtypes/custom4.c",
+                "Doc/includes/newtypes/sublist.c",
+                "Doc/includes/run-func.c",
+                "Include/Python.h",
+                "Include/abstract.h",
+                "Include/bltinmodule.h",
+                "Include/boolobject.h",
+                "Include/bytearrayobject.h",
+                "Include/bytesobject.h",
+                "Include/ceval.h",
+                "Include/codecs.h",
+                "Include/compile.h"
+              ],
+              "request": {
+                "id": 1,
+                "command": "find",
+                "query": "/(return|if|while)[ \\t]/",
+                "limit": 16,
+                "snippets": 3,
+                "snippet_bytes": 240,
+                "sort": "path",
+                "memory_mb": 1024,
+                "max_output_bytes": 1048576,
+                "regex_steps": 18446744073709551615,
+                "path": [
+                  "Android/testbed/app/src/main/c/main_activity.c",
+                  "Doc/includes/newtypes/custom.c",
+                  "Doc/includes/newtypes/custom2.c",
+                  "Doc/includes/newtypes/custom3.c",
+                  "Doc/includes/newtypes/custom4.c",
+                  "Doc/includes/newtypes/sublist.c",
+                  "Doc/includes/run-func.c",
+                  "Include/Python.h",
+                  "Include/abstract.h",
+                  "Include/bltinmodule.h",
+                  "Include/boolobject.h",
+                  "Include/bytearrayobject.h",
+                  "Include/bytesobject.h",
+                  "Include/ceval.h",
+                  "Include/codecs.h",
+                  "Include/compile.h"
+                ]
+              },
+              "method": "Independent source-byte matcher on first 16 sorted matching files; LF/CR/BOM and UTF-8 clipping accounted for; regex matching lines, term/literal occurrences",
+              "status": "passed",
+              "results_sha256": "34f11e17659c4f27bbabe9371ed79533f366e4aaf0563dd80d41e3332b68e5a3"
+            }
+          },
+          "same_snapshot_ranked_sha256": "e9f7299faffee06d08dd220364adb113d081dcd66d45f02b1bf5a5c2daa72462",
+          "validated": true
+        },
+        {
+          "profile": "fast",
+          "case": "selective_term",
+          "profile_command": [
+            "/workspace/scratch/93bfa6b783da/rs-final-tiny",
+            "find",
+            "PyImport_ImportModuleLevelObject",
+            "--index",
+            "/workspace/scratch/93bfa6b783da/perf-real-cpython-diagnostic/current-fast",
+            "--json",
+            "--limit",
+            "0",
+            "--snippets",
+            "0",
+            "--memory-mb",
+            "256",
+            "--max-output-bytes",
+            "1048576",
+            "--regex-steps",
+            "18446744073709551615",
+            "--profile"
+          ],
+          "profile_response": {
+            "api_version": 1,
+            "execution_complete": true,
+            "has_more": false,
+            "metrics": {
+              "candidates": 6,
+              "profile": {
+                "candidate_seconds": 0.000217698,
+                "content_bytes": 0,
+                "content_open_seconds": 0,
+                "content_opens": 0,
+                "content_read_seconds": 0,
+                "content_reads": 0,
+                "filtered_documents": 0,
+                "line_processing_seconds": 0,
+                "matching_seconds": 0,
+                "planning_seconds": 0.000879056,
+                "regex_steps": 0,
+                "snippet_seconds": 8e-08,
+                "verification_seconds": 0,
+                "workers": 1
+              },
+              "scanned_bytes": 0,
+              "seconds": 0.001096804
+            },
+            "next_cursor": null,
+            "output_truncated": false,
+            "position_units": {
+              "column": "utf8_byte",
+              "column_base": 1,
+              "line_base": 1
+            },
+            "results": [],
+            "returned": 0,
+            "snapshot": {
+              "freshness": "unknown",
+              "generation": "1",
+              "source": "index"
+            },
+            "status": "ok",
+            "total": 6,
+            "warnings": []
+          },
+          "profile_sample": {
+            "wall_seconds": 0.004714950002380647,
+            "cpu_seconds": 0.004514,
+            "peak_rss_bytes": 15728640,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor"
+          },
+          "full_counts": {
+            "baseline": {
+              "pages": 1,
+              "matching_files": 6,
+              "matches": 8,
+              "path_count_sha256": "a122050317306397cf1783d7c592ce456cbbd0923be3c866b46554fecfa67ae9",
+              "service_command": [
+                "/workspace/scratch/93bfa6b783da/ReSearchify-baseline/build/rs",
+                "serve",
+                "--stdio",
+                "--index",
+                "/workspace/scratch/93bfa6b783da/perf-real-cpython-diagnostic/current-fast"
+              ],
+              "initial_request": {
+                "command": "find",
+                "query": "PyImport_ImportModuleLevelObject",
+                "memory_mb": 1024,
+                "limit": 10000,
+                "snippets": 0,
+                "sort": "path",
+                "fields": [
+                  "path",
+                  "matches"
+                ],
+                "regex_steps": 18446744073709551615,
+                "max_output_bytes": 1048576
+              },
+              "memory_mb": 1024,
+              "page_limit": 10000,
+              "max_output_bytes": 1048576
+            },
+            "current": {
+              "pages": 1,
+              "matching_files": 6,
+              "matches": 8,
+              "path_count_sha256": "a122050317306397cf1783d7c592ce456cbbd0923be3c866b46554fecfa67ae9",
+              "service_command": [
+                "/workspace/scratch/93bfa6b783da/rs-final-tiny",
+                "serve",
+                "--stdio",
+                "--index",
+                "/workspace/scratch/93bfa6b783da/perf-real-cpython-diagnostic/current-fast"
+              ],
+              "initial_request": {
+                "command": "find",
+                "query": "PyImport_ImportModuleLevelObject",
+                "memory_mb": 1024,
+                "limit": 10000,
+                "snippets": 0,
+                "sort": "path",
+                "fields": [
+                  "path",
+                  "matches"
+                ],
+                "regex_steps": 18446744073709551615,
+                "max_output_bytes": 1048576
+              },
+              "memory_mb": 1024,
+              "page_limit": 10000,
+              "max_output_bytes": 1048576
+            }
+          },
+          "snippets": {
+            "baseline": {
+              "files_checked": 6,
+              "paths": [
+                "Include/import.h",
+                "Include/internal/pycore_import.h",
+                "PC/python3dll.c",
+                "Python/bltinmodule.c",
+                "Python/ceval.c",
+                "Python/import.c"
+              ],
+              "request": {
+                "id": 1,
+                "command": "find",
+                "query": "PyImport_ImportModuleLevelObject",
+                "limit": 6,
+                "snippets": 3,
+                "snippet_bytes": 240,
+                "sort": "path",
+                "memory_mb": 1024,
+                "max_output_bytes": 1048576,
+                "regex_steps": 18446744073709551615,
+                "path": [
+                  "Include/import.h",
+                  "Include/internal/pycore_import.h",
+                  "PC/python3dll.c",
+                  "Python/bltinmodule.c",
+                  "Python/ceval.c",
+                  "Python/import.c"
+                ]
+              },
+              "method": "Independent source-byte matcher on first 16 sorted matching files; LF/CR/BOM and UTF-8 clipping accounted for; regex matching lines, term/literal occurrences",
+              "status": "passed",
+              "results_sha256": "67ee2c2c0c5ac632b52f43ac2ce8621fb22e293b2f53d99ce9a74d6ab8a72997"
+            },
+            "current": {
+              "files_checked": 6,
+              "paths": [
+                "Include/import.h",
+                "Include/internal/pycore_import.h",
+                "PC/python3dll.c",
+                "Python/bltinmodule.c",
+                "Python/ceval.c",
+                "Python/import.c"
+              ],
+              "request": {
+                "id": 1,
+                "command": "find",
+                "query": "PyImport_ImportModuleLevelObject",
+                "limit": 6,
+                "snippets": 3,
+                "snippet_bytes": 240,
+                "sort": "path",
+                "memory_mb": 1024,
+                "max_output_bytes": 1048576,
+                "regex_steps": 18446744073709551615,
+                "path": [
+                  "Include/import.h",
+                  "Include/internal/pycore_import.h",
+                  "PC/python3dll.c",
+                  "Python/bltinmodule.c",
+                  "Python/ceval.c",
+                  "Python/import.c"
+                ]
+              },
+              "method": "Independent source-byte matcher on first 16 sorted matching files; LF/CR/BOM and UTF-8 clipping accounted for; regex matching lines, term/literal occurrences",
+              "status": "passed",
+              "results_sha256": "67ee2c2c0c5ac632b52f43ac2ce8621fb22e293b2f53d99ce9a74d6ab8a72997"
+            }
+          },
+          "same_snapshot_ranked_sha256": "aa987b056a77bc8cd5e56deb49973fe1f90116d757b50e24b71c087df027b482",
+          "validated": true
+        },
+        {
+          "profile": "fast",
+          "case": "common_term",
+          "profile_command": [
+            "/workspace/scratch/93bfa6b783da/rs-final-tiny",
+            "find",
+            "return",
+            "--index",
+            "/workspace/scratch/93bfa6b783da/perf-real-cpython-diagnostic/current-fast",
+            "--json",
+            "--limit",
+            "0",
+            "--snippets",
+            "0",
+            "--memory-mb",
+            "256",
+            "--max-output-bytes",
+            "1048576",
+            "--regex-steps",
+            "18446744073709551615",
+            "--profile"
+          ],
+          "profile_response": {
+            "api_version": 1,
+            "execution_complete": true,
+            "has_more": false,
+            "metrics": {
+              "candidates": 728,
+              "profile": {
+                "candidate_seconds": 0.009651555,
+                "content_bytes": 0,
+                "content_open_seconds": 0,
+                "content_opens": 0,
+                "content_read_seconds": 0,
+                "content_reads": 0,
+                "filtered_documents": 0,
+                "line_processing_seconds": 0,
+                "matching_seconds": 0,
+                "planning_seconds": 0.000867848,
+                "regex_steps": 0,
+                "snippet_seconds": 1.9e-07,
+                "verification_seconds": 0,
+                "workers": 1
+              },
+              "scanned_bytes": 0,
+              "seconds": 0.010519553
+            },
+            "next_cursor": null,
+            "output_truncated": false,
+            "position_units": {
+              "column": "utf8_byte",
+              "column_base": 1,
+              "line_base": 1
+            },
+            "results": [],
+            "returned": 0,
+            "snapshot": {
+              "freshness": "unknown",
+              "generation": "1",
+              "source": "index"
+            },
+            "status": "ok",
+            "total": 728,
+            "warnings": []
+          },
+          "profile_sample": {
+            "wall_seconds": 0.01449057200079551,
+            "cpu_seconds": 0.014249999999999999,
+            "peak_rss_bytes": 15728640,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor"
+          },
+          "full_counts": {
+            "baseline": {
+              "pages": 1,
+              "matching_files": 728,
+              "matches": 45893,
+              "path_count_sha256": "b1d0831becd371124357709de5acd47523b1cc600b03272d055eab84b3834813",
+              "service_command": [
+                "/workspace/scratch/93bfa6b783da/ReSearchify-baseline/build/rs",
+                "serve",
+                "--stdio",
+                "--index",
+                "/workspace/scratch/93bfa6b783da/perf-real-cpython-diagnostic/current-fast"
+              ],
+              "initial_request": {
+                "command": "find",
+                "query": "return",
+                "memory_mb": 1024,
+                "limit": 10000,
+                "snippets": 0,
+                "sort": "path",
+                "fields": [
+                  "path",
+                  "matches"
+                ],
+                "regex_steps": 18446744073709551615,
+                "max_output_bytes": 1048576
+              },
+              "memory_mb": 1024,
+              "page_limit": 10000,
+              "max_output_bytes": 1048576
+            },
+            "current": {
+              "pages": 1,
+              "matching_files": 728,
+              "matches": 45893,
+              "path_count_sha256": "b1d0831becd371124357709de5acd47523b1cc600b03272d055eab84b3834813",
+              "service_command": [
+                "/workspace/scratch/93bfa6b783da/rs-final-tiny",
+                "serve",
+                "--stdio",
+                "--index",
+                "/workspace/scratch/93bfa6b783da/perf-real-cpython-diagnostic/current-fast"
+              ],
+              "initial_request": {
+                "command": "find",
+                "query": "return",
+                "memory_mb": 1024,
+                "limit": 10000,
+                "snippets": 0,
+                "sort": "path",
+                "fields": [
+                  "path",
+                  "matches"
+                ],
+                "regex_steps": 18446744073709551615,
+                "max_output_bytes": 1048576
+              },
+              "memory_mb": 1024,
+              "page_limit": 10000,
+              "max_output_bytes": 1048576
+            }
+          },
+          "snippets": {
+            "baseline": {
+              "files_checked": 16,
+              "paths": [
+                "Android/testbed/app/src/main/c/main_activity.c",
+                "Doc/includes/newtypes/custom.c",
+                "Doc/includes/newtypes/custom2.c",
+                "Doc/includes/newtypes/custom3.c",
+                "Doc/includes/newtypes/custom4.c",
+                "Doc/includes/newtypes/sublist.c",
+                "Doc/includes/run-func.c",
+                "Include/abstract.h",
+                "Include/boolobject.h",
+                "Include/ceval.h",
+                "Include/codecs.h",
+                "Include/cpython/abstract.h",
+                "Include/cpython/bytearrayobject.h",
+                "Include/cpython/bytesobject.h",
+                "Include/cpython/cellobject.h",
+                "Include/cpython/ceval.h"
+              ],
+              "request": {
+                "id": 1,
+                "command": "find",
+                "query": "return",
+                "limit": 16,
+                "snippets": 3,
+                "snippet_bytes": 240,
+                "sort": "path",
+                "memory_mb": 1024,
+                "max_output_bytes": 1048576,
+                "regex_steps": 18446744073709551615,
+                "path": [
+                  "Android/testbed/app/src/main/c/main_activity.c",
+                  "Doc/includes/newtypes/custom.c",
+                  "Doc/includes/newtypes/custom2.c",
+                  "Doc/includes/newtypes/custom3.c",
+                  "Doc/includes/newtypes/custom4.c",
+                  "Doc/includes/newtypes/sublist.c",
+                  "Doc/includes/run-func.c",
+                  "Include/abstract.h",
+                  "Include/boolobject.h",
+                  "Include/ceval.h",
+                  "Include/codecs.h",
+                  "Include/cpython/abstract.h",
+                  "Include/cpython/bytearrayobject.h",
+                  "Include/cpython/bytesobject.h",
+                  "Include/cpython/cellobject.h",
+                  "Include/cpython/ceval.h"
+                ]
+              },
+              "method": "Independent source-byte matcher on first 16 sorted matching files; LF/CR/BOM and UTF-8 clipping accounted for; regex matching lines, term/literal occurrences",
+              "status": "passed",
+              "results_sha256": "dc8483a16436820189f8c9162acd76d3335ef865fe92236a2d4fb0233736fe6a"
+            },
+            "current": {
+              "files_checked": 16,
+              "paths": [
+                "Android/testbed/app/src/main/c/main_activity.c",
+                "Doc/includes/newtypes/custom.c",
+                "Doc/includes/newtypes/custom2.c",
+                "Doc/includes/newtypes/custom3.c",
+                "Doc/includes/newtypes/custom4.c",
+                "Doc/includes/newtypes/sublist.c",
+                "Doc/includes/run-func.c",
+                "Include/abstract.h",
+                "Include/boolobject.h",
+                "Include/ceval.h",
+                "Include/codecs.h",
+                "Include/cpython/abstract.h",
+                "Include/cpython/bytearrayobject.h",
+                "Include/cpython/bytesobject.h",
+                "Include/cpython/cellobject.h",
+                "Include/cpython/ceval.h"
+              ],
+              "request": {
+                "id": 1,
+                "command": "find",
+                "query": "return",
+                "limit": 16,
+                "snippets": 3,
+                "snippet_bytes": 240,
+                "sort": "path",
+                "memory_mb": 1024,
+                "max_output_bytes": 1048576,
+                "regex_steps": 18446744073709551615,
+                "path": [
+                  "Android/testbed/app/src/main/c/main_activity.c",
+                  "Doc/includes/newtypes/custom.c",
+                  "Doc/includes/newtypes/custom2.c",
+                  "Doc/includes/newtypes/custom3.c",
+                  "Doc/includes/newtypes/custom4.c",
+                  "Doc/includes/newtypes/sublist.c",
+                  "Doc/includes/run-func.c",
+                  "Include/abstract.h",
+                  "Include/boolobject.h",
+                  "Include/ceval.h",
+                  "Include/codecs.h",
+                  "Include/cpython/abstract.h",
+                  "Include/cpython/bytearrayobject.h",
+                  "Include/cpython/bytesobject.h",
+                  "Include/cpython/cellobject.h",
+                  "Include/cpython/ceval.h"
+                ]
+              },
+              "method": "Independent source-byte matcher on first 16 sorted matching files; LF/CR/BOM and UTF-8 clipping accounted for; regex matching lines, term/literal occurrences",
+              "status": "passed",
+              "results_sha256": "dc8483a16436820189f8c9162acd76d3335ef865fe92236a2d4fb0233736fe6a"
+            }
+          },
+          "same_snapshot_ranked_sha256": "bb83bcebf08503adf4a3cf1bf13ef05bdadb7c0e2a404cf571385289dfee7ec1",
+          "validated": true
+        },
+        {
+          "profile": "fast",
+          "case": "selective_literal",
+          "profile_command": [
+            "/workspace/scratch/93bfa6b783da/rs-final-tiny",
+            "find",
+            "\"PyImport_ImportModuleLevelObject(\"",
+            "--index",
+            "/workspace/scratch/93bfa6b783da/perf-real-cpython-diagnostic/current-fast",
+            "--json",
+            "--limit",
+            "0",
+            "--snippets",
+            "0",
+            "--memory-mb",
+            "256",
+            "--max-output-bytes",
+            "1048576",
+            "--regex-steps",
+            "18446744073709551615",
+            "--profile"
+          ],
+          "profile_response": {
+            "api_version": 1,
+            "execution_complete": true,
+            "has_more": false,
+            "metrics": {
+              "candidates": 8,
+              "profile": {
+                "candidate_seconds": 0.002542474,
+                "content_bytes": 408035,
+                "content_open_seconds": 5.0968000000000004e-05,
+                "content_opens": 6,
+                "content_read_seconds": 0.00010100299999999998,
+                "content_reads": 12,
+                "filtered_documents": 0,
+                "line_processing_seconds": 0.0009041709999999899,
+                "matching_seconds": 0.00046953100000001,
+                "planning_seconds": 0.008377963,
+                "regex_steps": 0,
+                "snippet_seconds": 9e-08,
+                "verification_seconds": 0.00082787,
+                "workers": 1
+              },
+              "scanned_bytes": 408035,
+              "seconds": 0.010920497
+            },
+            "next_cursor": null,
+            "output_truncated": false,
+            "position_units": {
+              "column": "utf8_byte",
+              "column_base": 1,
+              "line_base": 1
+            },
+            "results": [],
+            "returned": 0,
+            "snapshot": {
+              "freshness": "unknown",
+              "generation": "1",
+              "source": "index"
+            },
+            "status": "ok",
+            "total": 5,
+            "warnings": []
+          },
+          "profile_sample": {
+            "wall_seconds": 0.015226470997731667,
+            "cpu_seconds": 0.015005999999999999,
+            "peak_rss_bytes": 15728640,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor"
+          },
+          "full_counts": {
+            "baseline": {
+              "pages": 1,
+              "matching_files": 5,
+              "matches": 7,
+              "path_count_sha256": "f2e459b225112c55dce62adf24f9c8f9d335399b7a44e1e5f37f9be9d01a8cff",
+              "service_command": [
+                "/workspace/scratch/93bfa6b783da/ReSearchify-baseline/build/rs",
+                "serve",
+                "--stdio",
+                "--index",
+                "/workspace/scratch/93bfa6b783da/perf-real-cpython-diagnostic/current-fast"
+              ],
+              "initial_request": {
+                "command": "find",
+                "query": "\"PyImport_ImportModuleLevelObject(\"",
+                "memory_mb": 1024,
+                "limit": 10000,
+                "snippets": 0,
+                "sort": "path",
+                "fields": [
+                  "path",
+                  "matches"
+                ],
+                "regex_steps": 18446744073709551615,
+                "max_output_bytes": 1048576
+              },
+              "memory_mb": 1024,
+              "page_limit": 10000,
+              "max_output_bytes": 1048576
+            },
+            "current": {
+              "pages": 1,
+              "matching_files": 5,
+              "matches": 7,
+              "path_count_sha256": "f2e459b225112c55dce62adf24f9c8f9d335399b7a44e1e5f37f9be9d01a8cff",
+              "service_command": [
+                "/workspace/scratch/93bfa6b783da/rs-final-tiny",
+                "serve",
+                "--stdio",
+                "--index",
+                "/workspace/scratch/93bfa6b783da/perf-real-cpython-diagnostic/current-fast"
+              ],
+              "initial_request": {
+                "command": "find",
+                "query": "\"PyImport_ImportModuleLevelObject(\"",
+                "memory_mb": 1024,
+                "limit": 10000,
+                "snippets": 0,
+                "sort": "path",
+                "fields": [
+                  "path",
+                  "matches"
+                ],
+                "regex_steps": 18446744073709551615,
+                "max_output_bytes": 1048576
+              },
+              "memory_mb": 1024,
+              "page_limit": 10000,
+              "max_output_bytes": 1048576
+            }
+          },
+          "snippets": {
+            "baseline": {
+              "files_checked": 5,
+              "paths": [
+                "Include/import.h",
+                "Include/internal/pycore_import.h",
+                "Python/bltinmodule.c",
+                "Python/ceval.c",
+                "Python/import.c"
+              ],
+              "request": {
+                "id": 1,
+                "command": "find",
+                "query": "\"PyImport_ImportModuleLevelObject(\"",
+                "limit": 5,
+                "snippets": 3,
+                "snippet_bytes": 240,
+                "sort": "path",
+                "memory_mb": 1024,
+                "max_output_bytes": 1048576,
+                "regex_steps": 18446744073709551615,
+                "path": [
+                  "Include/import.h",
+                  "Include/internal/pycore_import.h",
+                  "Python/bltinmodule.c",
+                  "Python/ceval.c",
+                  "Python/import.c"
+                ]
+              },
+              "method": "Independent source-byte matcher on first 16 sorted matching files; LF/CR/BOM and UTF-8 clipping accounted for; regex matching lines, term/literal occurrences",
+              "status": "passed",
+              "results_sha256": "4df9bebe27422aa37d1e3f90c15a8da1dde5019c71bae42494367298c484ffcc"
+            },
+            "current": {
+              "files_checked": 5,
+              "paths": [
+                "Include/import.h",
+                "Include/internal/pycore_import.h",
+                "Python/bltinmodule.c",
+                "Python/ceval.c",
+                "Python/import.c"
+              ],
+              "request": {
+                "id": 1,
+                "command": "find",
+                "query": "\"PyImport_ImportModuleLevelObject(\"",
+                "limit": 5,
+                "snippets": 3,
+                "snippet_bytes": 240,
+                "sort": "path",
+                "memory_mb": 1024,
+                "max_output_bytes": 1048576,
+                "regex_steps": 18446744073709551615,
+                "path": [
+                  "Include/import.h",
+                  "Include/internal/pycore_import.h",
+                  "Python/bltinmodule.c",
+                  "Python/ceval.c",
+                  "Python/import.c"
+                ]
+              },
+              "method": "Independent source-byte matcher on first 16 sorted matching files; LF/CR/BOM and UTF-8 clipping accounted for; regex matching lines, term/literal occurrences",
+              "status": "passed",
+              "results_sha256": "4df9bebe27422aa37d1e3f90c15a8da1dde5019c71bae42494367298c484ffcc"
+            }
+          },
+          "same_snapshot_ranked_sha256": "3e2cc47de717413a66d2b2b41d364890205281361596362aa6a7b258127a415d",
+          "validated": true
+        },
+        {
+          "profile": "fast",
+          "case": "common_literal",
+          "profile_command": [
+            "/workspace/scratch/93bfa6b783da/rs-final-tiny",
+            "find",
+            "\"return \"",
+            "--index",
+            "/workspace/scratch/93bfa6b783da/perf-real-cpython-diagnostic/current-fast",
+            "--json",
+            "--limit",
+            "0",
+            "--snippets",
+            "0",
+            "--memory-mb",
+            "256",
+            "--max-output-bytes",
+            "1048576",
+            "--regex-steps",
+            "18446744073709551615",
+            "--profile"
+          ],
+          "profile_response": {
+            "api_version": 1,
+            "execution_complete": true,
+            "has_more": false,
+            "metrics": {
+              "candidates": 745,
+              "profile": {
+                "candidate_seconds": 0.04344849,
+                "content_bytes": 23360683,
+                "content_open_seconds": 0.024597574000000004,
+                "content_opens": 64,
+                "content_read_seconds": 0.005537425000000001,
+                "content_reads": 921,
+                "filtered_documents": 0,
+                "line_processing_seconds": 0.05680141700000023,
+                "matching_seconds": 0.03646619599999977,
+                "planning_seconds": 0.00219531,
+                "regex_steps": 0,
+                "snippet_seconds": 3.3e-07,
+                "verification_seconds": 0.047495822,
+                "workers": 8
+              },
+              "scanned_bytes": 23360683,
+              "seconds": 0.04564399
+            },
+            "next_cursor": null,
+            "output_truncated": false,
+            "position_units": {
+              "column": "utf8_byte",
+              "column_base": 1,
+              "line_base": 1
+            },
+            "results": [],
+            "returned": 0,
+            "snapshot": {
+              "freshness": "unknown",
+              "generation": "1",
+              "source": "index"
+            },
+            "status": "ok",
+            "total": 722,
+            "warnings": []
+          },
+          "profile_sample": {
+            "wall_seconds": 0.05100020799727645,
+            "cpu_seconds": 0.16764099999999998,
+            "peak_rss_bytes": 15728640,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor"
+          },
+          "full_counts": {
+            "baseline": {
+              "pages": 1,
+              "matching_files": 722,
+              "matches": 44912,
+              "path_count_sha256": "3aa31c97fc875a047e675d72b69cfa78df5187306411c75652057b49ce7a7add",
+              "service_command": [
+                "/workspace/scratch/93bfa6b783da/ReSearchify-baseline/build/rs",
+                "serve",
+                "--stdio",
+                "--index",
+                "/workspace/scratch/93bfa6b783da/perf-real-cpython-diagnostic/current-fast"
+              ],
+              "initial_request": {
+                "command": "find",
+                "query": "\"return \"",
+                "memory_mb": 1024,
+                "limit": 10000,
+                "snippets": 0,
+                "sort": "path",
+                "fields": [
+                  "path",
+                  "matches"
+                ],
+                "regex_steps": 18446744073709551615,
+                "max_output_bytes": 1048576
+              },
+              "memory_mb": 1024,
+              "page_limit": 10000,
+              "max_output_bytes": 1048576
+            },
+            "current": {
+              "pages": 1,
+              "matching_files": 722,
+              "matches": 44912,
+              "path_count_sha256": "3aa31c97fc875a047e675d72b69cfa78df5187306411c75652057b49ce7a7add",
+              "service_command": [
+                "/workspace/scratch/93bfa6b783da/rs-final-tiny",
+                "serve",
+                "--stdio",
+                "--index",
+                "/workspace/scratch/93bfa6b783da/perf-real-cpython-diagnostic/current-fast"
+              ],
+              "initial_request": {
+                "command": "find",
+                "query": "\"return \"",
+                "memory_mb": 1024,
+                "limit": 10000,
+                "snippets": 0,
+                "sort": "path",
+                "fields": [
+                  "path",
+                  "matches"
+                ],
+                "regex_steps": 18446744073709551615,
+                "max_output_bytes": 1048576
+              },
+              "memory_mb": 1024,
+              "page_limit": 10000,
+              "max_output_bytes": 1048576
+            }
+          },
+          "snippets": {
+            "baseline": {
+              "files_checked": 16,
+              "paths": [
+                "Android/testbed/app/src/main/c/main_activity.c",
+                "Doc/includes/newtypes/custom.c",
+                "Doc/includes/newtypes/custom2.c",
+                "Doc/includes/newtypes/custom3.c",
+                "Doc/includes/newtypes/custom4.c",
+                "Doc/includes/newtypes/sublist.c",
+                "Doc/includes/run-func.c",
+                "Include/abstract.h",
+                "Include/boolobject.h",
+                "Include/ceval.h",
+                "Include/codecs.h",
+                "Include/cpython/abstract.h",
+                "Include/cpython/bytearrayobject.h",
+                "Include/cpython/bytesobject.h",
+                "Include/cpython/cellobject.h",
+                "Include/cpython/ceval.h"
+              ],
+              "request": {
+                "id": 1,
+                "command": "find",
+                "query": "\"return \"",
+                "limit": 16,
+                "snippets": 3,
+                "snippet_bytes": 240,
+                "sort": "path",
+                "memory_mb": 1024,
+                "max_output_bytes": 1048576,
+                "regex_steps": 18446744073709551615,
+                "path": [
+                  "Android/testbed/app/src/main/c/main_activity.c",
+                  "Doc/includes/newtypes/custom.c",
+                  "Doc/includes/newtypes/custom2.c",
+                  "Doc/includes/newtypes/custom3.c",
+                  "Doc/includes/newtypes/custom4.c",
+                  "Doc/includes/newtypes/sublist.c",
+                  "Doc/includes/run-func.c",
+                  "Include/abstract.h",
+                  "Include/boolobject.h",
+                  "Include/ceval.h",
+                  "Include/codecs.h",
+                  "Include/cpython/abstract.h",
+                  "Include/cpython/bytearrayobject.h",
+                  "Include/cpython/bytesobject.h",
+                  "Include/cpython/cellobject.h",
+                  "Include/cpython/ceval.h"
+                ]
+              },
+              "method": "Independent source-byte matcher on first 16 sorted matching files; LF/CR/BOM and UTF-8 clipping accounted for; regex matching lines, term/literal occurrences",
+              "status": "passed",
+              "results_sha256": "cc5f4ab962b93dde8621895e93c242cd3934714d4f1c78dabbfc6c50f585db76"
+            },
+            "current": {
+              "files_checked": 16,
+              "paths": [
+                "Android/testbed/app/src/main/c/main_activity.c",
+                "Doc/includes/newtypes/custom.c",
+                "Doc/includes/newtypes/custom2.c",
+                "Doc/includes/newtypes/custom3.c",
+                "Doc/includes/newtypes/custom4.c",
+                "Doc/includes/newtypes/sublist.c",
+                "Doc/includes/run-func.c",
+                "Include/abstract.h",
+                "Include/boolobject.h",
+                "Include/ceval.h",
+                "Include/codecs.h",
+                "Include/cpython/abstract.h",
+                "Include/cpython/bytearrayobject.h",
+                "Include/cpython/bytesobject.h",
+                "Include/cpython/cellobject.h",
+                "Include/cpython/ceval.h"
+              ],
+              "request": {
+                "id": 1,
+                "command": "find",
+                "query": "\"return \"",
+                "limit": 16,
+                "snippets": 3,
+                "snippet_bytes": 240,
+                "sort": "path",
+                "memory_mb": 1024,
+                "max_output_bytes": 1048576,
+                "regex_steps": 18446744073709551615,
+                "path": [
+                  "Android/testbed/app/src/main/c/main_activity.c",
+                  "Doc/includes/newtypes/custom.c",
+                  "Doc/includes/newtypes/custom2.c",
+                  "Doc/includes/newtypes/custom3.c",
+                  "Doc/includes/newtypes/custom4.c",
+                  "Doc/includes/newtypes/sublist.c",
+                  "Doc/includes/run-func.c",
+                  "Include/abstract.h",
+                  "Include/boolobject.h",
+                  "Include/ceval.h",
+                  "Include/codecs.h",
+                  "Include/cpython/abstract.h",
+                  "Include/cpython/bytearrayobject.h",
+                  "Include/cpython/bytesobject.h",
+                  "Include/cpython/cellobject.h",
+                  "Include/cpython/ceval.h"
+                ]
+              },
+              "method": "Independent source-byte matcher on first 16 sorted matching files; LF/CR/BOM and UTF-8 clipping accounted for; regex matching lines, term/literal occurrences",
+              "status": "passed",
+              "results_sha256": "cc5f4ab962b93dde8621895e93c242cd3934714d4f1c78dabbfc6c50f585db76"
+            }
+          },
+          "same_snapshot_ranked_sha256": "ac31e4b891ca25c924def36ac57f3ed0ab94744770ff14e3b9f3ef730d883e39",
+          "validated": true
+        },
+        {
+          "profile": "fast",
+          "case": "negative_literal",
+          "profile_command": [
+            "/workspace/scratch/93bfa6b783da/rs-final-tiny",
+            "find",
+            "\"researchify_absent_6e9ae0ce70a44e78bdf088c197fb7134\"",
+            "--index",
+            "/workspace/scratch/93bfa6b783da/perf-real-cpython-diagnostic/current-fast",
+            "--json",
+            "--limit",
+            "0",
+            "--snippets",
+            "0",
+            "--memory-mb",
+            "256",
+            "--max-output-bytes",
+            "1048576",
+            "--regex-steps",
+            "18446744073709551615",
+            "--profile"
+          ],
+          "profile_response": {
+            "api_version": 1,
+            "execution_complete": true,
+            "has_more": false,
+            "metrics": {
+              "candidates": 11,
+              "profile": {
+                "candidate_seconds": 0.008186044,
+                "content_bytes": 1362274,
+                "content_open_seconds": 7.758800000000002e-05,
+                "content_opens": 7,
+                "content_read_seconds": 0.0002691709999999999,
+                "content_reads": 29,
+                "filtered_documents": 0,
+                "line_processing_seconds": 0.003197135999999947,
+                "matching_seconds": 0.0017261570000000532,
+                "planning_seconds": 0.007798465,
+                "regex_steps": 0,
+                "snippet_seconds": 9e-08,
+                "verification_seconds": 0.002481449000000001,
+                "workers": 1
+              },
+              "scanned_bytes": 1362274,
+              "seconds": 0.015984559
+            },
+            "next_cursor": null,
+            "output_truncated": false,
+            "position_units": {
+              "column": "utf8_byte",
+              "column_base": 1,
+              "line_base": 1
+            },
+            "results": [],
+            "returned": 0,
+            "snapshot": {
+              "freshness": "unknown",
+              "generation": "1",
+              "source": "index"
+            },
+            "status": "ok",
+            "total": 0,
+            "warnings": []
+          },
+          "profile_sample": {
+            "wall_seconds": 0.025170125998556614,
+            "cpu_seconds": 0.024879,
+            "peak_rss_bytes": 15728640,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor"
+          },
+          "full_counts": {
+            "baseline": {
+              "pages": 1,
+              "matching_files": 0,
+              "matches": 0,
+              "path_count_sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+              "service_command": [
+                "/workspace/scratch/93bfa6b783da/ReSearchify-baseline/build/rs",
+                "serve",
+                "--stdio",
+                "--index",
+                "/workspace/scratch/93bfa6b783da/perf-real-cpython-diagnostic/current-fast"
+              ],
+              "initial_request": {
+                "command": "find",
+                "query": "\"researchify_absent_6e9ae0ce70a44e78bdf088c197fb7134\"",
+                "memory_mb": 1024,
+                "limit": 10000,
+                "snippets": 0,
+                "sort": "path",
+                "fields": [
+                  "path",
+                  "matches"
+                ],
+                "regex_steps": 18446744073709551615,
+                "max_output_bytes": 1048576
+              },
+              "memory_mb": 1024,
+              "page_limit": 10000,
+              "max_output_bytes": 1048576
+            },
+            "current": {
+              "pages": 1,
+              "matching_files": 0,
+              "matches": 0,
+              "path_count_sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+              "service_command": [
+                "/workspace/scratch/93bfa6b783da/rs-final-tiny",
+                "serve",
+                "--stdio",
+                "--index",
+                "/workspace/scratch/93bfa6b783da/perf-real-cpython-diagnostic/current-fast"
+              ],
+              "initial_request": {
+                "command": "find",
+                "query": "\"researchify_absent_6e9ae0ce70a44e78bdf088c197fb7134\"",
+                "memory_mb": 1024,
+                "limit": 10000,
+                "snippets": 0,
+                "sort": "path",
+                "fields": [
+                  "path",
+                  "matches"
+                ],
+                "regex_steps": 18446744073709551615,
+                "max_output_bytes": 1048576
+              },
+              "memory_mb": 1024,
+              "page_limit": 10000,
+              "max_output_bytes": 1048576
+            }
+          },
+          "snippets": {
+            "baseline": {
+              "files_checked": 0,
+              "status": "passed: empty result set"
+            },
+            "current": {
+              "files_checked": 0,
+              "status": "passed: empty result set"
+            }
+          },
+          "same_snapshot_ranked_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "validated": true
+        },
+        {
+          "profile": "fast",
+          "case": "selective_regex",
+          "profile_command": [
+            "/workspace/scratch/93bfa6b783da/rs-final-tiny",
+            "find",
+            "/PyImport_[A-Za-z0-9_]+/",
+            "--index",
+            "/workspace/scratch/93bfa6b783da/perf-real-cpython-diagnostic/current-fast",
+            "--json",
+            "--limit",
+            "0",
+            "--snippets",
+            "0",
+            "--memory-mb",
+            "256",
+            "--max-output-bytes",
+            "1048576",
+            "--regex-steps",
+            "18446744073709551615",
+            "--profile"
+          ],
+          "profile_response": {
+            "api_version": 1,
+            "execution_complete": true,
+            "has_more": false,
+            "metrics": {
+              "candidates": 79,
+              "profile": {
+                "candidate_seconds": 0.029623231,
+                "content_bytes": 5046210,
+                "content_open_seconds": 7.860000000000004e-05,
+                "content_opens": 8,
+                "content_read_seconds": 0.0008561889999999998,
+                "content_reads": 125,
+                "filtered_documents": 0,
+                "line_processing_seconds": 0.010167714999999867,
+                "matching_seconds": 0.007630135000000137,
+                "planning_seconds": 0.001623088,
+                "regex_steps": 10098914,
+                "snippet_seconds": 3.01e-07,
+                "verification_seconds": 0.008931786999999998,
+                "workers": 1
+              },
+              "scanned_bytes": 5046210,
+              "seconds": 0.03124658
+            },
+            "next_cursor": null,
+            "output_truncated": false,
+            "position_units": {
+              "column": "utf8_byte",
+              "column_base": 1,
+              "line_base": 1
+            },
+            "results": [],
+            "returned": 0,
+            "snapshot": {
+              "freshness": "unknown",
+              "generation": "1",
+              "source": "index"
+            },
+            "status": "ok",
+            "total": 77,
+            "warnings": []
+          },
+          "profile_sample": {
+            "wall_seconds": 0.03541875000519212,
+            "cpu_seconds": 0.034927,
+            "peak_rss_bytes": 15728640,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor"
+          },
+          "full_counts": {
+            "baseline": {
+              "pages": 1,
+              "matching_files": 77,
+              "matches": 488,
+              "path_count_sha256": "bf0f5b2bf88456ee5c8110955b777bdf28f33d5a946eb0be4c1f6eb33b96541b",
+              "service_command": [
+                "/workspace/scratch/93bfa6b783da/ReSearchify-baseline/build/rs",
+                "serve",
+                "--stdio",
+                "--index",
+                "/workspace/scratch/93bfa6b783da/perf-real-cpython-diagnostic/current-fast"
+              ],
+              "initial_request": {
+                "command": "find",
+                "query": "/PyImport_[A-Za-z0-9_]+/",
+                "memory_mb": 1024,
+                "limit": 10000,
+                "snippets": 0,
+                "sort": "path",
+                "fields": [
+                  "path",
+                  "matches"
+                ],
+                "regex_steps": 18446744073709551615,
+                "max_output_bytes": 1048576
+              },
+              "memory_mb": 1024,
+              "page_limit": 10000,
+              "max_output_bytes": 1048576
+            },
+            "current": {
+              "pages": 1,
+              "matching_files": 77,
+              "matches": 488,
+              "path_count_sha256": "bf0f5b2bf88456ee5c8110955b777bdf28f33d5a946eb0be4c1f6eb33b96541b",
+              "service_command": [
+                "/workspace/scratch/93bfa6b783da/rs-final-tiny",
+                "serve",
+                "--stdio",
+                "--index",
+                "/workspace/scratch/93bfa6b783da/perf-real-cpython-diagnostic/current-fast"
+              ],
+              "initial_request": {
+                "command": "find",
+                "query": "/PyImport_[A-Za-z0-9_]+/",
+                "memory_mb": 1024,
+                "limit": 10000,
+                "snippets": 0,
+                "sort": "path",
+                "fields": [
+                  "path",
+                  "matches"
+                ],
+                "regex_steps": 18446744073709551615,
+                "max_output_bytes": 1048576
+              },
+              "memory_mb": 1024,
+              "page_limit": 10000,
+              "max_output_bytes": 1048576
+            }
+          },
+          "snippets": {
+            "baseline": {
+              "files_checked": 16,
+              "paths": [
+                "Doc/includes/run-func.c",
+                "Include/cpython/import.h",
+                "Include/import.h",
+                "Include/internal/pycore_import.h",
+                "Include/internal/pycore_importdl.h",
+                "Include/moduleobject.h",
+                "Modules/_asynciomodule.c",
+                "Modules/_ctypes/callbacks.c",
+                "Modules/_cursesmodule.c",
+                "Modules/_datetimemodule.c",
+                "Modules/_decimal/_decimal.c",
+                "Modules/_elementtree.c",
+                "Modules/_interpchannelsmodule.c",
+                "Modules/_interpqueuesmodule.c",
+                "Modules/_interpretersmodule.c",
+                "Modules/_json.c"
+              ],
+              "request": {
+                "id": 1,
+                "command": "find",
+                "query": "/PyImport_[A-Za-z0-9_]+/",
+                "limit": 16,
+                "snippets": 3,
+                "snippet_bytes": 240,
+                "sort": "path",
+                "memory_mb": 1024,
+                "max_output_bytes": 1048576,
+                "regex_steps": 18446744073709551615,
+                "path": [
+                  "Doc/includes/run-func.c",
+                  "Include/cpython/import.h",
+                  "Include/import.h",
+                  "Include/internal/pycore_import.h",
+                  "Include/internal/pycore_importdl.h",
+                  "Include/moduleobject.h",
+                  "Modules/_asynciomodule.c",
+                  "Modules/_ctypes/callbacks.c",
+                  "Modules/_cursesmodule.c",
+                  "Modules/_datetimemodule.c",
+                  "Modules/_decimal/_decimal.c",
+                  "Modules/_elementtree.c",
+                  "Modules/_interpchannelsmodule.c",
+                  "Modules/_interpqueuesmodule.c",
+                  "Modules/_interpretersmodule.c",
+                  "Modules/_json.c"
+                ]
+              },
+              "method": "Independent source-byte matcher on first 16 sorted matching files; LF/CR/BOM and UTF-8 clipping accounted for; regex matching lines, term/literal occurrences",
+              "status": "passed",
+              "results_sha256": "a32062a18544f6eae6f3c2c3d978724fb696686cc548a3224e4d4d304ce9fe6c"
+            },
+            "current": {
+              "files_checked": 16,
+              "paths": [
+                "Doc/includes/run-func.c",
+                "Include/cpython/import.h",
+                "Include/import.h",
+                "Include/internal/pycore_import.h",
+                "Include/internal/pycore_importdl.h",
+                "Include/moduleobject.h",
+                "Modules/_asynciomodule.c",
+                "Modules/_ctypes/callbacks.c",
+                "Modules/_cursesmodule.c",
+                "Modules/_datetimemodule.c",
+                "Modules/_decimal/_decimal.c",
+                "Modules/_elementtree.c",
+                "Modules/_interpchannelsmodule.c",
+                "Modules/_interpqueuesmodule.c",
+                "Modules/_interpretersmodule.c",
+                "Modules/_json.c"
+              ],
+              "request": {
+                "id": 1,
+                "command": "find",
+                "query": "/PyImport_[A-Za-z0-9_]+/",
+                "limit": 16,
+                "snippets": 3,
+                "snippet_bytes": 240,
+                "sort": "path",
+                "memory_mb": 1024,
+                "max_output_bytes": 1048576,
+                "regex_steps": 18446744073709551615,
+                "path": [
+                  "Doc/includes/run-func.c",
+                  "Include/cpython/import.h",
+                  "Include/import.h",
+                  "Include/internal/pycore_import.h",
+                  "Include/internal/pycore_importdl.h",
+                  "Include/moduleobject.h",
+                  "Modules/_asynciomodule.c",
+                  "Modules/_ctypes/callbacks.c",
+                  "Modules/_cursesmodule.c",
+                  "Modules/_datetimemodule.c",
+                  "Modules/_decimal/_decimal.c",
+                  "Modules/_elementtree.c",
+                  "Modules/_interpchannelsmodule.c",
+                  "Modules/_interpqueuesmodule.c",
+                  "Modules/_interpretersmodule.c",
+                  "Modules/_json.c"
+                ]
+              },
+              "method": "Independent source-byte matcher on first 16 sorted matching files; LF/CR/BOM and UTF-8 clipping accounted for; regex matching lines, term/literal occurrences",
+              "status": "passed",
+              "results_sha256": "a32062a18544f6eae6f3c2c3d978724fb696686cc548a3224e4d4d304ce9fe6c"
+            }
+          },
+          "same_snapshot_ranked_sha256": "e2f3148b0fd0a56d71a6fbb2261587ecae5c28fd098995120765cd96e8f6ac9c",
+          "validated": true
+        },
+        {
+          "profile": "fast",
+          "case": "wide_regex",
+          "profile_command": [
+            "/workspace/scratch/93bfa6b783da/rs-final-tiny",
+            "find",
+            "/(return|if|while)[ \\t]/",
+            "--index",
+            "/workspace/scratch/93bfa6b783da/perf-real-cpython-diagnostic/current-fast",
+            "--json",
+            "--limit",
+            "0",
+            "--snippets",
+            "0",
+            "--memory-mb",
+            "256",
+            "--max-output-bytes",
+            "1048576",
+            "--regex-steps",
+            "18446744073709551615",
+            "--profile"
+          ],
+          "profile_response": {
+            "api_version": 1,
+            "execution_complete": true,
+            "has_more": false,
+            "metrics": {
+              "candidates": 1005,
+              "profile": {
+                "candidate_seconds": 1.108686927,
+                "content_bytes": 27501615,
+                "content_open_seconds": 0.0014330799999999993,
+                "content_opens": 8,
+                "content_read_seconds": 0.009382297,
+                "content_reads": 1230,
+                "filtered_documents": 0,
+                "line_processing_seconds": 0.05625667700000147,
+                "matching_seconds": 0.961147086999998,
+                "planning_seconds": 0.003279756,
+                "regex_steps": 252594506,
+                "snippet_seconds": 3.1e-07,
+                "verification_seconds": 0.054531965,
+                "workers": 1
+              },
+              "scanned_bytes": 27501615,
+              "seconds": 1.111966843
+            },
+            "next_cursor": null,
+            "output_truncated": false,
+            "position_units": {
+              "column": "utf8_byte",
+              "column_base": 1,
+              "line_base": 1
+            },
+            "results": [],
+            "returned": 0,
+            "snapshot": {
+              "freshness": "unknown",
+              "generation": "1",
+              "source": "index"
+            },
+            "status": "ok",
+            "total": 934,
+            "warnings": []
+          },
+          "profile_sample": {
+            "wall_seconds": 1.117975369998021,
+            "cpu_seconds": 1.1176679999999999,
+            "peak_rss_bytes": 15728640,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor"
+          },
+          "full_counts": {
+            "baseline": {
+              "pages": 1,
+              "matching_files": 934,
+              "matches": 111106,
+              "path_count_sha256": "d3c0e0aece36c18cfb5e5108d75c4d8b2c634114f589a9702e79fee7237ac325",
+              "service_command": [
+                "/workspace/scratch/93bfa6b783da/ReSearchify-baseline/build/rs",
+                "serve",
+                "--stdio",
+                "--index",
+                "/workspace/scratch/93bfa6b783da/perf-real-cpython-diagnostic/current-fast"
+              ],
+              "initial_request": {
+                "command": "find",
+                "query": "/(return|if|while)[ \\t]/",
+                "memory_mb": 1024,
+                "limit": 10000,
+                "snippets": 0,
+                "sort": "path",
+                "fields": [
+                  "path",
+                  "matches"
+                ],
+                "regex_steps": 18446744073709551615,
+                "max_output_bytes": 1048576
+              },
+              "memory_mb": 1024,
+              "page_limit": 10000,
+              "max_output_bytes": 1048576
+            },
+            "current": {
+              "pages": 1,
+              "matching_files": 934,
+              "matches": 111106,
+              "path_count_sha256": "d3c0e0aece36c18cfb5e5108d75c4d8b2c634114f589a9702e79fee7237ac325",
+              "service_command": [
+                "/workspace/scratch/93bfa6b783da/rs-final-tiny",
+                "serve",
+                "--stdio",
+                "--index",
+                "/workspace/scratch/93bfa6b783da/perf-real-cpython-diagnostic/current-fast"
+              ],
+              "initial_request": {
+                "command": "find",
+                "query": "/(return|if|while)[ \\t]/",
+                "memory_mb": 1024,
+                "limit": 10000,
+                "snippets": 0,
+                "sort": "path",
+                "fields": [
+                  "path",
+                  "matches"
+                ],
+                "regex_steps": 18446744073709551615,
+                "max_output_bytes": 1048576
+              },
+              "memory_mb": 1024,
+              "page_limit": 10000,
+              "max_output_bytes": 1048576
+            }
+          },
+          "snippets": {
+            "baseline": {
+              "files_checked": 16,
+              "paths": [
+                "Android/testbed/app/src/main/c/main_activity.c",
+                "Doc/includes/newtypes/custom.c",
+                "Doc/includes/newtypes/custom2.c",
+                "Doc/includes/newtypes/custom3.c",
+                "Doc/includes/newtypes/custom4.c",
+                "Doc/includes/newtypes/sublist.c",
+                "Doc/includes/run-func.c",
+                "Include/Python.h",
+                "Include/abstract.h",
+                "Include/bltinmodule.h",
+                "Include/boolobject.h",
+                "Include/bytearrayobject.h",
+                "Include/bytesobject.h",
+                "Include/ceval.h",
+                "Include/codecs.h",
+                "Include/compile.h"
+              ],
+              "request": {
+                "id": 1,
+                "command": "find",
+                "query": "/(return|if|while)[ \\t]/",
+                "limit": 16,
+                "snippets": 3,
+                "snippet_bytes": 240,
+                "sort": "path",
+                "memory_mb": 1024,
+                "max_output_bytes": 1048576,
+                "regex_steps": 18446744073709551615,
+                "path": [
+                  "Android/testbed/app/src/main/c/main_activity.c",
+                  "Doc/includes/newtypes/custom.c",
+                  "Doc/includes/newtypes/custom2.c",
+                  "Doc/includes/newtypes/custom3.c",
+                  "Doc/includes/newtypes/custom4.c",
+                  "Doc/includes/newtypes/sublist.c",
+                  "Doc/includes/run-func.c",
+                  "Include/Python.h",
+                  "Include/abstract.h",
+                  "Include/bltinmodule.h",
+                  "Include/boolobject.h",
+                  "Include/bytearrayobject.h",
+                  "Include/bytesobject.h",
+                  "Include/ceval.h",
+                  "Include/codecs.h",
+                  "Include/compile.h"
+                ]
+              },
+              "method": "Independent source-byte matcher on first 16 sorted matching files; LF/CR/BOM and UTF-8 clipping accounted for; regex matching lines, term/literal occurrences",
+              "status": "passed",
+              "results_sha256": "34f11e17659c4f27bbabe9371ed79533f366e4aaf0563dd80d41e3332b68e5a3"
+            },
+            "current": {
+              "files_checked": 16,
+              "paths": [
+                "Android/testbed/app/src/main/c/main_activity.c",
+                "Doc/includes/newtypes/custom.c",
+                "Doc/includes/newtypes/custom2.c",
+                "Doc/includes/newtypes/custom3.c",
+                "Doc/includes/newtypes/custom4.c",
+                "Doc/includes/newtypes/sublist.c",
+                "Doc/includes/run-func.c",
+                "Include/Python.h",
+                "Include/abstract.h",
+                "Include/bltinmodule.h",
+                "Include/boolobject.h",
+                "Include/bytearrayobject.h",
+                "Include/bytesobject.h",
+                "Include/ceval.h",
+                "Include/codecs.h",
+                "Include/compile.h"
+              ],
+              "request": {
+                "id": 1,
+                "command": "find",
+                "query": "/(return|if|while)[ \\t]/",
+                "limit": 16,
+                "snippets": 3,
+                "snippet_bytes": 240,
+                "sort": "path",
+                "memory_mb": 1024,
+                "max_output_bytes": 1048576,
+                "regex_steps": 18446744073709551615,
+                "path": [
+                  "Android/testbed/app/src/main/c/main_activity.c",
+                  "Doc/includes/newtypes/custom.c",
+                  "Doc/includes/newtypes/custom2.c",
+                  "Doc/includes/newtypes/custom3.c",
+                  "Doc/includes/newtypes/custom4.c",
+                  "Doc/includes/newtypes/sublist.c",
+                  "Doc/includes/run-func.c",
+                  "Include/Python.h",
+                  "Include/abstract.h",
+                  "Include/bltinmodule.h",
+                  "Include/boolobject.h",
+                  "Include/bytearrayobject.h",
+                  "Include/bytesobject.h",
+                  "Include/ceval.h",
+                  "Include/codecs.h",
+                  "Include/compile.h"
+                ]
+              },
+              "method": "Independent source-byte matcher on first 16 sorted matching files; LF/CR/BOM and UTF-8 clipping accounted for; regex matching lines, term/literal occurrences",
+              "status": "passed",
+              "results_sha256": "34f11e17659c4f27bbabe9371ed79533f366e4aaf0563dd80d41e3332b68e5a3"
+            }
+          },
+          "same_snapshot_ranked_sha256": "e9f7299faffee06d08dd220364adb113d081dcd66d45f02b1bf5a5c2daa72462",
+          "validated": true
+        }
+      ]
+    },
+    "v1_synthetic_before": {
+      "api_version": 1,
+      "execution_complete": true,
+      "has_more": false,
+      "metrics": {
+        "candidates": 100000,
+        "profile": {
+          "candidate_seconds": 2.197101349,
+          "content_bytes": 366645610,
+          "content_open_seconds": 0.030592756000000675,
+          "content_opens": 16,
+          "content_read_seconds": 0.29504975700000785,
+          "content_reads": 100000,
+          "filtered_documents": 0,
+          "line_processing_seconds": 0.4340217360000227,
+          "matching_seconds": 0.4185037170000063,
+          "planning_seconds": 4.878e-06,
+          "regex_steps": 735802330,
+          "snippet_seconds": 4.71e-07,
+          "verification_seconds": 0.7164907780002383,
+          "workers": 1
+        },
+        "scanned_bytes": 366645610,
+        "seconds": 2.197106537
+      },
+      "next_cursor": null,
+      "output_truncated": false,
+      "position_units": {
+        "column": "utf8_byte",
+        "column_base": 1,
+        "line_base": 1
+      },
+      "results": [],
+      "returned": 0,
+      "snapshot": {
+        "freshness": "unknown",
+        "generation": "1",
+        "source": "index"
+      },
+      "status": "ok",
+      "total": 100000,
+      "warnings": []
+    },
+    "v1_synthetic_after": {
+      "api_version": 1,
+      "execution_complete": true,
+      "has_more": false,
+      "metrics": {
+        "candidates": 100000,
+        "profile": {
+          "candidate_seconds": 2.288961701,
+          "content_bytes": 366645610,
+          "content_open_seconds": 0.029017259000002727,
+          "content_opens": 16,
+          "content_read_seconds": 0.2934747610000076,
+          "content_reads": 100000,
+          "filtered_documents": 0,
+          "line_processing_seconds": 0.5494413060000086,
+          "matching_seconds": 0.426129132999991,
+          "planning_seconds": 5.518e-06,
+          "regex_steps": 735802330,
+          "snippet_seconds": 3.4e-07,
+          "verification_seconds": 0.6949156320000266,
+          "workers": 1
+        },
+        "scanned_bytes": 366645610,
+        "seconds": 2.288967369
+      },
+      "next_cursor": null,
+      "output_truncated": false,
+      "position_units": {
+        "column": "utf8_byte",
+        "column_base": 1,
+        "line_base": 1
+      },
+      "results": [],
+      "returned": 0,
+      "snapshot": {
+        "freshness": "unknown",
+        "generation": "1",
+        "source": "index"
+      },
+      "status": "ok",
+      "total": 100000,
+      "warnings": []
+    }
+  },
+  "limitations": [
+    "One Linux x86-64 machine; no native Windows/macOS/ARM performance claim",
+    "No cold-cache claim; OS page cache uncontrolled",
+    "p95 at 7 or 11 observations equals maximum and is not a stable tail estimate",
+    "Observed V2 synthetic broad median regression +1.70% retained",
+    "V1 source rejected; V1 raw observations preserved without filtering",
+    "No multiplication of gains measured in different windows or against different baseline revisions"
+  ]
+}

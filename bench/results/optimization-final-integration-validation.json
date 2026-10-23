@@ -1,0 +1,39 @@
+{
+  "format": "researchify-integrated-validation-v1",
+  "date": "2026-10-23",
+  "source_commit": "228220743f205c370964fcb4475c8daee1f4b3b7",
+  "source_tree": "f723c7ed25c3b487e7f121c95865d05049ee5258",
+  "binary_sha256": "701c8a34f6578e212336e80628bdd711df6413d6c8f1e0edf7d8b58f8a4b1293",
+  "platform": "Linux-6.18.55-x86_64-with-glibc2.39",
+  "machine": "x86_64",
+  "compiler": "c++ (Ubuntu 13.3.0-6ubuntu2~24.04) 13.3.0",
+  "configuration": "Release, C++20, LTO disabled",
+  "build": {
+    "command": "cmake --build build --parallel 4",
+    "exit_code": 0
+  },
+  "ctest": {
+    "command": "ctest --test-dir build --output-on-failure",
+    "passed": 13,
+    "total": 13,
+    "elapsed_seconds": 6.22,
+    "exit_code": 0
+  },
+  "python": {
+    "command": "python3 -m unittest discover -s scripts -p 'test_*.py' -v",
+    "passed": 40,
+    "elapsed_seconds": 0.354,
+    "exit_code": 0
+  },
+  "scope": [
+    "integrated search planner",
+    "bounded update catalog reuse",
+    "regex initial transition rejection",
+    "measurement guard tests"
+  ],
+  "limitations": [
+    "This validation was executed on Linux x86-64, not the user Windows or Mac host.",
+    "Per-file cold-cache benchmark APIs are not exercised by the mocked Python guard tests.",
+    "Native-platform performance and external-source evidence are recorded separately."
+  ]
+}

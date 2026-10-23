@@ -54,6 +54,7 @@ std::vector<Field> build_fields() {
         integer("max_line_bytes", "Maximum source line size", 1, 16 * MiB, MiB),
         text("mode", "Change detection mode; metadata may miss changes", "strict", {"strict", "metadata"}),
         text("profile", "compact: terms and snapshots; fast: also document trigrams", "compact", {"compact", "fast"}),
+        boolean("profile_stages", "Include opt-in build stage timing (worker sums may overlap)"),
         strings("exclude", "Additional directory names; persisted"), strings("exclude_path", "Additional relative path globs; persisted"),
         integer("segment_documents", "Maximum documents per new segment", 1, 1000000, 8192)};
 }
@@ -63,7 +64,7 @@ const std::vector<Command>& registry() {
         c.push_back({"init", "Create ROOT/.researchify; default ROOT is current directory", false, build_fields()});
         c.push_back({"create", "Legacy create ROOT INDEX, using the v2 format", false, build_fields()});
         auto update = build_fields();
-        update.push_back(strings("changed_files", "Only check these relative files/deletions; not a global scan"));
+        update.push_back(strings("changed_files", "Check this complete list of known edits/additions/deletions; rename needs old+new paths; not a global scan"));
         c.push_back({"update", "Incrementally update changed contents and small catalog shards", false, std::move(update)});
         c.push_back({"find", "Exact file-scoped boolean search, phrases and bounded Unicode regex", true,
             {{"query", "Text query or {term|phrase|regex|and|or|not: ...} tree", Type::Query, 0, 0, nullptr, {}, true},
@@ -76,6 +77,8 @@ const std::vector<Command>& registry() {
              integer("max_scan_bytes", "Content-read budget; 0 unlimited", 0, (std::numeric_limits<std::uint64_t>::max)(), 0),
              integer("max_candidates", "Candidate budget; 0 unlimited", 0, (std::numeric_limits<std::uint64_t>::max)(), 0),
              integer("regex_steps", "Regex work budget across this query", 1, (std::numeric_limits<std::uint64_t>::max)(), 100000000),
+             integer("threads", "Search workers: 0 adaptive, 1 serial, otherwise a maximum", 0, 256, 0),
+             boolean("profile", "Include detailed search-stage counters and timings"),
              strings("fields", "Hit projection: path, content_id, score, matches, snippets")}});
         c.push_back({"files", "List indexed paths without reading content", true,
             {text("pattern", "Path glob; a pattern without slash matches basenames", "**"), integer("limit", "Maximum files", 0, 10000, 100), text("after", "Exclusive path cursor; also send generation")}});
@@ -409,6 +412,7 @@ BuildOptions build_options(const J& request, BuildOptions options) {
     options.max_line_bytes = static_cast<std::size_t>(num(request, "max_line_bytes", options.max_line_bytes));
     options.segment_documents = static_cast<std::size_t>(num(request, "segment_documents", options.segment_documents));
     options.profile = str(request, "profile", options.profile);
+    options.profile_stages = flag(request, "profile_stages");
     if (request.contains("mode")) options.trust_mtime = str(request, "mode") == "metadata";
     for (const auto& x : list(request, "exclude")) if (std::find(options.exclude_dirs.begin(), options.exclude_dirs.end(), x) == options.exclude_dirs.end()) options.exclude_dirs.push_back(x);
     for (const auto& x : list(request, "exclude_path")) if (std::find(options.exclude_paths.begin(), options.exclude_paths.end(), x) == options.exclude_paths.end()) options.exclude_paths.push_back(x);
@@ -435,6 +439,14 @@ J build_json(const J& request, const BuildReport& r) {
     out["seconds"] = r.seconds;
     out["global_scan"] = r.global_scan;
     out["warnings"] = array(r.warnings);
+    if (r.profile.enabled) {
+        const auto& p = r.profile;
+        out["stage_profile"] = O{{"enumeration_seconds", p.enumeration_seconds},
+            {"queue_wait_seconds", p.queue_wait_seconds}, {"metadata_lookup_seconds", p.metadata_lookup_seconds},
+            {"validation_seconds", p.validation_seconds},
+            {"capture_seconds", p.capture_seconds}, {"posting_write_seconds", p.posting_write_seconds},
+            {"catalog_seconds", p.catalog_seconds}, {"commit_seconds", p.commit_seconds}};
+    }
     return out;
 }
 }
@@ -662,6 +674,8 @@ J Service::dispatch(const J& request) {
     o.max_scan_bytes = num(request, "max_scan_bytes", 0);
     o.max_candidates = num(request, "max_candidates", 0);
     o.max_regex_steps = num(request, "regex_steps", 100000000);
+    o.threads = static_cast<std::size_t>(num(request, "threads", 0));
+    o.profile = flag(request, "profile");
     o.sort_path = str(request, "sort", "score") == "path";
     auto fields = list(request, "fields");
     const std::set<std::string> allowed{"path", "content_id", "score", "matches", "snippets"};
@@ -687,6 +701,17 @@ J Service::dispatch(const J& request) {
     out["position_units"] = O{{"line_base", 1}, {"column_base", 1}, {"column", "utf8_byte"}};
     out["total"] = str(request, "count", "exact") == "none" ? J(nullptr) : J(result.total_matches);
     out["metrics"] = O{{"candidates", result.candidates}, {"scanned_bytes", result.scanned_bytes}, {"seconds", result.seconds}};
+    if (o.profile) {
+        const auto& p = result.profile;
+        out["metrics"]["profile"] = O{
+            {"workers", static_cast<std::uint64_t>(p.workers)},
+            {"planning_seconds", p.planning_seconds}, {"candidate_seconds", p.candidate_seconds},
+            {"content_open_seconds", p.content_open_seconds}, {"content_read_seconds", p.content_read_seconds},
+            {"verification_seconds", p.verification_seconds}, {"line_processing_seconds", p.line_processing_seconds},
+            {"matching_seconds", p.matching_seconds}, {"snippet_seconds", p.snippet_seconds},
+            {"content_opens", p.content_opens}, {"content_reads", p.content_reads},
+            {"content_bytes", p.content_bytes}, {"regex_steps", p.regex_steps}, {"filtered_documents", p.filtered_documents}};
+    }
     fit_search(out, output_budget(request), result, sig, o.limit == 0);
     return out;
 }
@@ -797,6 +822,10 @@ void help(const std::string& name = "") {
     if (c.name == "find") std::cout << "\nConvenience: positional QUERY; --literal TEXT; --regex PATTERN; --query-file FILE.\n"
         << "AND/OR/NOT and parentheses apply to whole files. Terms are case-sensitive whole words.\n"
         << "Phrases and regex stay on one line. Columns are 1-based UTF-8 byte offsets.\n";
+    if (c.name == "update") std::cout << "\nKnown edit: rs update --changed-file src/main.cpp --strict\n"
+        << "Repeat --changed-file for every edited, added or deleted relative file. Rename: include old and new paths.\n"
+        << "Only listed files are checked; global_scan=false does not establish whole-workspace freshness.\n"
+        << "For external/unknown changes, run rs update --strict without --changed-file.\n";
     std::cout << "\n--json selects machine output; --help prints this help without opening an index.\n";
 }
 void print_human(const std::string& command, const J& result) {

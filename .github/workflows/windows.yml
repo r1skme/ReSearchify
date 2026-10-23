@@ -13,19 +13,115 @@ jobs:
   windows:
     name: Windows x64 (MSVC)
     runs-on: windows-2022
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Ensure ripgrep comparison is available
+        shell: pwsh
+        run: |
+          if (-not (Get-Command rg -ErrorAction SilentlyContinue)) {
+            choco install ripgrep --yes --no-progress
+            if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          }
+          rg --version
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
       - name: Configure
         run: cmake -S . -B build -G "Visual Studio 17 2022" -A x64 -DBUILD_TESTING=ON -DRESEARCHIFY_STATIC_RUNTIME=ON
       - name: Build
         run: cmake --build build --config Release --parallel 4
       - name: Test
         run: ctest --test-dir build -C Release --output-on-failure
+      - name: Test measurement harness
+        run: python -m unittest discover -s scripts -p "test_*.py"
+      - name: Benchmark smoke (not a performance gate)
+        shell: pwsh
+        run: |
+          ./build/Release/cs_bench.exe --work perf-smoke --phase generate --files 64 --lines 12
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          ./build/Release/cs_bench.exe --work perf-smoke --phase create --threads 2 --memory-mb 64
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          ./build/Release/cs_bench.exe --work perf-smoke --phase search --memory-mb 64 --repeats 3 --stages 1
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          ./build/Release/cs_bench.exe --work perf-smoke --phase create --index fast --profile fast --threads 2 --memory-mb 64
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          ./build/Release/cs_bench.exe --work perf-smoke --phase search --index fast --memory-mb 64 --repeats 3 --stages 1
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          python scripts/perf_benchmark.py --executable build/Release/rs.exe --index perf-smoke/index --corpus perf-smoke/source --iterations 3 --memory-mb 64 --query literal --query broad_regex --query no_match --rg rg --output perf-smoke/measurements.json
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: perf-windows-x64
+          path: perf-smoke/measurements.json
+      - name: Check whether tiny-file timing inputs changed
+        id: tiny_perf
+        shell: bash
+        env:
+          PREVIOUS_HEAD: ${{ github.event.before }}
+        run: |
+          set -euo pipefail
+          rerun=true
+          if [[ "$PREVIOUS_HEAD" =~ ^[0-9a-f]{40}$ ]]; then
+            if git fetch --no-tags --depth=1 origin "$PREVIOUS_HEAD"; then
+              if git diff --quiet "$PREVIOUS_HEAD" HEAD -- src include tests CMakeLists.txt cmake scripts .github/workflows bench ':(exclude)bench/results/**'; then
+                rerun=false
+              fi
+            fi
+          fi
+          echo "run=$rerun" >> "$GITHUB_OUTPUT"
+      - name: Check out original Windows performance baseline
+        if: steps.tiny_perf.outputs.run == 'true'
+        uses: actions/checkout@v4
+        with:
+          ref: eb858348169157686e70104af6b64f9539a39fe8
+          path: native-baselines/original
+          persist-credentials: false
+      - name: Build original native Windows comparison binary
+        if: steps.tiny_perf.outputs.run == 'true'
+        shell: pwsh
+        run: |
+          cmake -S native-baselines/original -B native-baselines/original/build -G "Visual Studio 17 2022" -A x64 -DBUILD_TESTING=OFF -DRESEARCHIFY_STATIC_RUNTIME=ON
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          cmake --build native-baselines/original/build --target researchify --config Release --parallel 4
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+      - name: Prove Windows lock regression fails on original and passes on fixed core
+        if: steps.tiny_perf.outputs.run == 'true'
+        timeout-minutes: 15
+        run: python scripts/windows_lock_regression.py --baseline-source native-baselines/original --current-build build --work native-lock-regression
+      - name: Preserve native Windows lock control evidence
+        if: always() && steps.tiny_perf.outputs.run == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-windows-lock-regression-x64
+          path: native-lock-regression/
+          if-no-files-found: warn
+      - name: Native 100k tiny-file comparison (correctness gate only)
+        if: steps.tiny_perf.outputs.run == 'true'
+        timeout-minutes: 70
+        shell: pwsh
+        run: |
+          $baselineRevision = git -C native-baselines/original rev-parse HEAD
+          if ($LASTEXITCODE -or $baselineRevision -ne 'eb858348169157686e70104af6b64f9539a39fe8') { throw 'Wrong baseline source revision' }
+          $currentRevision = git rev-parse HEAD
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          python scripts/tiny_comparison.py --baseline native-baselines/original/build/Release/rs.exe --current build/Release/rs.exe --baseline-revision $baselineRevision --current-revision $currentRevision --files 100000 --iterations 21 --session-iterations 1000 --fresh-processes 1000 --update-iterations 0 --index-threads 4 --rg rg --work tiny-native-perf
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+      - name: Preserve Windows tiny-file evidence, including incomplete runs
+        if: always() && steps.tiny_perf.outputs.run == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-performance-windows-tiny-x64
+          path: tiny-native-perf/results/
+          if-no-files-found: warn
       - name: Quick start check
         shell: pwsh
         run: |
           .\build\Release\rs.exe --help
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
           .\build\Release\rs.exe --version
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
       - name: Package portable ZIP
         shell: pwsh
         run: |
@@ -34,12 +130,88 @@ jobs:
           Copy-Item README.md, README.ru.md dist/package/
           Compress-Archive -Path dist/package/* -DestinationPath dist/ReSearchify-Windows-x64.zip -Force
           if (!(Test-Path dist/ReSearchify-Windows-x64.zip)) { throw 'Portable archive missing' }
+          Expand-Archive -Path dist/ReSearchify-Windows-x64.zip -DestinationPath dist/verify
+          $binaryBytes = [System.IO.File]::ReadAllBytes((Resolve-Path dist/verify/rs.exe))
+          $peOffset = [System.BitConverter]::ToInt32($binaryBytes, 0x3c)
+          if ([System.BitConverter]::ToUInt16($binaryBytes, $peOffset + 4) -ne 0x8664) {
+            throw 'Packaged executable is not Windows x86-64'
+          }
+          .\dist\verify\rs.exe --version
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
       - uses: actions/upload-artifact@v4
         with:
           name: researchify-windows-portable
           path: dist/ReSearchify-Windows-x64.zip
           if-no-files-found: error
 
+
+  windows_updates:
+    name: Windows x64 update comparison (independent runner)
+    runs-on: windows-2022
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check whether update timing inputs changed
+        id: update_perf
+        shell: bash
+        env:
+          PREVIOUS_HEAD: ${{ github.event.before }}
+        run: |
+          set -euo pipefail
+          rerun=true
+          if [[ "$PREVIOUS_HEAD" =~ ^[0-9a-f]{40}$ ]]; then
+            if git fetch --no-tags --depth=1 origin "$PREVIOUS_HEAD"; then
+              if git diff --quiet "$PREVIOUS_HEAD" HEAD -- src include tests CMakeLists.txt cmake scripts .github/workflows bench ':(exclude)bench/results/**'; then
+                rerun=false
+              fi
+            fi
+          fi
+          echo "run=$rerun" >> "$GITHUB_OUTPUT"
+      - name: Check out original Windows update baseline
+        if: steps.update_perf.outputs.run == 'true'
+        uses: actions/checkout@v4
+        with:
+          ref: eb858348169157686e70104af6b64f9539a39fe8
+          path: native-baselines/original
+          persist-credentials: false
+      - name: Build native update comparison binaries
+        if: steps.update_perf.outputs.run == 'true'
+        shell: pwsh
+        run: |
+          cmake -S . -B build -G "Visual Studio 17 2022" -A x64 -DBUILD_TESTING=OFF -DRESEARCHIFY_STATIC_RUNTIME=ON
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          cmake --build build --target researchify --config Release --parallel 4
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          cmake -S native-baselines/original -B native-baselines/original/build -G "Visual Studio 17 2022" -A x64 -DBUILD_TESTING=OFF -DRESEARCHIFY_STATIC_RUNTIME=ON
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          cmake --build native-baselines/original/build --target researchify --config Release --parallel 4
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+      - name: Native 100k tiny-file updates only (correctness gate only)
+        if: steps.update_perf.outputs.run == 'true'
+        timeout-minutes: 70
+        shell: pwsh
+        run: |
+          $baselineRevision = git -C native-baselines/original rev-parse HEAD
+          if ($LASTEXITCODE -or $baselineRevision -ne 'eb858348169157686e70104af6b64f9539a39fe8') { throw 'Wrong baseline source revision' }
+          $currentRevision = git rev-parse HEAD
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          python scripts/tiny_update_comparison.py --baseline native-baselines/original/build/Release/rs.exe --current build/Release/rs.exe --baseline-revision $baselineRevision --current-revision $currentRevision --files 100000 --update-iterations 7 --index-threads 4 --work tiny-native-updates
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+      - name: Preserve update evidence, including interrupted child reports
+        if: always() && steps.update_perf.outputs.run == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-performance-windows-updates-x64
+          # Child reports are included directly if cancellation prevents the
+          # parent finally block from copying them into results/.
+          path: |
+            tiny-native-updates/results/
+            tiny-native-updates/updates-compact/results.json
+            tiny-native-updates/updates-fast/results.json
+          if-no-files-found: warn
 
   linux:
     name: Linux ${{ matrix.arch }} (GCC)
@@ -56,12 +228,36 @@ jobs:
             machine: aarch64
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Ensure ripgrep comparison is available
+        run: |
+          if ! command -v rg >/dev/null; then
+            sudo apt-get update
+            sudo apt-get install --yes ripgrep
+          fi
+          rg --version
       - name: Configure
-        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON -DRESEARCHIFY_BUILD_BENCHMARKS=OFF
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON
       - name: Build
         run: cmake --build build --parallel 4
       - name: Test
         run: ctest --test-dir build --output-on-failure
+      - name: Test measurement harness
+        run: python -m unittest discover -s scripts -p "test_*.py"
+      - name: Benchmark smoke (not a performance gate)
+        run: |
+          ./build/cs_bench --work perf-smoke --phase generate --files 64 --lines 12
+          ./build/cs_bench --work perf-smoke --phase create --threads 2 --memory-mb 64
+          ./build/cs_bench --work perf-smoke --phase search --memory-mb 64 --repeats 3 --stages 1
+          ./build/cs_bench --work perf-smoke --phase create --index fast --profile fast --threads 2 --memory-mb 64
+          ./build/cs_bench --work perf-smoke --phase search --index fast --memory-mb 64 --repeats 3 --stages 1
+          python scripts/perf_benchmark.py --executable build/rs --index perf-smoke/index --corpus perf-smoke/source --iterations 3 --memory-mb 64 --query literal --query broad_regex --query no_match --rg rg --output perf-smoke/measurements.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: perf-linux-${{ matrix.arch }}
+          path: perf-smoke/measurements.json
       - name: Verify architecture, smoke-test and package
         shell: bash
         run: |
@@ -85,6 +281,7 @@ jobs:
   macos:
     name: macOS ${{ matrix.arch }} (Clang)
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
@@ -97,12 +294,100 @@ jobs:
             machine: arm64
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Ensure ripgrep comparison is available
+        run: |
+          if ! command -v rg >/dev/null; then
+            brew install ripgrep
+          fi
+          rg --version
       - name: Configure
-        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_DEPLOYMENT_TARGET=13.3 -DBUILD_TESTING=ON -DRESEARCHIFY_BUILD_BENCHMARKS=OFF
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_DEPLOYMENT_TARGET=13.3 -DBUILD_TESTING=ON
       - name: Build
         run: cmake --build build --parallel 3
       - name: Test
         run: ctest --test-dir build --output-on-failure
+      - name: Test measurement harness
+        run: python -m unittest discover -s scripts -p "test_*.py"
+      - name: Benchmark smoke (not a performance gate)
+        run: |
+          ./build/cs_bench --work perf-smoke --phase generate --files 64 --lines 12
+          ./build/cs_bench --work perf-smoke --phase create --threads 2 --memory-mb 64
+          ./build/cs_bench --work perf-smoke --phase search --memory-mb 64 --repeats 3 --stages 1
+          ./build/cs_bench --work perf-smoke --phase create --index fast --profile fast --threads 2 --memory-mb 64
+          ./build/cs_bench --work perf-smoke --phase search --index fast --memory-mb 64 --repeats 3 --stages 1
+          python scripts/perf_benchmark.py --executable build/rs --index perf-smoke/index --corpus perf-smoke/source --iterations 3 --memory-mb 64 --query literal --query broad_regex --query no_match --rg rg --output perf-smoke/measurements.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: perf-macos-${{ matrix.arch }}
+          path: perf-smoke/measurements.json
+      - name: Check whether native timing inputs changed
+        id: native_perf
+        shell: bash
+        env:
+          PREVIOUS_HEAD: ${{ github.event.before }}
+        run: |
+          set -euo pipefail
+          rerun=true
+          # Documentation/raw-evidence updates still build and test every target,
+          # but do not repeat a measured performance experiment on identical code.
+          # Missing history or non-synchronize events conservatively run it.
+          if [[ "$PREVIOUS_HEAD" =~ ^[0-9a-f]{40}$ ]]; then
+            if git fetch --no-tags --depth=1 origin "$PREVIOUS_HEAD"; then
+              if git diff --quiet "$PREVIOUS_HEAD" HEAD -- src include tests CMakeLists.txt cmake scripts .github/workflows bench ':(exclude)bench/results/**'; then
+                rerun=false
+              fi
+            fi
+          fi
+          echo "run=$rerun" >> "$GITHUB_OUTPUT"
+      - name: Check out original performance baseline
+        if: steps.native_perf.outputs.run == 'true'
+        uses: actions/checkout@v4
+        with:
+          ref: eb858348169157686e70104af6b64f9539a39fe8
+          path: native-baselines/original
+          persist-credentials: false
+      - name: Check out previous optimized checkpoint
+        if: steps.native_perf.outputs.run == 'true'
+        uses: actions/checkout@v4
+        with:
+          ref: dbcddf76708b614c26e212fa27b48efa33ddfd58
+          path: native-baselines/previous
+          persist-credentials: false
+      - name: Build native comparison binaries
+        if: steps.native_perf.outputs.run == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(uname -m)" = "${{ matrix.machine }}"
+          for revision in original previous; do
+            cmake -S "native-baselines/$revision" -B "native-baselines/$revision/build" \
+              -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_DEPLOYMENT_TARGET=13.3 -DBUILD_TESTING=OFF
+            cmake --build "native-baselines/$revision/build" --target researchify --parallel 3
+            test "$(lipo -archs "native-baselines/$revision/build/rs")" = "${{ matrix.machine }}"
+          done
+          test "$(lipo -archs build/rs)" = "${{ matrix.machine }}"
+      - name: Paired native performance comparisons (correctness gate only)
+        if: steps.native_perf.outputs.run == 'true'
+        timeout-minutes: 25
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/native_comparison.py \
+            --original native-baselines/original/build/rs --original-checkout native-baselines/original \
+            --previous native-baselines/previous/build/rs --previous-checkout native-baselines/previous \
+            --current build/rs --current-checkout . --generator build/cs_bench \
+            --machine "${{ matrix.machine }}" --files 20000 --iterations 21 --term-iterations 201 \
+            --rg rg --output-dir native-perf
+      - name: Preserve native comparison evidence, including failed/incomplete runs
+        if: always() && steps.native_perf.outputs.run == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-performance-macos-${{ matrix.arch }}
+          path: native-perf/results/
+          if-no-files-found: warn
       - name: Verify architecture, smoke-test and package
         shell: bash
         run: |
@@ -124,6 +409,15 @@ jobs:
           path: dist/ReSearchify-macOS-${{ matrix.arch }}.tar.gz
           if-no-files-found: error
 
+  clang:
+    name: Linux x64 (Clang)
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=clang++ -DBUILD_TESTING=ON
+      - run: cmake --build build --parallel 4
+      - run: ctest --test-dir build --output-on-failure
+
   sanitizers:
     name: Address/UB sanitizer
     runs-on: ubuntu-latest
@@ -136,7 +430,7 @@ jobs:
   preview:
     name: Publish tested multi-platform preview
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: [windows, linux, macos, sanitizers]
+    needs: [windows, windows_updates, linux, macos, clang, sanitizers]
     runs-on: ubuntu-22.04
     permissions:
       contents: write

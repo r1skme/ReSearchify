@@ -1,0 +1,36 @@
+diff --git a/src/engine.cpp b/src/engine.cpp
+index 588d3a3..cea87d2 100644
+--- a/src/engine.cpp
++++ b/src/engine.cpp
+@@ -422,8 +422,9 @@ struct ReadInfo {
+     std::uint32_t crc = 0, max_line = 0;
+     std::uint64_t lines = 0, bytes = 0;
+ };
++template<class Callback>
+ ReadInfo stream_text(std::istream& in, std::uint64_t size, std::size_t maximum,
+-                     const std::function<void(std::string_view, std::uint64_t)>& callback,
++                     const Callback& callback,
+                      std::ostream* copy = nullptr, SearchProfile* profile = nullptr) {
+     // Only lines crossing an I/O boundary need an owning buffer. Most source
+     // lines can be validated and consumed directly from the read buffer.
+@@ -498,8 +499,9 @@ std::uint64_t size = 0;
+ std::int64_t mtime = 0;
+ std::optional<Record> saved;
+ };
++template<class Callback>
+ ReadInfo read_source(const fs::path& root, const Job& job, std::size_t max_line,
+-                     const std::function<void(std::string_view, std::uint64_t)>& callback, std::ostream* copy = nullptr) {
++                     const Callback& callback, std::ostream* copy = nullptr) {
+     ensure_source_path(root, job.path);
+     auto p = root / path_from_utf8(job.path);
+     if (!fs::is_regular_file(fs::symlink_status(p)) || storage::checked_file_size(p) != job.size || timestamp(p) != job.mtime)
+@@ -530,7 +532,8 @@ public:
+           profile_(profile && profile->enabled ? profile : nullptr) {}
+     ContentReader(const ContentReader&) = delete;
+     ContentReader& operator=(const ContentReader&) = delete;
+-    ReadInfo read(const Record& r, const std::function<void(std::string_view, std::uint64_t)>& callback,
++    template<class Callback>
++    ReadInfo read(const Record& r, const Callback& callback,
+                   std::ostream* copy = nullptr) {
+         const auto opened = profile_ ? Clock::now() : Clock::time_point{};
+         auto found = std::find_if(files_.begin(), files_.end(), [&](const Entry& item) { return item.segment == r.segment; });

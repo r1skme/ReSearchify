@@ -1,0 +1,39 @@
+{
+  "format": "researchify-combined-validation-v1",
+  "source_revision": "456a5cf88c15330eaf8ae8c752e351e09e0f5ceb",
+  "published_source_equivalent_revision": "d71cbea1e6c71a9e3f07a4fed0f4d19fedd8f3b5",
+  "source_tree": "a017f6c242fb0d71c13a4efc422c9de09d68b28f",
+  "native_platform": "Linux x86-64, GCC 13.3 Release",
+  "binary_sha256": "444681365d904f513be7669bb9eb77ed4501ef1800f481f83714ca316fa9486f",
+  "build_command": "/root/.local/bin/cmake --build build --parallel 4",
+  "ctest": {
+    "command": "/root/.local/bin/ctest --test-dir build --output-on-failure",
+    "passed": 13,
+    "failed": 0,
+    "elapsed_seconds": 8.39,
+    "case_summaries": []
+  },
+  "python": {
+    "command": "python3 -m unittest discover -s scripts -p 'test_*.py'",
+    "passed": 28,
+    "failed": 0,
+    "elapsed_seconds": 0.339
+  },
+  "smoke": {
+    "command": "python3 scripts/tiny_comparison.py --baseline /workspace/scratch/93bfa6b783da/ReSearchify-baseline/build/rs --current /workspace/scratch/93bfa6b783da/rs-final-tiny --baseline-revision eb858348169157686e70104af6b64f9539a39fe8 --current-revision 456a5cf88c15330eaf8ae8c752e351e09e0f5ceb --work /tmp/researchify-combined-tiny64 --files 64 --iterations 1 --session-iterations 3 --fresh-processes 3 --update-iterations 1 --index-threads 2 --rg /opt/codex/codex-path/rg",
+    "complete": true,
+    "full_path_count_checks": 24,
+    "fresh_process_batches": 5,
+    "update_operations": 20,
+    "update_checks": 20,
+    "both_sources_restored": true,
+    "evidence": "optimization-combined-tiny64-smoke.zip",
+    "evidence_sha256": "cc3a6305f57e08fd4c477e03234fff2ff27cda33588b10f3a0191ed982353423",
+    "performance_claim": false
+  },
+  "notes": [
+    "Only local combined validation is represented here. Native cross-platform CI is a separate run.",
+    "The smoke uses one sample per operation to exercise orchestration, not establish performance.",
+    "The dedicated update benchmarks and native matrix provide separate evidence."
+  ]
+}

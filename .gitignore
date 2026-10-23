@@ -6,3 +6,5 @@
 *.user
 *.pdb
 *.ilk
+__pycache__/
+*.pyc

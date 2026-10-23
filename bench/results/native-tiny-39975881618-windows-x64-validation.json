@@ -1,0 +1,40 @@
+{
+  "format": "researchify-native-validation-excerpts-v1",
+  "workflow_run_id": 39975881618,
+  "job_id": 120490219734,
+  "job_name": "Windows x64 (MSVC)",
+  "source": "https://api.github.com/repos/r1skme/ReSearchify/actions/jobs/120490219734/logs",
+  "status": "completed",
+  "conclusion": "success",
+  "ctest": {
+    "passed": 13,
+    "total": 13,
+    "wall_seconds": 43.18
+  },
+  "python": {
+    "passed": 40,
+    "wall_seconds": 0.557
+  },
+  "benchmark_step": {
+    "completed": true
+  },
+  "log_excerpts": [
+    "2026-10-23T15:09:49.4727156Z Microsoft Windows Server 2022",
+    "2026-10-23T15:09:49.4730971Z Image: windows-2022",
+    "2026-10-23T15:09:57.3124024Z HEAD is now at db43130 Merge 5a358ec4a9638cf9285bfbb7fc02a0fbfbae1085 into f06dfbcca862407167a672cb42a6df8653c86791",
+    "2026-10-23T15:10:26.5670920Z -- The CXX compiler identification is MSVC 19.44.35229.0",
+    "2026-10-23T15:12:22.3148478Z 100% tests passed, 0 tests failed out of 13",
+    "2026-10-23T15:12:22.3149084Z Total Test time (real) =  43.18 sec",
+    "2026-10-23T15:12:25.4927837Z Ran 40 tests in 0.557s",
+    "2026-10-23T15:12:37.5472602Z -- The CXX compiler identification is MSVC 19.44.35229.0"
+  ],
+  "note": "Selected decoded log excerpts, not an unchanged full log archive. This passing earlier run does not supersede the later run21 concurrent GC/open failure.",
+  "independent_artifact_checks": {
+    "distributions": 199,
+    "update_operations": 140,
+    "update_marker_checks": 84,
+    "update_verify_or_rename_checks": 8,
+    "distribution_method": "Recursively recomputed iterations, median, nearest-rank p95, min/max of all retained numeric sample distributions; duplicate representations are counted as distributions, not unique target executions.",
+    "update_marker_method": "Compared every retained baseline/candidate marker result including scores, content identity, paths, counts and snippets exactly; verified all completed operation return codes/status/execution_complete and final non-marker checks."
+  }
+}

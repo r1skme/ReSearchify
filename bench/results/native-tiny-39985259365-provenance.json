@@ -1,0 +1,1134 @@
+{
+  "format": "researchify-native-ci-provenance-v1",
+  "scope": "Split Windows search/update CI; Windows search job failed its concurrent GC/read-open CTest before benchmarks",
+  "workflow_run_id": 39985259365,
+  "workflow_run_url": "https://github.com/r1skme/ReSearchify/actions/runs/39985259365",
+  "run_head_commit": "108ff41d2016abcc931bc8bd9418e288fd9d2677",
+  "run_head_tree": "edfbd3562bf68e11e03fb2ae622b9466750ccc02",
+  "checkout_commit": "d5ecb3abc6d63241c78870ee8263750dda73cb84",
+  "checkout_tree": "edfbd3562bf68e11e03fb2ae622b9466750ccc02",
+  "checkout_parents": [
+    "f06dfbcca862407167a672cb42a6df8653c86791",
+    "108ff41d2016abcc931bc8bd9418e288fd9d2677"
+  ],
+  "local_core_commit": "ef76aa8838e3107113800580d97cedd93487fc76",
+  "local_core_tree": "edfbd3562bf68e11e03fb2ae622b9466750ccc02",
+  "source_trees_equal": true,
+  "snapshot_at": "2026-10-23T16:33:58Z",
+  "jobs": [
+    {
+      "id": 120522639719,
+      "name": "macOS arm64 (Clang)",
+      "status": "completed",
+      "conclusion": "failure",
+      "started_at": "2026-10-23T16:15:29Z",
+      "completed_at": "2026-10-23T16:16:35Z",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-23T16:15:30Z",
+          "completed_at": "2026-10-23T16:15:31Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-23T16:15:31Z",
+          "completed_at": "2026-10-23T16:15:34Z"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-23T16:15:34Z",
+          "completed_at": "2026-10-23T16:15:34Z"
+        },
+        {
+          "name": "Ensure ripgrep comparison is available",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-23T16:15:34Z",
+          "completed_at": "2026-10-23T16:15:38Z"
+        },
+        {
+          "name": "Configure",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-23T16:15:38Z",
+          "completed_at": "2026-10-23T16:15:42Z"
+        },
+        {
+          "name": "Build",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-23T16:15:42Z",
+          "completed_at": "2026-10-23T16:16:14Z"
+        },
+        {
+          "name": "Test",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-10-23T16:16:14Z",
+          "completed_at": "2026-10-23T16:16:30Z"
+        },
+        {
+          "name": "Test measurement harness",
+          "status": "completed",
+          "conclusion": "failure",
+          "number": 8,
+          "started_at": "2026-10-23T16:16:30Z",
+          "completed_at": "2026-10-23T16:16:31Z"
+        },
+        {
+          "name": "Benchmark smoke (not a performance gate)",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 9,
+          "started_at": "2026-10-23T16:16:31Z",
+          "completed_at": "2026-10-23T16:16:31Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 10,
+          "started_at": "2026-10-23T16:16:31Z",
+          "completed_at": "2026-10-23T16:16:31Z"
+        },
+        {
+          "name": "Check whether native timing inputs changed",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 11,
+          "started_at": "2026-10-23T16:16:31Z",
+          "completed_at": "2026-10-23T16:16:31Z"
+        },
+        {
+          "name": "Check out original performance baseline",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 12,
+          "started_at": "2026-10-23T16:16:31Z",
+          "completed_at": "2026-10-23T16:16:31Z"
+        },
+        {
+          "name": "Check out previous optimized checkpoint",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 13,
+          "started_at": "2026-10-23T16:16:31Z",
+          "completed_at": "2026-10-23T16:16:31Z"
+        },
+        {
+          "name": "Build native comparison binaries",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 14,
+          "started_at": "2026-10-23T16:16:31Z",
+          "completed_at": "2026-10-23T16:16:31Z"
+        },
+        {
+          "name": "Paired native performance comparisons (correctness gate only)",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 15,
+          "started_at": "2026-10-23T16:16:31Z",
+          "completed_at": "2026-10-23T16:16:31Z"
+        },
+        {
+          "name": "Preserve native comparison evidence, including failed/incomplete runs",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 16,
+          "started_at": "2026-10-23T16:16:31Z",
+          "completed_at": "2026-10-23T16:16:31Z"
+        },
+        {
+          "name": "Verify architecture, smoke-test and package",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 17,
+          "started_at": "2026-10-23T16:16:31Z",
+          "completed_at": "2026-10-23T16:16:31Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 18,
+          "started_at": "2026-10-23T16:16:31Z",
+          "completed_at": "2026-10-23T16:16:31Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 35,
+          "started_at": "2026-10-23T16:16:31Z",
+          "completed_at": "2026-10-23T16:16:31Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 36,
+          "started_at": "2026-10-23T16:16:31Z",
+          "completed_at": "2026-10-23T16:16:32Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 37,
+          "started_at": "2026-10-23T16:16:32Z",
+          "completed_at": "2026-10-23T16:16:32Z"
+        }
+      ]
+    },
+    {
+      "id": 120522640055,
+      "name": "Linux arm64 (GCC)",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-23T16:15:31Z",
+      "completed_at": "2026-10-23T16:16:51Z",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-23T16:15:32Z",
+          "completed_at": "2026-10-23T16:15:32Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-23T16:15:32Z",
+          "completed_at": "2026-10-23T16:15:33Z"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-23T16:15:33Z",
+          "completed_at": "2026-10-23T16:15:34Z"
+        },
+        {
+          "name": "Ensure ripgrep comparison is available",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-23T16:15:34Z",
+          "completed_at": "2026-10-23T16:16:03Z"
+        },
+        {
+          "name": "Configure",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-23T16:16:03Z",
+          "completed_at": "2026-10-23T16:16:06Z"
+        },
+        {
+          "name": "Build",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-23T16:16:06Z",
+          "completed_at": "2026-10-23T16:16:36Z"
+        },
+        {
+          "name": "Test",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-10-23T16:16:36Z",
+          "completed_at": "2026-10-23T16:16:42Z"
+        },
+        {
+          "name": "Test measurement harness",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-10-23T16:16:42Z",
+          "completed_at": "2026-10-23T16:16:44Z"
+        },
+        {
+          "name": "Benchmark smoke (not a performance gate)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-10-23T16:16:44Z",
+          "completed_at": "2026-10-23T16:16:46Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-10-23T16:16:46Z",
+          "completed_at": "2026-10-23T16:16:47Z"
+        },
+        {
+          "name": "Verify architecture, smoke-test and package",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-10-23T16:16:47Z",
+          "completed_at": "2026-10-23T16:16:47Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12,
+          "started_at": "2026-10-23T16:16:47Z",
+          "completed_at": "2026-10-23T16:16:49Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 23,
+          "started_at": "2026-10-23T16:16:49Z",
+          "completed_at": "2026-10-23T16:16:49Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 24,
+          "started_at": "2026-10-23T16:16:49Z",
+          "completed_at": "2026-10-23T16:16:49Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 25,
+          "started_at": "2026-10-23T16:16:49Z",
+          "completed_at": "2026-10-23T16:16:49Z"
+        }
+      ]
+    },
+    {
+      "id": 120522640093,
+      "name": "Linux x64 (GCC)",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-23T16:15:28Z",
+      "completed_at": "2026-10-23T16:16:36Z",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-23T16:15:29Z",
+          "completed_at": "2026-10-23T16:15:30Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-23T16:15:30Z",
+          "completed_at": "2026-10-23T16:15:32Z"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-23T16:15:32Z",
+          "completed_at": "2026-10-23T16:15:32Z"
+        },
+        {
+          "name": "Ensure ripgrep comparison is available",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-23T16:15:32Z",
+          "completed_at": "2026-10-23T16:15:52Z"
+        },
+        {
+          "name": "Configure",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-23T16:15:52Z",
+          "completed_at": "2026-10-23T16:15:53Z"
+        },
+        {
+          "name": "Build",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-23T16:15:53Z",
+          "completed_at": "2026-10-23T16:16:23Z"
+        },
+        {
+          "name": "Test",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-10-23T16:16:23Z",
+          "completed_at": "2026-10-23T16:16:28Z"
+        },
+        {
+          "name": "Test measurement harness",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-10-23T16:16:28Z",
+          "completed_at": "2026-10-23T16:16:29Z"
+        },
+        {
+          "name": "Benchmark smoke (not a performance gate)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-10-23T16:16:29Z",
+          "completed_at": "2026-10-23T16:16:32Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-10-23T16:16:32Z",
+          "completed_at": "2026-10-23T16:16:33Z"
+        },
+        {
+          "name": "Verify architecture, smoke-test and package",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-10-23T16:16:33Z",
+          "completed_at": "2026-10-23T16:16:33Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12,
+          "started_at": "2026-10-23T16:16:33Z",
+          "completed_at": "2026-10-23T16:16:34Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 23,
+          "started_at": "2026-10-23T16:16:34Z",
+          "completed_at": "2026-10-23T16:16:34Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 24,
+          "started_at": "2026-10-23T16:16:34Z",
+          "completed_at": "2026-10-23T16:16:34Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 25,
+          "started_at": "2026-10-23T16:16:34Z",
+          "completed_at": "2026-10-23T16:16:34Z"
+        }
+      ]
+    },
+    {
+      "id": 120522640113,
+      "name": "Windows x64 (MSVC)",
+      "status": "completed",
+      "conclusion": "failure",
+      "started_at": "2026-10-23T16:15:29Z",
+      "completed_at": "2026-10-23T16:18:03Z",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-23T16:15:30Z",
+          "completed_at": "2026-10-23T16:15:31Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-23T16:15:31Z",
+          "completed_at": "2026-10-23T16:15:37Z"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-23T16:15:37Z",
+          "completed_at": "2026-10-23T16:15:37Z"
+        },
+        {
+          "name": "Ensure ripgrep comparison is available",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-23T16:15:37Z",
+          "completed_at": "2026-10-23T16:15:50Z"
+        },
+        {
+          "name": "Configure",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-23T16:15:50Z",
+          "completed_at": "2026-10-23T16:16:04Z"
+        },
+        {
+          "name": "Build",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-23T16:16:04Z",
+          "completed_at": "2026-10-23T16:17:16Z"
+        },
+        {
+          "name": "Test",
+          "status": "completed",
+          "conclusion": "failure",
+          "number": 7,
+          "started_at": "2026-10-23T16:17:16Z",
+          "completed_at": "2026-10-23T16:18:00Z"
+        },
+        {
+          "name": "Test measurement harness",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 8,
+          "started_at": "2026-10-23T16:18:00Z",
+          "completed_at": "2026-10-23T16:18:00Z"
+        },
+        {
+          "name": "Benchmark smoke (not a performance gate)",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 9,
+          "started_at": "2026-10-23T16:18:00Z",
+          "completed_at": "2026-10-23T16:18:00Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 10,
+          "started_at": "2026-10-23T16:18:00Z",
+          "completed_at": "2026-10-23T16:18:00Z"
+        },
+        {
+          "name": "Check whether tiny-file timing inputs changed",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 11,
+          "started_at": "2026-10-23T16:18:00Z",
+          "completed_at": "2026-10-23T16:18:00Z"
+        },
+        {
+          "name": "Check out original Windows performance baseline",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 12,
+          "started_at": "2026-10-23T16:18:00Z",
+          "completed_at": "2026-10-23T16:18:00Z"
+        },
+        {
+          "name": "Build original native Windows comparison binary",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 13,
+          "started_at": "2026-10-23T16:18:00Z",
+          "completed_at": "2026-10-23T16:18:00Z"
+        },
+        {
+          "name": "Native 100k tiny-file comparison (correctness gate only)",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 14,
+          "started_at": "2026-10-23T16:18:00Z",
+          "completed_at": "2026-10-23T16:18:00Z"
+        },
+        {
+          "name": "Preserve Windows tiny-file evidence, including incomplete runs",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 15,
+          "started_at": "2026-10-23T16:18:00Z",
+          "completed_at": "2026-10-23T16:18:00Z"
+        },
+        {
+          "name": "Quick start check",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 16,
+          "started_at": "2026-10-23T16:18:00Z",
+          "completed_at": "2026-10-23T16:18:00Z"
+        },
+        {
+          "name": "Package portable ZIP",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 17,
+          "started_at": "2026-10-23T16:18:00Z",
+          "completed_at": "2026-10-23T16:18:00Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 18,
+          "started_at": "2026-10-23T16:18:00Z",
+          "completed_at": "2026-10-23T16:18:00Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 35,
+          "started_at": "2026-10-23T16:18:00Z",
+          "completed_at": "2026-10-23T16:18:00Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 36,
+          "started_at": "2026-10-23T16:18:00Z",
+          "completed_at": "2026-10-23T16:18:01Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 37,
+          "started_at": "2026-10-23T16:18:01Z",
+          "completed_at": "2026-10-23T16:18:01Z"
+        }
+      ]
+    },
+    {
+      "id": 120522640288,
+      "name": "Linux x64 (Clang)",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-23T16:15:28Z",
+      "completed_at": "2026-10-23T16:16:05Z",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-23T16:15:29Z",
+          "completed_at": "2026-10-23T16:15:29Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-23T16:15:29Z",
+          "completed_at": "2026-10-23T16:15:32Z"
+        },
+        {
+          "name": "Run cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=clang++ -DBUILD_TESTING=ON",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-23T16:15:32Z",
+          "completed_at": "2026-10-23T16:15:35Z"
+        },
+        {
+          "name": "Run cmake --build build --parallel 4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-23T16:15:35Z",
+          "completed_at": "2026-10-23T16:15:59Z"
+        },
+        {
+          "name": "Run ctest --test-dir build --output-on-failure",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-23T16:15:59Z",
+          "completed_at": "2026-10-23T16:16:03Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-10-23T16:16:03Z",
+          "completed_at": "2026-10-23T16:16:03Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-10-23T16:16:03Z",
+          "completed_at": "2026-10-23T16:16:03Z"
+        }
+      ]
+    },
+    {
+      "id": 120522640541,
+      "name": "macOS x64 (Clang)",
+      "status": "completed",
+      "conclusion": "failure",
+      "started_at": "2026-10-23T16:15:29Z",
+      "completed_at": "2026-10-23T16:17:20Z",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-23T16:15:30Z",
+          "completed_at": "2026-10-23T16:15:31Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-23T16:15:31Z",
+          "completed_at": "2026-10-23T16:15:34Z"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-23T16:15:34Z",
+          "completed_at": "2026-10-23T16:15:34Z"
+        },
+        {
+          "name": "Ensure ripgrep comparison is available",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-23T16:15:34Z",
+          "completed_at": "2026-10-23T16:15:39Z"
+        },
+        {
+          "name": "Configure",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-23T16:15:39Z",
+          "completed_at": "2026-10-23T16:15:45Z"
+        },
+        {
+          "name": "Build",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-23T16:15:45Z",
+          "completed_at": "2026-10-23T16:16:50Z"
+        },
+        {
+          "name": "Test",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-10-23T16:16:50Z",
+          "completed_at": "2026-10-23T16:17:15Z"
+        },
+        {
+          "name": "Test measurement harness",
+          "status": "completed",
+          "conclusion": "failure",
+          "number": 8,
+          "started_at": "2026-10-23T16:17:15Z",
+          "completed_at": "2026-10-23T16:17:16Z"
+        },
+        {
+          "name": "Benchmark smoke (not a performance gate)",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 9,
+          "started_at": "2026-10-23T16:17:16Z",
+          "completed_at": "2026-10-23T16:17:16Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 10,
+          "started_at": "2026-10-23T16:17:16Z",
+          "completed_at": "2026-10-23T16:17:16Z"
+        },
+        {
+          "name": "Check whether native timing inputs changed",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 11,
+          "started_at": "2026-10-23T16:17:16Z",
+          "completed_at": "2026-10-23T16:17:16Z"
+        },
+        {
+          "name": "Check out original performance baseline",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 12,
+          "started_at": "2026-10-23T16:17:16Z",
+          "completed_at": "2026-10-23T16:17:16Z"
+        },
+        {
+          "name": "Check out previous optimized checkpoint",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 13,
+          "started_at": "2026-10-23T16:17:16Z",
+          "completed_at": "2026-10-23T16:17:16Z"
+        },
+        {
+          "name": "Build native comparison binaries",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 14,
+          "started_at": "2026-10-23T16:17:16Z",
+          "completed_at": "2026-10-23T16:17:16Z"
+        },
+        {
+          "name": "Paired native performance comparisons (correctness gate only)",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 15,
+          "started_at": "2026-10-23T16:17:16Z",
+          "completed_at": "2026-10-23T16:17:16Z"
+        },
+        {
+          "name": "Preserve native comparison evidence, including failed/incomplete runs",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 16,
+          "started_at": "2026-10-23T16:17:16Z",
+          "completed_at": "2026-10-23T16:17:16Z"
+        },
+        {
+          "name": "Verify architecture, smoke-test and package",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 17,
+          "started_at": "2026-10-23T16:17:16Z",
+          "completed_at": "2026-10-23T16:17:16Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 18,
+          "started_at": "2026-10-23T16:17:16Z",
+          "completed_at": "2026-10-23T16:17:16Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 35,
+          "started_at": "2026-10-23T16:17:16Z",
+          "completed_at": "2026-10-23T16:17:16Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 36,
+          "started_at": "2026-10-23T16:17:16Z",
+          "completed_at": "2026-10-23T16:17:17Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 37,
+          "started_at": "2026-10-23T16:17:17Z",
+          "completed_at": "2026-10-23T16:17:17Z"
+        }
+      ]
+    },
+    {
+      "id": 120522640551,
+      "name": "Windows x64 update comparison (independent runner)",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-23T16:15:28Z",
+      "completed_at": "2026-10-23T16:26:55Z",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-23T16:15:29Z",
+          "completed_at": "2026-10-23T16:15:30Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-23T16:15:30Z",
+          "completed_at": "2026-10-23T16:15:35Z"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-23T16:15:35Z",
+          "completed_at": "2026-10-23T16:15:35Z"
+        },
+        {
+          "name": "Check whether update timing inputs changed",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-23T16:15:35Z",
+          "completed_at": "2026-10-23T16:15:36Z"
+        },
+        {
+          "name": "Check out original Windows update baseline",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-23T16:15:36Z",
+          "completed_at": "2026-10-23T16:15:40Z"
+        },
+        {
+          "name": "Build native update comparison binaries",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-23T16:15:40Z",
+          "completed_at": "2026-10-23T16:17:06Z"
+        },
+        {
+          "name": "Native 100k tiny-file updates only (correctness gate only)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-10-23T16:17:06Z",
+          "completed_at": "2026-10-23T16:26:48Z"
+        },
+        {
+          "name": "Preserve update evidence, including interrupted child reports",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-10-23T16:26:48Z",
+          "completed_at": "2026-10-23T16:26:49Z"
+        },
+        {
+          "name": "Post Check out original Windows update baseline",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 14,
+          "started_at": "2026-10-23T16:26:49Z",
+          "completed_at": "2026-10-23T16:26:51Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 15,
+          "started_at": "2026-10-23T16:26:51Z",
+          "completed_at": "2026-10-23T16:26:51Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 16,
+          "started_at": "2026-10-23T16:26:51Z",
+          "completed_at": "2026-10-23T16:26:53Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 17,
+          "started_at": "2026-10-23T16:26:53Z",
+          "completed_at": "2026-10-23T16:26:53Z"
+        }
+      ]
+    },
+    {
+      "id": 120522640684,
+      "name": "Address/UB sanitizer",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-23T16:15:28Z",
+      "completed_at": "2026-10-23T16:17:49Z",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-23T16:15:29Z",
+          "completed_at": "2026-10-23T16:15:29Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-23T16:15:29Z",
+          "completed_at": "2026-10-23T16:15:32Z"
+        },
+        {
+          "name": "Run cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DRESEARCHIFY_SANITIZERS=ON -DBUILD_TESTING=ON",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-23T16:15:32Z",
+          "completed_at": "2026-10-23T16:15:36Z"
+        },
+        {
+          "name": "Run cmake --build build --parallel 4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-23T16:15:36Z",
+          "completed_at": "2026-10-23T16:16:18Z"
+        },
+        {
+          "name": "Run ctest --test-dir build --output-on-failure",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-23T16:16:18Z",
+          "completed_at": "2026-10-23T16:17:47Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-10-23T16:17:47Z",
+          "completed_at": "2026-10-23T16:17:48Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-10-23T16:17:48Z",
+          "completed_at": "2026-10-23T16:17:48Z"
+        }
+      ]
+    },
+    {
+      "id": 120528131099,
+      "name": "Publish tested multi-platform preview",
+      "status": "completed",
+      "conclusion": "skipped",
+      "started_at": "2026-10-23T16:26:56Z",
+      "completed_at": "2026-10-23T16:26:55Z",
+      "steps": []
+    }
+  ],
+  "artifacts": [
+    {
+      "id": 12515757564,
+      "name": "native-performance-windows-updates-x64",
+      "size_in_bytes": 54334,
+      "url": "https://api.github.com/repos/r1skme/ReSearchify/actions/artifacts/12515757564",
+      "archive_download_url": "https://api.github.com/repos/r1skme/ReSearchify/actions/artifacts/12515757564/zip",
+      "expired": false,
+      "created_at": "2026-10-23T16:26:49Z",
+      "expires_at": "2027-01-21T16:15:25Z",
+      "updated_at": "2026-10-23T16:26:49Z",
+      "digest": "sha256:af5b12fec0ef5801495943d43f5911fc6eb9e59151d0f7acb6a00862667e0d59",
+      "workflow_run": {
+        "id": 39985259365,
+        "repository_id": 1427610584,
+        "head_repository_id": 1427610584,
+        "head_branch": "perf/cross-platform-optimization",
+        "head_sha": "108ff41d2016abcc931bc8bd9418e288fd9d2677"
+      },
+      "local_file": "bench/results/native-tiny-39985259365-windows-updates-x64.zip",
+      "local_sha256": "af5b12fec0ef5801495943d43f5911fc6eb9e59151d0f7acb6a00862667e0d59",
+      "digest_verified": true,
+      "members": [
+        {
+          "name": "results/compact-updates.json",
+          "size_bytes": 218046,
+          "sha256": "e9d2344871a1a71e2994402b098a9425fa17bd2e20ff0253b7a9cff169678490"
+        },
+        {
+          "name": "results/fast-updates.json",
+          "size_bytes": 217999,
+          "sha256": "97a24ba6507f36772fde3349b239b0e9db9ce19928ae0105b578bb6269fa3577"
+        },
+        {
+          "name": "results/compact-updates.log",
+          "size_bytes": 193,
+          "sha256": "1f68bd62bb9fdf5d88d373332d5572fbb5fb22b84523db693e8d3172c917e117"
+        },
+        {
+          "name": "results/fast-updates.log",
+          "size_bytes": 190,
+          "sha256": "aeec8f4faf82556c3709b129a4b66b2a84fe1eb5bd3686d74d99202532516a15"
+        },
+        {
+          "name": "results/fixture.json",
+          "size_bytes": 287,
+          "sha256": "a3999c0b3720ed3e22bbf410872a5090ded71a83802f85ed6beee6fef9b9aee0"
+        },
+        {
+          "name": "results/summary.json",
+          "size_bytes": 10927,
+          "sha256": "87b79f8ac77ae579ad2fa29a9f284543a093150030a7e170afbda45c154dec36"
+        },
+        {
+          "name": "results/update-fixture.json",
+          "size_bytes": 701,
+          "sha256": "f591fc80b05251d0973e5d657a113248c2f116ec5d055caee586066aa34992e0"
+        },
+        {
+          "name": "updates-compact/results.json",
+          "size_bytes": 218046,
+          "sha256": "e9d2344871a1a71e2994402b098a9425fa17bd2e20ff0253b7a9cff169678490"
+        },
+        {
+          "name": "updates-fast/results.json",
+          "size_bytes": 217999,
+          "sha256": "97a24ba6507f36772fde3349b239b0e9db9ce19928ae0105b578bb6269fa3577"
+        }
+      ]
+    }
+  ],
+  "note": "Windows update performance runs in a separate job/window. Search performance was skipped in failed Windows CTest job. Later pass/fix must be recorded separately.",
+  "update_window_note": "Independent update-only job completed 70 operations / 46 checks per profile; original bytes, timestamp and complete corpus path/content digest were restored. This job cannot supersede failed CTest in the separate Windows search job."
+}

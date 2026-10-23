@@ -6,7 +6,14 @@
 #include <random>
 #include <set>
 #include <sstream>
+#include <system_error>
 #include <thread>
+#ifdef _WIN32
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h>
+#endif
 using namespace test;
 using J = researchify::json::Value;
 using O = J::Object;
@@ -64,6 +71,62 @@ J initialize(const std::string& version = "2025-11-25") {
 }
 J initialized() { return O{{"jsonrpc", "2.0"}, {"method", "notifications/initialized"}};
 }
+#ifdef _WIN32
+// Explicit legacy disposition keeps the directory delete-pending until close.
+// RemoveDirectoryW can use POSIX deletion and unlink its name immediately.
+// Keep this platform fixture in the tests; the runtime uses std::filesystem.
+class DeletePendingDirectory {
+    HANDLE handle_ = INVALID_HANDLE_VALUE;
+public:
+    explicit DeletePendingDirectory(const fs::path& path) {
+        REQUIRE(fs::create_directory(path));
+        handle_ = CreateFileW(path.c_str(), GENERIC_READ | DELETE,
+            FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, nullptr,
+            OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, nullptr);
+        if (handle_ == INVALID_HANDLE_VALUE)
+            throw std::system_error(static_cast<int>(GetLastError()), std::system_category(), "CreateFileW lock directory");
+        FILE_DISPOSITION_INFO disposition{TRUE};
+        if (!SetFileInformationByHandle(handle_, FileDispositionInfo, &disposition,
+                static_cast<DWORD>(sizeof(disposition)))) {
+            const auto code = GetLastError();
+            release();
+            throw std::system_error(static_cast<int>(code), std::system_category(), "SetFileInformationByHandle legacy disposition");
+        }
+    }
+    void require_pending() const {
+        FILE_STANDARD_INFO information{};
+        if (!GetFileInformationByHandleEx(handle_, FileStandardInfo, &information,
+                static_cast<DWORD>(sizeof(information))))
+            throw std::system_error(static_cast<int>(GetLastError()), std::system_category(), "GetFileInformationByHandleEx lock directory");
+        REQUIRE(information.Directory);
+        REQUIRE(information.DeletePending);
+    }
+    DWORD release() noexcept {
+        if (handle_ == INVALID_HANDLE_VALUE) return ERROR_SUCCESS;
+        const auto handle = handle_;
+        handle_ = INVALID_HANDLE_VALUE;
+        return CloseHandle(handle) ? ERROR_SUCCESS : GetLastError();
+    }
+    ~DeletePendingDirectory() { release(); }
+    DeletePendingDirectory(const DeletePendingDirectory&) = delete;
+    DeletePendingDirectory& operator=(const DeletePendingDirectory&) = delete;
+};
+void require_delete_pending(const fs::path& path, const DeletePendingDirectory& pending) {
+    pending.require_pending();
+    std::error_code code;
+    const auto created = fs::create_directory(path, code);
+    // This is also a negative control for the previous DirectoryLock predicate:
+    // an error other than file_exists used to end even a waiting acquisition.
+    const bool legacy_wait_would_reject = code && code != std::errc::file_exists;
+    std::cout << "DELETE_PENDING " << path_to_utf8(path.filename())
+        << " created=" << created << " error=" << code.category().name()
+        << ':' << code.value() << " (" << code.message() << ")"
+        << " legacy_wait_would_reject=" << legacy_wait_would_reject << '\n';
+    REQUIRE(!created);
+    REQUIRE(code == std::errc::permission_denied || code == std::errc::no_such_file_or_directory);
+    REQUIRE(legacy_wait_would_reject);
+}
+#endif
 int main() {
     return run({
         {"term_search_uses_index_and_lazy_snippets", [] {
@@ -217,22 +280,86 @@ int main() {
             Workspace w;
             write(w.root / "a", "common\n");
             create_index(w.root, w.index, options());
-            std::atomic<unsigned> failures{0};
             auto readers = std::async(std::launch::async, [&] {
+                std::vector<std::string> failures;
                 for (unsigned k = 0; k != 80; ++k) try { Index i(w.index, 32);
-                if (i.search("common").total_matches != 1) ++failures;
+                    const auto matches = i.search("common").total_matches;
+                    if (matches != 1) failures.push_back("reader " + std::to_string(k)
+                        + ": expected 1 match, got " + std::to_string(matches));
                 }
-                catch (...) { ++failures;
+                catch (const Error& e) {
+                    failures.push_back("reader " + std::to_string(k) + ": " + e.code() + ": " + e.what());
                 }
+                catch (const std::exception& e) {
+                    failures.push_back("reader " + std::to_string(k) + ": " + e.what());
+                }
+                catch (...) {
+                    failures.push_back("reader " + std::to_string(k) + ": unknown exception");
+                }
+                return failures;
             });
             for (unsigned k = 0; k != 12; ++k) {
                 write(w.root / "a", "common version" + std::to_string(k) + "\n");
                 update_index(w.index);
                 garbage_collect(w.index, 1);
             }
-            readers.get();
-            REQUIRE(failures.load() == 0);
+            const auto failures = readers.get();
+            if (!failures.empty()) {
+                std::ostringstream detail;
+                detail << failures.size() << " concurrent reader failure(s)";
+                for (const auto& failure : failures) detail << '\n' << failure;
+                throw std::runtime_error(detail.str());
+            }
+            REQUIRE(failures.empty());
         }},
+#ifdef _WIN32
+        {"windows_reader_waits_for_delete_pending_access_lock", [] {
+            Workspace w;
+            write(w.root / "a", "common\n");
+            create_index(w.root, w.index, options());
+            DeletePendingDirectory pending(w.index / "access.lock");
+            require_delete_pending(w.index / "access.lock", pending);
+            std::promise<void> started;
+            auto ready = started.get_future();
+            auto reader = std::async(std::launch::async, [&] {
+                started.set_value();
+                Index index(w.index, 32);
+                return index.search("common").total_matches;
+            });
+            try {
+                ready.wait();
+                const auto while_held = reader.wait_for(std::chrono::milliseconds(200));
+                // Release before assertions, get(), or future destruction on any
+                // error; the owning test must never wait for its own live handle.
+                const auto close_error = pending.release();
+                const auto matches = reader.get();
+                REQUIRE(close_error == ERROR_SUCCESS);
+                REQUIRE(while_held == std::future_status::timeout);
+                REQUIRE(matches == 1);
+            } catch (...) {
+                pending.release();
+                throw;
+            }
+            REQUIRE(!fs::exists(w.index / "access.lock"));
+            REQUIRE(Index(w.index).verify().files == 1);
+        }},
+        {"windows_writer_does_not_steal_delete_pending_lock", [] {
+            Workspace w;
+            write(w.root / "a", "oldterm\n");
+            create_index(w.root, w.index, options());
+            const auto generation = Index(w.index).generation();
+            write(w.root / "a", "newterm\n");
+            DeletePendingDirectory pending(w.index / "writer.lock");
+            require_delete_pending(w.index / "writer.lock", pending);
+            rejects([&] { update_index(w.index, options()); }, "E_LOCKED");
+            REQUIRE(Index(w.index).generation() == generation);
+            REQUIRE(Index(w.index).search("oldterm").total_matches == 1);
+            REQUIRE(pending.release() == ERROR_SUCCESS);
+            REQUIRE(update_index(w.index, options()).generation > generation);
+            REQUIRE(Index(w.index).search("newterm").total_matches == 1);
+            REQUIRE(!fs::exists(w.index / "writer.lock"));
+        }},
+#endif
         {"snapshot_read_stale_workspace_and_traversal", [] {
             Workspace w;
             write(w.root / "a", "alpha\nbeta\ngamma\n");

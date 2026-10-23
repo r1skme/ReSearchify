@@ -1,0 +1,251 @@
+{
+  "format": "researchify-tiny-final-provenance-v1",
+  "complete": true,
+  "measurement_date": "2026-10-23",
+  "platform": "Linux-6.18.55-x86_64-with-glibc2.39",
+  "machine": "x86_64",
+  "local_source_commit": "228220743f205c370964fcb4475c8daee1f4b3b7",
+  "public_source_commit": "9713ff706d94e0af6a606a5cdc1bed39e03afe11",
+  "source_tree": "f723c7ed25c3b487e7f121c95865d05049ee5258",
+  "tree_equivalence": {
+    "local": "git rev-parse 228220743f205c370964fcb4475c8daee1f4b3b7^{tree}",
+    "public": "https://api.github.com/repos/r1skme/ReSearchify/git/commits/9713ff706d94e0af6a606a5cdc1bed39e03afe11",
+    "returned_public_tree": "f723c7ed25c3b487e7f121c95865d05049ee5258",
+    "verified_equal": true,
+    "note": "GitHub API commit metadata differs; complete source trees are byte-identical"
+  },
+  "baseline_source_commit": "eb858348169157686e70104af6b64f9539a39fe8",
+  "baseline_source_tree": "c354829282f628b921581aefa9d577d69707be52",
+  "binaries": {
+    "baseline": {
+      "path": "/workspace/scratch/93bfa6b783da/ReSearchify-baseline/build/rs",
+      "revision": "eb858348169157686e70104af6b64f9539a39fe8",
+      "sha256": "b0a2c90c2dcaa3a71993751ec895807f32e8959e7439397971880564087e9154",
+      "native": {
+        "format": "ELF",
+        "machine": "x86_64"
+      }
+    },
+    "current": {
+      "path": "/workspace/scratch/93bfa6b783da/rs-final-integrated",
+      "revision": "228220743f205c370964fcb4475c8daee1f4b3b7",
+      "sha256": "701c8a34f6578e212336e80628bdd711df6413d6c8f1e0edf7d8b58f8a4b1293",
+      "native": {
+        "format": "ELF",
+        "machine": "x86_64"
+      }
+    }
+  },
+  "compiler_and_flags": {
+    "baseline": {
+      "identical_artifacts_read_only_checked": [
+        {
+          "path": "/workspace/scratch/93bfa6b783da/ReSearchify-baseline/build/rs",
+          "sha256": "b0a2c90c2dcaa3a71993751ec895807f32e8959e7439397971880564087e9154"
+        },
+        {
+          "path": "/workspace/scratch/93bfa6b783da/ReSearchify-baseline/build/rs",
+          "sha256": "b0a2c90c2dcaa3a71993751ec895807f32e8959e7439397971880564087e9154"
+        }
+      ],
+      "compiler": "GNU 13.3.0",
+      "cmake": "4.4.4",
+      "configuration": "Release",
+      "flags": "-O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Wconversion -Wshadow",
+      "lto": false,
+      "compiler_record": "provenance/baseline-compiler.cmake",
+      "flags_record": "provenance/baseline-flags.make"
+    },
+    "current": {
+      "identical_artifacts_read_only_checked": [
+        {
+          "path": "/workspace/scratch/93bfa6b783da/rs-final-integrated",
+          "sha256": "701c8a34f6578e212336e80628bdd711df6413d6c8f1e0edf7d8b58f8a4b1293"
+        },
+        {
+          "path": "/workspace/scratch/93bfa6b783da/ReSearchify/build/rs",
+          "sha256": "701c8a34f6578e212336e80628bdd711df6413d6c8f1e0edf7d8b58f8a4b1293"
+        }
+      ],
+      "compiler": "GNU 13.3.0",
+      "cmake": "4.4.4",
+      "configuration": "Release",
+      "flags": "-O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Wconversion -Wshadow",
+      "lto": false,
+      "compiler_record": "provenance/current-compiler.cmake",
+      "flags_record": "provenance/current-flags.make"
+    }
+  },
+  "ripgrep": {
+    "path": "/opt/codex/codex-path/rg",
+    "sha256": "e62198eb19b136b88c330af83647b5a962cb99b6b1f066758568f12de1974849",
+    "version_record": "ripgrep 15.2.0 (rev e89fff89ac)\n\nfeatures:+pcre2\nsimd(compile):+SSE2,-SSSE3,-AVX2\nsimd(runtime):+SSE2,+SSSE3,+AVX2\n\nPCRE2 10.45 is available (JIT is available)\n",
+    "hash_scope": "Read-only identity capture during evidence packaging; original benchmark retains the version and commands"
+  },
+  "driver_capture": {
+    "source_commit": "228220743f205c370964fcb4475c8daee1f4b3b7",
+    "all_seven_current_files_equal_commit": true,
+    "scope": "Captured after measurement from the measured source revision; no contemporaneous driver-hash claim"
+  },
+  "fixture": {
+    "format": "researchify-tiny-corpus-v1",
+    "kind": "synthetic-surrogate",
+    "files": 100000,
+    "lines": 800000,
+    "bytes": 19034450,
+    "path_and_content_sha256": "d99f3d069ea6e58538a16f3080656292ac29bc4f325162ea5576ffa255e3d2dd",
+    "generation_seconds": 3.5862163709971355
+  },
+  "validation": {
+    "stored_distributions_recomputed_exactly": 199,
+    "full_path_count_checks": 24,
+    "snippet_sampled_file_result_records": 200,
+    "fresh_process_tool_samples": 756,
+    "jsonl_term_pairs_per_profile": 1000,
+    "jsonl_literal_pairs_per_profile": 21,
+    "sequential_cli_blocks": 5,
+    "processes_per_block": 1000,
+    "update_operations": 140,
+    "update_correctness_records": 92,
+    "mutation_audit_events": 98,
+    "method": "Independent stdlib recomputation of every stored median/p95/min/max/sample count, raw JSONL timings and update sample-to-summary values; no target execution or source/index mutation"
+  },
+  "raw_capture": {
+    "directory": "/tmp/researchify-final-tiny-100k/results",
+    "files": 14,
+    "scope": "Every result JSON/log retained byte-for-byte, with fixture metadata, exact revision drivers, recomputation and build/source identity records; no source files, indexes or executables bundled"
+  },
+  "archive": {
+    "file": "optimization-tiny-final.zip",
+    "bytes": 456750,
+    "sha256": "16d52c1856913f83d27df3395b50eea0ae9cbb6b1b4aee7748aa8d7dea391c93",
+    "entries": {
+      "results/compact-process.json": {
+        "bytes": 101381,
+        "sha256": "905b28c1bc289962e306a046fa32797489a8734e17444e780e625a98454be7b0"
+      },
+      "results/compact-process.log": {
+        "bytes": 105821,
+        "sha256": "dfd4bf3a972ed5459fe035f1cb526e6a4231d7f9aec16398f909e95415508443"
+      },
+      "results/compact-sessions.json": {
+        "bytes": 2338939,
+        "sha256": "85fee1c4c8414567217966435739f031f2ee0c2ec0cd6960b2d8b89f2cea392b"
+      },
+      "results/compact-sessions.log": {
+        "bytes": 232,
+        "sha256": "608ff06344e417de4f31f0908b2942d8d5150bdd65b7074cab6a0af27409c6f4"
+      },
+      "results/compact-updates.json": {
+        "bytes": 212596,
+        "sha256": "550260800f5f2bd8b079ed9e9bdff472bcc0f0a4f928527f50534b332aa957f3"
+      },
+      "results/compact-updates.log": {
+        "bytes": 170,
+        "sha256": "6f7f378d7e2e07166d05db4c4126e0df7a416a147b93e0ba38c084fa61e9b21a"
+      },
+      "results/fast-process.json": {
+        "bytes": 101060,
+        "sha256": "b2795734f746d84ff10f92ad707ca49ab6f32ff0d1864557825c38ff297fcd3d"
+      },
+      "results/fast-process.log": {
+        "bytes": 105500,
+        "sha256": "3cd1c85645f8912321100a4b4ff2aa24cff75059d15edaecbd23868c1c229649"
+      },
+      "results/fast-sessions.json": {
+        "bytes": 2338943,
+        "sha256": "b594b564bdf7c84537b69aba969440e146b1217c91bef8dd6262f1f9a86c84e1"
+      },
+      "results/fast-sessions.log": {
+        "bytes": 226,
+        "sha256": "1f0de3b2245414a38ae33053110aa653b963db5f3e1f795a712b17d6269501fd"
+      },
+      "results/fast-updates.json": {
+        "bytes": 212301,
+        "sha256": "6894626388f541ba9ca3b7fc349dabeec7fa81ff110a2c25f936e47980c1a504"
+      },
+      "results/fast-updates.log": {
+        "bytes": 167,
+        "sha256": "af7d0565c2219f87c70f0a411fed1ea528b9527250155efd8aec1af4aeba0e54"
+      },
+      "results/summary.json": {
+        "bytes": 237310,
+        "sha256": "b2b42a8ee583ce0adcb9514a90a666725a8d9759e6131b06bc7046cd265bddbd"
+      },
+      "results/update-fixture.json": {
+        "bytes": 662,
+        "sha256": "219ff6cf0f281e1bb3dd08d9eb1c8d47e94923224968fa50d0c31485ff0236d7"
+      },
+      "fixture/fixture.json": {
+        "bytes": 278,
+        "sha256": "214831d7fbe525ffb4fade5c92ff79de368c7b0b6669282b7ba7d1d79e7a7ac0"
+      },
+      "fixture/benchmark.meta": {
+        "bytes": 29,
+        "sha256": "56b06a085e2cf71c961df5fc6a20ca34e5f0087916cced37f37665b0c854a7ba"
+      },
+      "drivers/tiny_comparison.py": {
+        "bytes": 23446,
+        "sha256": "a52c61a6d47ab4e31af381712b24b51cdd5ab0b22f9c4b6824e2859cec00e70c"
+      },
+      "drivers/generate_tiny_corpus.py": {
+        "bytes": 2247,
+        "sha256": "c13fe92c689e69926898b93fa413c9f30a75414fcaae46534a307a3dc619cd17"
+      },
+      "drivers/perf_benchmark.py": {
+        "bytes": 27498,
+        "sha256": "8d7f54c48fb99057ccc17648da418a78edaa19a77ccf34bcbe7ea9150cf3b10e"
+      },
+      "drivers/compare_benchmarks.py": {
+        "bytes": 8642,
+        "sha256": "30dc11c78c9706f2f759aff5c935c3cfa7eae64785b42bcc95bf520ff488cafc"
+      },
+      "drivers/compare_sessions.py": {
+        "bytes": 13322,
+        "sha256": "0fd96c915fdc4b88734daa31e091be8bd74825ad9b2cac3fb037f448fc658bf2"
+      },
+      "drivers/update_benchmark.py": {
+        "bytes": 17428,
+        "sha256": "b59301978c505f905f7a718f9ec654f6bed0568094c0997574973ee31a78ccbb"
+      },
+      "drivers/maintenance_benchmark.py": {
+        "bytes": 21909,
+        "sha256": "2261e8e546253f9c4f7896925260f1505d5f7ccd7e8ed1591633e54c27acc8d2"
+      },
+      "verification/recompute.py": {
+        "bytes": 13433,
+        "sha256": "9d18ba33423e5cb955d26da7e4c14f15c724d2a2cb88adb213d529c38f531893"
+      },
+      "provenance/public-commit.json": {
+        "bytes": 1449,
+        "sha256": "2e505ae5d0b358f7e6734a54f9688de7e2337fad40b85de4f66ceb1418325614"
+      },
+      "provenance/baseline-compiler.cmake": {
+        "bytes": 6317,
+        "sha256": "7ef92dd932bdcfdab6d0ec5255258c2989a983f722a2f0dcb514c43b5575f75d"
+      },
+      "provenance/baseline-flags.make": {
+        "bytes": 310,
+        "sha256": "195d9a4c48d9c869f3eb88543d9b829c1d1f64b8c9bc54fee942f5e9fbd5fa78"
+      },
+      "provenance/current-compiler.cmake": {
+        "bytes": 6317,
+        "sha256": "7ef92dd932bdcfdab6d0ec5255258c2989a983f722a2f0dcb514c43b5575f75d"
+      },
+      "provenance/current-flags.make": {
+        "bytes": 301,
+        "sha256": "05fc1e5398cacb528381199d06df3f232e1e1cf95c73b08700f09398f8eead61"
+      }
+    },
+    "read_back_byte_equality": true
+  },
+  "summary": {
+    "file": "optimization-tiny-final-summary.json",
+    "bytes": 197476,
+    "sha256": "67851ff171808c5591cbd82400ca63f4952fc5cc5cc9c0f9e7bf867833ac1e94"
+  },
+  "reproduction": {
+    "command": "python3 scripts/tiny_comparison.py --baseline <original-eb858-rs> --current <final-rs> --baseline-revision eb858348169157686e70104af6b64f9539a39fe8 --current-revision 9713ff706d94e0af6a606a5cdc1bed39e03afe11 --files 100000 --iterations 21 --session-iterations 1000 --fresh-processes 1000 --update-iterations 7 --index-threads 8 --rg <rg-15.2.0> --work <new-owned-directory>",
+    "scope": "Reconstructed top-level invocation from retained settings and child commands; not a captured shell transcript. Public revision is tree-equivalent to the measured local source. Rebuilding does not promise byte-identical binaries or index packing."
+  }
+}

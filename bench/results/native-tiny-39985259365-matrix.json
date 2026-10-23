@@ -1,0 +1,392 @@
+{
+  "format": "researchify-native-matrix-status-v1",
+  "workflow_run_id": 39985259365,
+  "workflow_url": "https://github.com/r1skme/ReSearchify/actions/runs/39985259365",
+  "captured_at": "2026-10-23T16:33:58Z",
+  "head_commit": "108ff41d2016abcc931bc8bd9418e288fd9d2677",
+  "checkout_commit": "d5ecb3abc6d63241c78870ee8263750dda73cb84",
+  "complete_tree": "edfbd3562bf68e11e03fb2ae622b9466750ccc02",
+  "jobs": [
+    {
+      "id": 120522639719,
+      "name": "macOS arm64 (Clang)",
+      "status": "completed",
+      "conclusion": "failure",
+      "started_at": "2026-10-23T16:15:29Z",
+      "completed_at": "2026-10-23T16:16:35Z",
+      "non_passing_steps": [
+        {
+          "name": "Test measurement harness",
+          "status": "completed",
+          "conclusion": "failure",
+          "number": 8,
+          "started_at": "2026-10-23T16:16:30Z",
+          "completed_at": "2026-10-23T16:16:31Z"
+        },
+        {
+          "name": "Benchmark smoke (not a performance gate)",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 9,
+          "started_at": "2026-10-23T16:16:31Z",
+          "completed_at": "2026-10-23T16:16:31Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 10,
+          "started_at": "2026-10-23T16:16:31Z",
+          "completed_at": "2026-10-23T16:16:31Z"
+        },
+        {
+          "name": "Check whether native timing inputs changed",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 11,
+          "started_at": "2026-10-23T16:16:31Z",
+          "completed_at": "2026-10-23T16:16:31Z"
+        },
+        {
+          "name": "Check out original performance baseline",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 12,
+          "started_at": "2026-10-23T16:16:31Z",
+          "completed_at": "2026-10-23T16:16:31Z"
+        },
+        {
+          "name": "Check out previous optimized checkpoint",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 13,
+          "started_at": "2026-10-23T16:16:31Z",
+          "completed_at": "2026-10-23T16:16:31Z"
+        },
+        {
+          "name": "Build native comparison binaries",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 14,
+          "started_at": "2026-10-23T16:16:31Z",
+          "completed_at": "2026-10-23T16:16:31Z"
+        },
+        {
+          "name": "Paired native performance comparisons (correctness gate only)",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 15,
+          "started_at": "2026-10-23T16:16:31Z",
+          "completed_at": "2026-10-23T16:16:31Z"
+        },
+        {
+          "name": "Preserve native comparison evidence, including failed/incomplete runs",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 16,
+          "started_at": "2026-10-23T16:16:31Z",
+          "completed_at": "2026-10-23T16:16:31Z"
+        },
+        {
+          "name": "Verify architecture, smoke-test and package",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 17,
+          "started_at": "2026-10-23T16:16:31Z",
+          "completed_at": "2026-10-23T16:16:31Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 18,
+          "started_at": "2026-10-23T16:16:31Z",
+          "completed_at": "2026-10-23T16:16:31Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 35,
+          "started_at": "2026-10-23T16:16:31Z",
+          "completed_at": "2026-10-23T16:16:31Z"
+        }
+      ]
+    },
+    {
+      "id": 120522640055,
+      "name": "Linux arm64 (GCC)",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-23T16:15:31Z",
+      "completed_at": "2026-10-23T16:16:51Z",
+      "non_passing_steps": []
+    },
+    {
+      "id": 120522640093,
+      "name": "Linux x64 (GCC)",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-23T16:15:28Z",
+      "completed_at": "2026-10-23T16:16:36Z",
+      "non_passing_steps": []
+    },
+    {
+      "id": 120522640113,
+      "name": "Windows x64 (MSVC)",
+      "status": "completed",
+      "conclusion": "failure",
+      "started_at": "2026-10-23T16:15:29Z",
+      "completed_at": "2026-10-23T16:18:03Z",
+      "non_passing_steps": [
+        {
+          "name": "Test",
+          "status": "completed",
+          "conclusion": "failure",
+          "number": 7,
+          "started_at": "2026-10-23T16:17:16Z",
+          "completed_at": "2026-10-23T16:18:00Z"
+        },
+        {
+          "name": "Test measurement harness",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 8,
+          "started_at": "2026-10-23T16:18:00Z",
+          "completed_at": "2026-10-23T16:18:00Z"
+        },
+        {
+          "name": "Benchmark smoke (not a performance gate)",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 9,
+          "started_at": "2026-10-23T16:18:00Z",
+          "completed_at": "2026-10-23T16:18:00Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 10,
+          "started_at": "2026-10-23T16:18:00Z",
+          "completed_at": "2026-10-23T16:18:00Z"
+        },
+        {
+          "name": "Check whether tiny-file timing inputs changed",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 11,
+          "started_at": "2026-10-23T16:18:00Z",
+          "completed_at": "2026-10-23T16:18:00Z"
+        },
+        {
+          "name": "Check out original Windows performance baseline",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 12,
+          "started_at": "2026-10-23T16:18:00Z",
+          "completed_at": "2026-10-23T16:18:00Z"
+        },
+        {
+          "name": "Build original native Windows comparison binary",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 13,
+          "started_at": "2026-10-23T16:18:00Z",
+          "completed_at": "2026-10-23T16:18:00Z"
+        },
+        {
+          "name": "Native 100k tiny-file comparison (correctness gate only)",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 14,
+          "started_at": "2026-10-23T16:18:00Z",
+          "completed_at": "2026-10-23T16:18:00Z"
+        },
+        {
+          "name": "Preserve Windows tiny-file evidence, including incomplete runs",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 15,
+          "started_at": "2026-10-23T16:18:00Z",
+          "completed_at": "2026-10-23T16:18:00Z"
+        },
+        {
+          "name": "Quick start check",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 16,
+          "started_at": "2026-10-23T16:18:00Z",
+          "completed_at": "2026-10-23T16:18:00Z"
+        },
+        {
+          "name": "Package portable ZIP",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 17,
+          "started_at": "2026-10-23T16:18:00Z",
+          "completed_at": "2026-10-23T16:18:00Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 18,
+          "started_at": "2026-10-23T16:18:00Z",
+          "completed_at": "2026-10-23T16:18:00Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 35,
+          "started_at": "2026-10-23T16:18:00Z",
+          "completed_at": "2026-10-23T16:18:00Z"
+        }
+      ]
+    },
+    {
+      "id": 120522640288,
+      "name": "Linux x64 (Clang)",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-23T16:15:28Z",
+      "completed_at": "2026-10-23T16:16:05Z",
+      "non_passing_steps": []
+    },
+    {
+      "id": 120522640541,
+      "name": "macOS x64 (Clang)",
+      "status": "completed",
+      "conclusion": "failure",
+      "started_at": "2026-10-23T16:15:29Z",
+      "completed_at": "2026-10-23T16:17:20Z",
+      "non_passing_steps": [
+        {
+          "name": "Test measurement harness",
+          "status": "completed",
+          "conclusion": "failure",
+          "number": 8,
+          "started_at": "2026-10-23T16:17:15Z",
+          "completed_at": "2026-10-23T16:17:16Z"
+        },
+        {
+          "name": "Benchmark smoke (not a performance gate)",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 9,
+          "started_at": "2026-10-23T16:17:16Z",
+          "completed_at": "2026-10-23T16:17:16Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 10,
+          "started_at": "2026-10-23T16:17:16Z",
+          "completed_at": "2026-10-23T16:17:16Z"
+        },
+        {
+          "name": "Check whether native timing inputs changed",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 11,
+          "started_at": "2026-10-23T16:17:16Z",
+          "completed_at": "2026-10-23T16:17:16Z"
+        },
+        {
+          "name": "Check out original performance baseline",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 12,
+          "started_at": "2026-10-23T16:17:16Z",
+          "completed_at": "2026-10-23T16:17:16Z"
+        },
+        {
+          "name": "Check out previous optimized checkpoint",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 13,
+          "started_at": "2026-10-23T16:17:16Z",
+          "completed_at": "2026-10-23T16:17:16Z"
+        },
+        {
+          "name": "Build native comparison binaries",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 14,
+          "started_at": "2026-10-23T16:17:16Z",
+          "completed_at": "2026-10-23T16:17:16Z"
+        },
+        {
+          "name": "Paired native performance comparisons (correctness gate only)",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 15,
+          "started_at": "2026-10-23T16:17:16Z",
+          "completed_at": "2026-10-23T16:17:16Z"
+        },
+        {
+          "name": "Preserve native comparison evidence, including failed/incomplete runs",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 16,
+          "started_at": "2026-10-23T16:17:16Z",
+          "completed_at": "2026-10-23T16:17:16Z"
+        },
+        {
+          "name": "Verify architecture, smoke-test and package",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 17,
+          "started_at": "2026-10-23T16:17:16Z",
+          "completed_at": "2026-10-23T16:17:16Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 18,
+          "started_at": "2026-10-23T16:17:16Z",
+          "completed_at": "2026-10-23T16:17:16Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 35,
+          "started_at": "2026-10-23T16:17:16Z",
+          "completed_at": "2026-10-23T16:17:16Z"
+        }
+      ]
+    },
+    {
+      "id": 120522640551,
+      "name": "Windows x64 update comparison (independent runner)",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-23T16:15:28Z",
+      "completed_at": "2026-10-23T16:26:55Z",
+      "non_passing_steps": []
+    },
+    {
+      "id": 120522640684,
+      "name": "Address/UB sanitizer",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-23T16:15:28Z",
+      "completed_at": "2026-10-23T16:17:49Z",
+      "non_passing_steps": []
+    },
+    {
+      "id": 120528131099,
+      "name": "Publish tested multi-platform preview",
+      "status": "completed",
+      "conclusion": "skipped",
+      "started_at": "2026-10-23T16:26:56Z",
+      "completed_at": "2026-10-23T16:26:55Z",
+      "non_passing_steps": []
+    }
+  ],
+  "interpretation": "Linux GCC x64/ARM64, Clang x64 and ASan/UBSan passed. Both macOS builds and all 13 CTest suites passed, but four Python alias-path mock assertions failed on each. Windows search job failed concurrent GC/read-open CTest. Separate Windows update-only benchmark passed with 140 operations / 92 checks. Publishing was skipped. Earlier successful performance windows do not replace these failed gates."
+}

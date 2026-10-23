@@ -1,0 +1,270 @@
+{
+  "format": "researchify-tiny-update-comparison-v1",
+  "scope": "updates-only",
+  "complete": true,
+  "started_utc": "2026-10-23T16:17:08.084685+00:00",
+  "platform": "Windows-2022Server-10.0.20348-SP0",
+  "machine": "AMD64",
+  "python": "3.12.10",
+  "logical_cpus": 4,
+  "ci": {
+    "GITHUB_RUN_ID": "39985259365",
+    "GITHUB_RUN_ATTEMPT": "1",
+    "GITHUB_JOB": "windows_updates",
+    "RUNNER_NAME": "GitHub Actions 1000000247",
+    "RUNNER_OS": "Windows",
+    "RUNNER_ARCH": "X64"
+  },
+  "binaries": {
+    "baseline": {
+      "path": "D:\\a\\ReSearchify\\ReSearchify\\native-baselines\\original\\build\\Release\\rs.exe",
+      "revision": "eb858348169157686e70104af6b64f9539a39fe8",
+      "sha256": "e33166d8d2bac497a6a2c0ca6a2b8dfbe5664597609368accbee80e1059bdcf2",
+      "native": {
+        "format": "PE",
+        "machine": "x86_64"
+      }
+    },
+    "current": {
+      "path": "D:\\a\\ReSearchify\\ReSearchify\\build\\Release\\rs.exe",
+      "revision": "d5ecb3abc6d63241c78870ee8263750dda73cb84",
+      "sha256": "9be260d4e67bee4fc58af7fcdd3b12c0ec405edffb7f2a3757f28c19450af75c",
+      "native": {
+        "format": "PE",
+        "machine": "x86_64"
+      }
+    }
+  },
+  "drivers": {
+    "tiny_update_comparison.py": {
+      "path": "D:\\a\\ReSearchify\\ReSearchify\\scripts\\tiny_update_comparison.py",
+      "sha256": "075263f24313185eff67d304e3266639d6a2f203a35839a96a4be98122c637d2"
+    },
+    "generate_tiny_corpus.py": {
+      "path": "D:\\a\\ReSearchify\\ReSearchify\\scripts\\generate_tiny_corpus.py",
+      "sha256": "fa92dab50efc9d2eba428379f561ba7646c15d20b0449bac2b7453265e04988a"
+    },
+    "tiny_comparison.py": {
+      "path": "D:\\a\\ReSearchify\\ReSearchify\\scripts\\tiny_comparison.py",
+      "sha256": "e625a946ccd0b503bfebd2de077f678d1a865fda6e95405ec4d527da2151580b"
+    },
+    "update_benchmark.py": {
+      "path": "D:\\a\\ReSearchify\\ReSearchify\\scripts\\update_benchmark.py",
+      "sha256": "495c2599c25475b19216a1932095c58dec589bb4dfca2026203de385eb8d022f"
+    },
+    "perf_benchmark.py": {
+      "path": "D:\\a\\ReSearchify\\ReSearchify\\scripts\\perf_benchmark.py",
+      "sha256": "bcaacbafa461047d7a46eaa3e78e72ad30f9ae2ddd2ccb01bd34cd83f5b910fc"
+    },
+    "compare_sessions.py": {
+      "path": "D:\\a\\ReSearchify\\ReSearchify\\scripts\\compare_sessions.py",
+      "sha256": "8801c1c6222706bf287e6a2c3f98ce731d82a2030d5c0f2a6d64a35843fbbad3"
+    },
+    "maintenance_benchmark.py": {
+      "path": "D:\\a\\ReSearchify\\ReSearchify\\scripts\\maintenance_benchmark.py",
+      "sha256": "5bafd62e8be11a1044220f15ef24f018d1e60834c7b042e2509446aa33ccd812"
+    }
+  },
+  "builds": [
+    {
+      "writer": "current",
+      "profile": "compact",
+      "command": [
+        "D:\\a\\ReSearchify\\ReSearchify\\build\\Release\\rs.exe",
+        "create",
+        "--root",
+        "D:\\a\\ReSearchify\\ReSearchify\\tiny-native-updates\\fixture\\source",
+        "--index",
+        "D:\\a\\ReSearchify\\ReSearchify\\tiny-native-updates\\current-compact",
+        "--profile",
+        "compact",
+        "--threads",
+        "4",
+        "--memory-mb",
+        "256",
+        "--json"
+      ],
+      "complete": true,
+      "sample": {
+        "wall_seconds": 16.178355699999997,
+        "returncode": 0,
+        "stdout": "{\"added\":100000,\"api_version\":1,\"bytes\":19034450,\"changed\":0,\"execution_complete\":true,\"files\":100000,\"generation\":\"1\",\"global_scan\":true,\"hashed\":100000,\"lines\":800000,\"memory_budget_bytes\":268435456,\"removed\":0,\"seconds\":16.170397999999999,\"segments\":16,\"skipped\":0,\"status\":\"ok\",\"tokenized\":100000,\"unchanged\":0,\"warnings\":[],\"workers\":4}\r\n",
+        "stderr": "",
+        "cpu_seconds": 54.890625,
+        "peak_rss_bytes": 17252352,
+        "resource_method": "Windows process counters (null if inaccessible)"
+      },
+      "storage": {
+        "committed_index_bytes": 44754774,
+        "transaction_scratch_bytes": 0,
+        "spill_scratch_bytes": 0,
+        "coordination_bytes": 0,
+        "literal_sidecar_bytes": 0,
+        "total_file_bytes": 44754774,
+        "measurement": "logical file sizes; transaction-* scratch, nested segment sort/literal-sort spills and reader/writer coordination separated; no deletion"
+      }
+    },
+    {
+      "writer": "current",
+      "profile": "fast",
+      "command": [
+        "D:\\a\\ReSearchify\\ReSearchify\\build\\Release\\rs.exe",
+        "create",
+        "--root",
+        "D:\\a\\ReSearchify\\ReSearchify\\tiny-native-updates\\fixture\\source",
+        "--index",
+        "D:\\a\\ReSearchify\\ReSearchify\\tiny-native-updates\\current-fast",
+        "--profile",
+        "fast",
+        "--threads",
+        "4",
+        "--memory-mb",
+        "256",
+        "--json"
+      ],
+      "complete": true,
+      "sample": {
+        "wall_seconds": 23.038490600000046,
+        "returncode": 0,
+        "stdout": "{\"added\":100000,\"api_version\":1,\"bytes\":19034450,\"changed\":0,\"execution_complete\":true,\"files\":100000,\"generation\":\"1\",\"global_scan\":true,\"hashed\":100000,\"lines\":800000,\"memory_budget_bytes\":268435456,\"removed\":0,\"seconds\":23.033060299999999,\"segments\":16,\"skipped\":0,\"status\":\"ok\",\"tokenized\":100000,\"unchanged\":0,\"warnings\":[],\"workers\":4}\r\n",
+        "stderr": "",
+        "cpu_seconds": 84.5,
+        "peak_rss_bytes": 26357760,
+        "resource_method": "Windows process counters (null if inaccessible)"
+      },
+      "storage": {
+        "committed_index_bytes": 125796070,
+        "transaction_scratch_bytes": 0,
+        "spill_scratch_bytes": 0,
+        "coordination_bytes": 0,
+        "literal_sidecar_bytes": 0,
+        "total_file_bytes": 125796070,
+        "measurement": "logical file sizes; transaction-* scratch, nested segment sort/literal-sort spills and reader/writer coordination separated; no deletion"
+      }
+    }
+  ],
+  "reports": [
+    "compact-updates.json",
+    "fast-updates.json"
+  ],
+  "update_reports": [
+    {
+      "profile": "compact",
+      "command": [
+        "C:\\hostedtoolcache\\windows\\Python\\3.12.10\\x64\\python.exe",
+        "D:\\a\\ReSearchify\\ReSearchify\\scripts\\update_benchmark.py",
+        "--baseline",
+        "D:\\a\\ReSearchify\\ReSearchify\\native-baselines\\original\\build\\Release\\rs.exe",
+        "--candidate",
+        "D:\\a\\ReSearchify\\ReSearchify\\build\\Release\\rs.exe",
+        "--base-index",
+        "D:\\a\\ReSearchify\\ReSearchify\\tiny-native-updates\\current-compact",
+        "--fixture",
+        "D:\\a\\ReSearchify\\ReSearchify\\tiny-native-updates\\fixture\\update-fixture.json",
+        "--work",
+        "D:\\a\\ReSearchify\\ReSearchify\\tiny-native-updates\\updates-compact",
+        "--iterations",
+        "7",
+        "--threads",
+        "4",
+        "--memory-mb",
+        "256",
+        "--timeout",
+        "300"
+      ],
+      "report": "compact-updates.json",
+      "complete": true,
+      "base_index_writer": "current",
+      "source_restored": true,
+      "post_run_sha256": "8930ff6d19b4a7fa049bad97d76af11680716004a8980c191075602bb5116aee",
+      "operations": 70,
+      "checks": 46
+    },
+    {
+      "profile": "fast",
+      "command": [
+        "C:\\hostedtoolcache\\windows\\Python\\3.12.10\\x64\\python.exe",
+        "D:\\a\\ReSearchify\\ReSearchify\\scripts\\update_benchmark.py",
+        "--baseline",
+        "D:\\a\\ReSearchify\\ReSearchify\\native-baselines\\original\\build\\Release\\rs.exe",
+        "--candidate",
+        "D:\\a\\ReSearchify\\ReSearchify\\build\\Release\\rs.exe",
+        "--base-index",
+        "D:\\a\\ReSearchify\\ReSearchify\\tiny-native-updates\\current-fast",
+        "--fixture",
+        "D:\\a\\ReSearchify\\ReSearchify\\tiny-native-updates\\fixture\\update-fixture.json",
+        "--work",
+        "D:\\a\\ReSearchify\\ReSearchify\\tiny-native-updates\\updates-fast",
+        "--iterations",
+        "7",
+        "--threads",
+        "4",
+        "--memory-mb",
+        "256",
+        "--timeout",
+        "300"
+      ],
+      "report": "fast-updates.json",
+      "complete": true,
+      "base_index_writer": "current",
+      "source_restored": true,
+      "post_run_sha256": "8930ff6d19b4a7fa049bad97d76af11680716004a8980c191075602bb5116aee",
+      "operations": 70,
+      "checks": 46
+    }
+  ],
+  "source_restoration": {
+    "checked": true,
+    "restored": true,
+    "actual": {
+      "files": 100000,
+      "bytes": 19034450,
+      "lines": 800000,
+      "path_and_content_sha256": "d99f3d069ea6e58538a16f3080656292ac29bc4f325162ea5576ffa255e3d2dd"
+    },
+    "original_edit_mtime_ns": 1792772228225339200,
+    "final_edit_mtime_ns": 1792772228225339200
+  },
+  "conditions": {
+    "fixture": "New owned generated eight-line tiny-file surrogate, not the user's corpus",
+    "window": "Independent update-only runner; never combine these timings with the search job as one runner session",
+    "cache": "Uncontrolled OS cache with excluded setup/warmups; not cold-cache",
+    "timing": "Existing paired update driver; complete CLI lifetime; equal scopes; full correctness and restoration checks",
+    "index": "Only current-writer compact/fast base indexes; both versions receive independent copies",
+    "build": "One current-writer setup sample per profile, separate from update timing",
+    "memory_mb": 256,
+    "index_threads": 4,
+    "update_iterations": 7,
+    "search_series": false,
+    "gates": "Correctness/completion only, no throughput threshold"
+  },
+  "generation": {
+    "command": [
+      "C:\\hostedtoolcache\\windows\\Python\\3.12.10\\x64\\python.exe",
+      "D:\\a\\ReSearchify\\ReSearchify\\scripts\\generate_tiny_corpus.py",
+      "--work",
+      "D:\\a\\ReSearchify\\ReSearchify\\tiny-native-updates\\fixture",
+      "--files",
+      "100000"
+    ],
+    "sample": {
+      "wall_seconds": 10.913299600000073,
+      "returncode": 0,
+      "stdout": "{\"format\": \"researchify-tiny-corpus-v1\", \"kind\": \"synthetic-surrogate\", \"files\": 100000, \"lines\": 800000, \"bytes\": 19034450, \"path_and_content_sha256\": \"d99f3d069ea6e58538a16f3080656292ac29bc4f325162ea5576ffa255e3d2dd\", \"generation_seconds\": 10.855999300000008}\r\n",
+      "stderr": "",
+      "cpu_seconds": 10.390625,
+      "peak_rss_bytes": 15380480,
+      "resource_method": "Windows process counters (null if inaccessible)"
+    }
+  },
+  "fixture": {
+    "format": "researchify-tiny-corpus-v1",
+    "kind": "synthetic-surrogate",
+    "files": 100000,
+    "lines": 800000,
+    "bytes": 19034450,
+    "path_and_content_sha256": "d99f3d069ea6e58538a16f3080656292ac29bc4f325162ea5576ffa255e3d2dd",
+    "generation_seconds": 10.855999300000008
+  },
+  "finished_utc": "2026-10-23T16:26:47.926560+00:00"
+}
