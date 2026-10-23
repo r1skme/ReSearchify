@@ -1,0 +1,4422 @@
+{
+  "format": "researchify-cache-comparison-v1",
+  "complete": true,
+  "host": {
+    "platform": "Linux-6.18.55-x86_64-with-glibc2.39",
+    "machine": "x86_64",
+    "python": "3.12.14",
+    "logical_cpus": 9
+  },
+  "fixture": {
+    "format": "researchify-cache-fixture-v1",
+    "disposable": true,
+    "description": "Owned generated 64-file cache fixture; not a user corpus; eight lines with documented same-line smoke duplication",
+    "source": "source",
+    "indexes": {
+      "baseline": "baseline-compact",
+      "current": "current-compact"
+    },
+    "corpus_manifest": "fixture.json",
+    "corpus_manifest_sha256": "ca68efa596fa13a39dbfd2af756d96e5f1bbeba19157c493a56d8bf53abaca97"
+  },
+  "fixture_marker": "/tmp/researchify-cache-gate-1892ph6m/smoke/fixture/cache-fixture.json",
+  "seed": 1729,
+  "fixture_marker_sha256": "8a4d495808974b6ab79dff1307e654130f80afa1f6188109b1456a2f04d66f18",
+  "drivers": {
+    "cache_benchmark.py": {
+      "path": "/workspace/scratch/93bfa6b783da/ReSearchify-cache-benchmark/scripts/cache_benchmark.py",
+      "sha256": "58fcc908532719307d03304e0309a1b419fa325435863004f0a1c7fb9d31165c"
+    },
+    "perf_benchmark.py": {
+      "path": "/workspace/scratch/93bfa6b783da/ReSearchify-cache-benchmark/scripts/perf_benchmark.py",
+      "sha256": "8d7f54c48fb99057ccc17648da418a78edaa19a77ccf34bcbe7ea9150cf3b10e"
+    },
+    "tiny_comparison.py": {
+      "path": "/workspace/scratch/93bfa6b783da/ReSearchify-cache-benchmark/scripts/tiny_comparison.py",
+      "sha256": "a52c61a6d47ab4e31af381712b24b51cdd5ab0b22f9c4b6824e2859cec00e70c"
+    },
+    "compare_sessions.py": {
+      "path": "/workspace/scratch/93bfa6b783da/ReSearchify-cache-benchmark/scripts/compare_sessions.py",
+      "sha256": "0fd96c915fdc4b88734daa31e091be8bd74825ad9b2cac3fb037f448fc658bf2"
+    }
+  },
+  "binaries": {
+    "baseline": {
+      "path": "/workspace/scratch/93bfa6b783da/ReSearchify-baseline/build/rs",
+      "sha256": "b0a2c90c2dcaa3a71993751ec895807f32e8959e7439397971880564087e9154"
+    },
+    "current": {
+      "path": "/workspace/scratch/93bfa6b783da/rs-final-integrated",
+      "sha256": "701c8a34f6578e212336e80628bdd711df6413d6c8f1e0edf7d8b58f8a4b1293"
+    },
+    "rg": {
+      "path": "/opt/codex/codex-path/rg",
+      "sha256": "e62198eb19b136b88c330af83647b5a962cb99b6b1f066758568f12de1974849"
+    }
+  },
+  "conditions": {
+    "cache_scope": "scoped source/index file data pages only; metadata is touched by setup/probes and not evicted; binaries, shared libraries and device caches are uncontrolled",
+    "cold": "owned-file posix_fadvise DONTNEED then PROT_NONE mincore; verified only if all observed ranges have zero resident pages",
+    "observation_window": "ranges observed sequentially; another process or readahead could repopulate earlier ranges before target launch",
+    "warm": "one identical fresh-process query replay immediately before each warm measurement",
+    "process": "fresh target and isolated resource helper per sample; helper and cache setup excluded from target timing",
+    "rss": "POSIX high-water can include inherited Python pre-exec floor; resource helper never loads fixture inventories",
+    "comparison": "RS count-only; rg occurrence counts for term/literal and matching-line counts for regex; rg emits per-file counts, included in target timing; untimed full path/count equivalence first",
+    "index_build": "excluded, indexes must be constructed separately",
+    "memory_mb": 256,
+    "threading": "each executable's default",
+    "p95": "nearest rank; with 7 repetitions p95 is the maximum"
+  },
+  "inventory": {
+    "source": {
+      "path": "/tmp/researchify-cache-gate-1892ph6m/smoke/results/source-inventory.json",
+      "sha256": "025e963b97c392ce9cd2c52c105acabafffcd3e1d392940ee9aa77644b2ed4d2",
+      "files": 64,
+      "bytes": 11216
+    },
+    "baseline": {
+      "path": "/tmp/researchify-cache-gate-1892ph6m/smoke/results/baseline-inventory.json",
+      "sha256": "17833d742388c868ae0439c4163444bdbdb8346d5fbc491dffa9ac646bb8f0f4",
+      "files": 75,
+      "bytes": 38442
+    },
+    "current": {
+      "path": "/tmp/researchify-cache-gate-1892ph6m/smoke/results/current-inventory.json",
+      "sha256": "0c7950e46c1da0858c963890d193f010ece56e1b968e8dcada4491ec0e124325",
+      "files": 75,
+      "bytes": 38447
+    }
+  },
+  "correctness": [
+    {
+      "query": {
+        "name": "term",
+        "query": "needle_42",
+        "rg": "\\bneedle_42\\b"
+      },
+      "files": 1,
+      "complete_paths_counts_equal": true,
+      "path_count_sha256": "91eebc9626d3301b416d7d4eb44f1638bbfa7f8770fa30de6b3539ff4545f719",
+      "oracle": {
+        "path": "/tmp/researchify-cache-gate-1892ph6m/smoke/results/term-oracle.json.gz",
+        "sha256": "35d3cc84efe4dd525a8356c47646f7309e5daece5fe6b993065dfbd5209e5c67",
+        "uncompressed_bytes": 28
+      }
+    },
+    {
+      "query": {
+        "name": "literal",
+        "query": "\"needle_42 = 0;\"",
+        "rg": "needle_42 = 0;",
+        "fixed": true
+      },
+      "files": 1,
+      "complete_paths_counts_equal": true,
+      "path_count_sha256": "2ca22a5edb7265331bf625e3bced5e5c34a60824d9613ed64923ace8b390358b",
+      "oracle": {
+        "path": "/tmp/researchify-cache-gate-1892ph6m/smoke/results/literal-oracle.json.gz",
+        "sha256": "f8e1a60413e2827bd4b9ee84b45ad4726133aba9154739e89fbb6fd1c64f3692",
+        "uncompressed_bytes": 28
+      }
+    },
+    {
+      "query": {
+        "name": "broad_regex",
+        "query": "/needle_[0-9]+/",
+        "rg": "needle_[0-9]+"
+      },
+      "files": 64,
+      "complete_paths_counts_equal": true,
+      "path_count_sha256": "4e7291dc340b09a3701f7bdc721a3e2fa18b5626fca7f70db826388a780b0e3a",
+      "oracle": {
+        "path": "/tmp/researchify-cache-gate-1892ph6m/smoke/results/broad_regex-oracle.json.gz",
+        "sha256": "e00be69de7dd39b417795461a6c2780d29fe04a29ff11362004a5fcd4a8ad4cb",
+        "uncompressed_bytes": 1782
+      }
+    }
+  ],
+  "rows": [
+    {
+      "query": {
+        "name": "term",
+        "query": "needle_42",
+        "rg": "\\bneedle_42\\b"
+      },
+      "mode": "cold",
+      "commands": {
+        "baseline": [
+          "/workspace/scratch/93bfa6b783da/ReSearchify-baseline/build/rs",
+          "find",
+          "needle_42",
+          "--index",
+          "/tmp/researchify-cache-gate-1892ph6m/smoke/fixture/baseline-compact",
+          "--json",
+          "--limit",
+          "0",
+          "--snippets",
+          "0",
+          "--memory-mb",
+          "256",
+          "--regex-steps",
+          "18446744073709551615"
+        ],
+        "current": [
+          "/workspace/scratch/93bfa6b783da/rs-final-integrated",
+          "find",
+          "needle_42",
+          "--index",
+          "/tmp/researchify-cache-gate-1892ph6m/smoke/fixture/current-compact",
+          "--json",
+          "--limit",
+          "0",
+          "--snippets",
+          "0",
+          "--memory-mb",
+          "256",
+          "--regex-steps",
+          "18446744073709551615"
+        ],
+        "rg": [
+          "/opt/codex/codex-path/rg",
+          "--no-config",
+          "--no-ignore",
+          "--hidden",
+          "--text",
+          "--color",
+          "never",
+          "--case-sensitive",
+          "--count-matches",
+          "--null",
+          "--regexp",
+          "\\bneedle_42\\b",
+          "."
+        ]
+      },
+      "orders": [
+        [
+          "current",
+          "baseline",
+          "rg"
+        ]
+      ],
+      "tools": {
+        "baseline": [
+          {
+            "wall_seconds": 0.004549466000753455,
+            "returncode": 0,
+            "stdout": "{\"api_version\":1,\"execution_complete\":true,\"has_more\":false,\"metrics\":{\"candidates\":1,\"scanned_bytes\":0,\"seconds\":0.0010180429999999999},\"next_cursor\":null,\"output_truncated\":false,\"position_units\":{\"column\":\"utf8_byte\",\"column_base\":1,\"line_base\":1},\"results\":[],\"returned\":0,\"snapshot\":{\"freshness\":\"unknown\",\"generation\":\"1\",\"source\":\"index\"},\"status\":\"ok\",\"total\":1,\"warnings\":[]}\n",
+            "stderr": "",
+            "cpu_seconds": 0.003418,
+            "peak_rss_bytes": 16121856,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "os_io": {
+              "input_block_operations": 48,
+              "output_block_operations": 8,
+              "major_page_faults": 0,
+              "minor_page_faults": 547,
+              "method": "isolated target getrusage(RUSAGE_CHILDREN); OS block-operation counters, not device-byte measurements"
+            },
+            "target_worker_ready_monotonic_ns": 49825461002591,
+            "cache": {
+              "requested": "cold",
+              "label": "verified-cold-file-data-pages",
+              "probe_unavailable": null,
+              "before_advice": {
+                "files": 75,
+                "files_checked": 75,
+                "pages_checked": 75,
+                "resident_pages": 75,
+                "resident_examples": [
+                  {
+                    "path": "catalog-1-105.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-111.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-126.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-138.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-14.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-145.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-152.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-161.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-162.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-174.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-191.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-2.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-205.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-248.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-250.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-26.tbl",
+                    "resident_pages": 1
+                  }
+                ],
+                "errors": [],
+                "observation_started_monotonic_ns": 49825414531904,
+                "complete": true,
+                "observation_finished_monotonic_ns": 49825415438709
+              },
+              "advice": {
+                "attempted_files": 75,
+                "advised_files": 75,
+                "errors": [],
+                "complete": true
+              },
+              "before_target": {
+                "files": 75,
+                "files_checked": 75,
+                "pages_checked": 75,
+                "resident_pages": 0,
+                "resident_examples": [],
+                "errors": [],
+                "observation_started_monotonic_ns": 49825415868966,
+                "complete": true,
+                "observation_finished_monotonic_ns": 49825416660447
+              },
+              "target_ready_monotonic_ns": 49825416661509,
+              "after_target": {
+                "files": 75,
+                "files_checked": 75,
+                "pages_checked": 75,
+                "resident_pages": 6,
+                "resident_examples": [
+                  {
+                    "path": "catalog-1-161.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "commit-1.bin",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "segment-1000001/terms.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "segment-1000002/terms.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "segment-1000003/terms.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "segment-1000004/terms.tbl",
+                    "resident_pages": 1
+                  }
+                ],
+                "errors": [],
+                "observation_started_monotonic_ns": 49825476619027,
+                "complete": true,
+                "observation_finished_monotonic_ns": 49825478955844
+              }
+            },
+            "engine_metrics": {
+              "candidates": 1,
+              "scanned_bytes": 0,
+              "seconds": 0.001018043
+            }
+          }
+        ],
+        "current": [
+          {
+            "wall_seconds": 0.004631415002222639,
+            "returncode": 0,
+            "stdout": "{\"api_version\":1,\"execution_complete\":true,\"has_more\":false,\"metrics\":{\"candidates\":1,\"scanned_bytes\":0,\"seconds\":0.0011031249999999999},\"next_cursor\":null,\"output_truncated\":false,\"position_units\":{\"column\":\"utf8_byte\",\"column_base\":1,\"line_base\":1},\"results\":[],\"returned\":0,\"snapshot\":{\"freshness\":\"unknown\",\"generation\":\"1\",\"source\":\"index\"},\"status\":\"ok\",\"total\":1,\"warnings\":[]}\n",
+            "stderr": "",
+            "cpu_seconds": 0.003395,
+            "peak_rss_bytes": 16121856,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "os_io": {
+              "input_block_operations": 48,
+              "output_block_operations": 8,
+              "major_page_faults": 0,
+              "minor_page_faults": 553,
+              "method": "isolated target getrusage(RUSAGE_CHILDREN); OS block-operation counters, not device-byte measurements"
+            },
+            "target_worker_ready_monotonic_ns": 49825399288398,
+            "cache": {
+              "requested": "cold",
+              "label": "verified-cold-file-data-pages",
+              "probe_unavailable": null,
+              "before_advice": {
+                "files": 75,
+                "files_checked": 75,
+                "pages_checked": 75,
+                "resident_pages": 75,
+                "resident_examples": [
+                  {
+                    "path": "catalog-1-105.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-111.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-126.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-138.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-14.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-145.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-152.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-161.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-162.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-174.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-191.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-2.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-205.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-248.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-250.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-26.tbl",
+                    "resident_pages": 1
+                  }
+                ],
+                "errors": [],
+                "observation_started_monotonic_ns": 49825349181570,
+                "complete": true,
+                "observation_finished_monotonic_ns": 49825351853751
+              },
+              "advice": {
+                "attempted_files": 75,
+                "advised_files": 75,
+                "errors": [],
+                "complete": true
+              },
+              "before_target": {
+                "files": 75,
+                "files_checked": 75,
+                "pages_checked": 75,
+                "resident_pages": 0,
+                "resident_examples": [],
+                "errors": [],
+                "observation_started_monotonic_ns": 49825352318851,
+                "complete": true,
+                "observation_finished_monotonic_ns": 49825353090182
+              },
+              "target_ready_monotonic_ns": 49825353090502,
+              "after_target": {
+                "files": 75,
+                "files_checked": 75,
+                "pages_checked": 75,
+                "resident_pages": 6,
+                "resident_examples": [
+                  {
+                    "path": "catalog-1-161.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "commit-1.bin",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "segment-1000001/terms.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "segment-1000002/terms.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "segment-1000003/terms.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "segment-1000004/terms.tbl",
+                    "resident_pages": 1
+                  }
+                ],
+                "errors": [],
+                "observation_started_monotonic_ns": 49825412792506,
+                "complete": true,
+                "observation_finished_monotonic_ns": 49825413755155
+              }
+            },
+            "engine_metrics": {
+              "candidates": 1,
+              "scanned_bytes": 0,
+              "seconds": 0.001103125
+            }
+          }
+        ],
+        "rg": [
+          {
+            "wall_seconds": 0.006229424005141482,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 0.008216,
+            "peak_rss_bytes": 16121856,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "os_io": {
+              "input_block_operations": 512,
+              "output_block_operations": 0,
+              "major_page_faults": 0,
+              "minor_page_faults": 1156,
+              "method": "isolated target getrusage(RUSAGE_CHILDREN); OS block-operation counters, not device-byte measurements"
+            },
+            "target_worker_ready_monotonic_ns": 49825534233499,
+            "cache": {
+              "requested": "cold",
+              "label": "verified-cold-file-data-pages",
+              "probe_unavailable": null,
+              "before_advice": {
+                "files": 64,
+                "files_checked": 64,
+                "pages_checked": 64,
+                "resident_pages": 64,
+                "resident_examples": [
+                  {
+                    "path": "group_0/module_0.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_1.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_10.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_11.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_12.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_13.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_14.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_15.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_16.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_17.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_18.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_19.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_2.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_20.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_21.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_22.cpp",
+                    "resident_pages": 1
+                  }
+                ],
+                "errors": [],
+                "observation_started_monotonic_ns": 49825480125103,
+                "complete": true,
+                "observation_finished_monotonic_ns": 49825481752432
+              },
+              "advice": {
+                "attempted_files": 64,
+                "advised_files": 64,
+                "errors": [],
+                "complete": true
+              },
+              "before_target": {
+                "files": 64,
+                "files_checked": 64,
+                "pages_checked": 64,
+                "resident_pages": 0,
+                "resident_examples": [],
+                "errors": [],
+                "observation_started_monotonic_ns": 49825482121477,
+                "complete": true,
+                "observation_finished_monotonic_ns": 49825483063435
+              },
+              "target_ready_monotonic_ns": 49825483063815,
+              "after_target": {
+                "files": 64,
+                "files_checked": 64,
+                "pages_checked": 64,
+                "resident_pages": 64,
+                "resident_examples": [
+                  {
+                    "path": "group_0/module_0.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_1.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_10.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_11.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_12.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_13.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_14.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_15.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_16.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_17.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_18.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_19.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_2.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_20.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_21.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_22.cpp",
+                    "resident_pages": 1
+                  }
+                ],
+                "errors": [],
+                "observation_started_monotonic_ns": 49825548955809,
+                "complete": true,
+                "observation_finished_monotonic_ns": 49825549850105
+              }
+            },
+            "stdout_bytes": 26,
+            "stdout_sha256": "a051b81a0a6be1d1fbe4e260575f2b54c3f3257cf79e33271eef2f3f312dd5a2",
+            "path_count_sha256": "91eebc9626d3301b416d7d4eb44f1638bbfa7f8770fa30de6b3539ff4545f719",
+            "matching_files": 1
+          }
+        ]
+      },
+      "summaries": {
+        "baseline": {
+          "verified-cold-file-data-pages": {
+            "wall_ms": {
+              "iterations": 1,
+              "median": 4.549466000753455,
+              "p95": 4.549466000753455,
+              "min": 4.549466000753455,
+              "max": 4.549466000753455,
+              "samples": [
+                4.549466000753455
+              ]
+            },
+            "cpu_ms": {
+              "iterations": 1,
+              "median": 3.418,
+              "p95": 3.418,
+              "min": 3.418,
+              "max": 3.418,
+              "samples": [
+                3.418
+              ]
+            },
+            "peak_rss_bytes": {
+              "iterations": 1,
+              "median": 16121856,
+              "p95": 16121856,
+              "min": 16121856,
+              "max": 16121856,
+              "samples": [
+                16121856
+              ]
+            },
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor"
+          }
+        },
+        "current": {
+          "verified-cold-file-data-pages": {
+            "wall_ms": {
+              "iterations": 1,
+              "median": 4.631415002222639,
+              "p95": 4.631415002222639,
+              "min": 4.631415002222639,
+              "max": 4.631415002222639,
+              "samples": [
+                4.631415002222639
+              ]
+            },
+            "cpu_ms": {
+              "iterations": 1,
+              "median": 3.395,
+              "p95": 3.395,
+              "min": 3.395,
+              "max": 3.395,
+              "samples": [
+                3.395
+              ]
+            },
+            "peak_rss_bytes": {
+              "iterations": 1,
+              "median": 16121856,
+              "p95": 16121856,
+              "min": 16121856,
+              "max": 16121856,
+              "samples": [
+                16121856
+              ]
+            },
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor"
+          }
+        },
+        "rg": {
+          "verified-cold-file-data-pages": {
+            "wall_ms": {
+              "iterations": 1,
+              "median": 6.229424005141482,
+              "p95": 6.229424005141482,
+              "min": 6.229424005141482,
+              "max": 6.229424005141482,
+              "samples": [
+                6.229424005141482
+              ]
+            },
+            "cpu_ms": {
+              "iterations": 1,
+              "median": 8.216,
+              "p95": 8.216,
+              "min": 8.216,
+              "max": 8.216,
+              "samples": [
+                8.216
+              ]
+            },
+            "peak_rss_bytes": {
+              "iterations": 1,
+              "median": 16121856,
+              "p95": 16121856,
+              "min": 16121856,
+              "max": 16121856,
+              "samples": [
+                16121856
+              ]
+            },
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor"
+          }
+        }
+      }
+    },
+    {
+      "query": {
+        "name": "term",
+        "query": "needle_42",
+        "rg": "\\bneedle_42\\b"
+      },
+      "mode": "warm",
+      "commands": {
+        "baseline": [
+          "/workspace/scratch/93bfa6b783da/ReSearchify-baseline/build/rs",
+          "find",
+          "needle_42",
+          "--index",
+          "/tmp/researchify-cache-gate-1892ph6m/smoke/fixture/baseline-compact",
+          "--json",
+          "--limit",
+          "0",
+          "--snippets",
+          "0",
+          "--memory-mb",
+          "256",
+          "--regex-steps",
+          "18446744073709551615"
+        ],
+        "current": [
+          "/workspace/scratch/93bfa6b783da/rs-final-integrated",
+          "find",
+          "needle_42",
+          "--index",
+          "/tmp/researchify-cache-gate-1892ph6m/smoke/fixture/current-compact",
+          "--json",
+          "--limit",
+          "0",
+          "--snippets",
+          "0",
+          "--memory-mb",
+          "256",
+          "--regex-steps",
+          "18446744073709551615"
+        ],
+        "rg": [
+          "/opt/codex/codex-path/rg",
+          "--no-config",
+          "--no-ignore",
+          "--hidden",
+          "--text",
+          "--color",
+          "never",
+          "--case-sensitive",
+          "--count-matches",
+          "--null",
+          "--regexp",
+          "\\bneedle_42\\b",
+          "."
+        ]
+      },
+      "orders": [
+        [
+          "baseline",
+          "rg",
+          "current"
+        ]
+      ],
+      "tools": {
+        "baseline": [
+          {
+            "wall_seconds": 0.003332975997182075,
+            "returncode": 0,
+            "stdout": "{\"api_version\":1,\"execution_complete\":true,\"has_more\":false,\"metrics\":{\"candidates\":1,\"scanned_bytes\":0,\"seconds\":0.000169665},\"next_cursor\":null,\"output_truncated\":false,\"position_units\":{\"column\":\"utf8_byte\",\"column_base\":1,\"line_base\":1},\"results\":[],\"returned\":0,\"snapshot\":{\"freshness\":\"unknown\",\"generation\":\"1\",\"source\":\"index\"},\"status\":\"ok\",\"total\":1,\"warnings\":[]}\n",
+            "stderr": "",
+            "cpu_seconds": 0.00314,
+            "peak_rss_bytes": 16121856,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "os_io": {
+              "input_block_operations": 0,
+              "output_block_operations": 8,
+              "major_page_faults": 0,
+              "minor_page_faults": 546,
+              "method": "isolated target getrusage(RUSAGE_CHILDREN); OS block-operation counters, not device-byte measurements"
+            },
+            "target_worker_ready_monotonic_ns": 49825690282018,
+            "cache": {
+              "requested": "warm",
+              "label": "warm-query-replay",
+              "probe_unavailable": null,
+              "before_advice": null,
+              "advice": null,
+              "before_target": {
+                "files": 75,
+                "files_checked": 75,
+                "pages_checked": 75,
+                "resident_pages": 6,
+                "resident_examples": [
+                  {
+                    "path": "catalog-1-161.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "commit-1.bin",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "segment-1000001/terms.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "segment-1000002/terms.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "segment-1000003/terms.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "segment-1000004/terms.tbl",
+                    "resident_pages": 1
+                  }
+                ],
+                "errors": [],
+                "observation_started_monotonic_ns": 49825637530078,
+                "complete": true,
+                "observation_finished_monotonic_ns": 49825639022945
+              },
+              "target_ready_monotonic_ns": 49825639023305,
+              "after_target": {
+                "files": 75,
+                "files_checked": 75,
+                "pages_checked": 75,
+                "resident_pages": 6,
+                "resident_examples": [
+                  {
+                    "path": "catalog-1-161.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "commit-1.bin",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "segment-1000001/terms.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "segment-1000002/terms.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "segment-1000003/terms.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "segment-1000004/terms.tbl",
+                    "resident_pages": 1
+                  }
+                ],
+                "errors": [],
+                "observation_started_monotonic_ns": 49825702451597,
+                "complete": true,
+                "observation_finished_monotonic_ns": 49825703372813
+              }
+            },
+            "engine_metrics": {
+              "candidates": 1,
+              "scanned_bytes": 0,
+              "seconds": 0.000169665
+            }
+          }
+        ],
+        "current": [
+          {
+            "wall_seconds": 0.0032568270034971647,
+            "returncode": 0,
+            "stdout": "{\"api_version\":1,\"execution_complete\":true,\"has_more\":false,\"metrics\":{\"candidates\":1,\"scanned_bytes\":0,\"seconds\":0.00015977},\"next_cursor\":null,\"output_truncated\":false,\"position_units\":{\"column\":\"utf8_byte\",\"column_base\":1,\"line_base\":1},\"results\":[],\"returned\":0,\"snapshot\":{\"freshness\":\"unknown\",\"generation\":\"1\",\"source\":\"index\"},\"status\":\"ok\",\"total\":1,\"warnings\":[]}\n",
+            "stderr": "",
+            "cpu_seconds": 0.0030659999999999997,
+            "peak_rss_bytes": 16121856,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "os_io": {
+              "input_block_operations": 0,
+              "output_block_operations": 8,
+              "major_page_faults": 0,
+              "minor_page_faults": 554,
+              "method": "isolated target getrusage(RUSAGE_CHILDREN); OS block-operation counters, not device-byte measurements"
+            },
+            "target_worker_ready_monotonic_ns": 49826007792101,
+            "cache": {
+              "requested": "warm",
+              "label": "warm-query-replay",
+              "probe_unavailable": null,
+              "before_advice": null,
+              "advice": null,
+              "before_target": {
+                "files": 75,
+                "files_checked": 75,
+                "pages_checked": 75,
+                "resident_pages": 6,
+                "resident_examples": [
+                  {
+                    "path": "catalog-1-161.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "commit-1.bin",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "segment-1000001/terms.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "segment-1000002/terms.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "segment-1000003/terms.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "segment-1000004/terms.tbl",
+                    "resident_pages": 1
+                  }
+                ],
+                "errors": [],
+                "observation_started_monotonic_ns": 49825961141282,
+                "complete": true,
+                "observation_finished_monotonic_ns": 49825962032824
+              },
+              "target_ready_monotonic_ns": 49825962033185,
+              "after_target": {
+                "files": 75,
+                "files_checked": 75,
+                "pages_checked": 75,
+                "resident_pages": 6,
+                "resident_examples": [
+                  {
+                    "path": "catalog-1-161.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "commit-1.bin",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "segment-1000001/terms.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "segment-1000002/terms.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "segment-1000003/terms.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "segment-1000004/terms.tbl",
+                    "resident_pages": 1
+                  }
+                ],
+                "errors": [],
+                "observation_started_monotonic_ns": 49826026824538,
+                "complete": true,
+                "observation_finished_monotonic_ns": 49826027768989
+              }
+            },
+            "engine_metrics": {
+              "candidates": 1,
+              "scanned_bytes": 0,
+              "seconds": 0.00015977
+            }
+          }
+        ],
+        "rg": [
+          {
+            "wall_seconds": 0.007617947994731367,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 0.008865,
+            "peak_rss_bytes": 16121856,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "os_io": {
+              "input_block_operations": 0,
+              "output_block_operations": 0,
+              "major_page_faults": 0,
+              "minor_page_faults": 1152,
+              "method": "isolated target getrusage(RUSAGE_CHILDREN); OS block-operation counters, not device-byte measurements"
+            },
+            "target_worker_ready_monotonic_ns": 49825861568233,
+            "cache": {
+              "requested": "warm",
+              "label": "warm-query-replay",
+              "probe_unavailable": null,
+              "before_advice": null,
+              "advice": null,
+              "before_target": {
+                "files": 64,
+                "files_checked": 64,
+                "pages_checked": 64,
+                "resident_pages": 64,
+                "resident_examples": [
+                  {
+                    "path": "group_0/module_0.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_1.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_10.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_11.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_12.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_13.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_14.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_15.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_16.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_17.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_18.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_19.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_2.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_20.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_21.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_22.cpp",
+                    "resident_pages": 1
+                  }
+                ],
+                "errors": [],
+                "observation_started_monotonic_ns": 49825797253612,
+                "complete": true,
+                "observation_finished_monotonic_ns": 49825798123692
+              },
+              "target_ready_monotonic_ns": 49825798124062,
+              "after_target": {
+                "files": 64,
+                "files_checked": 64,
+                "pages_checked": 64,
+                "resident_pages": 64,
+                "resident_examples": [
+                  {
+                    "path": "group_0/module_0.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_1.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_10.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_11.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_12.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_13.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_14.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_15.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_16.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_17.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_18.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_19.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_2.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_20.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_21.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_22.cpp",
+                    "resident_pages": 1
+                  }
+                ],
+                "errors": [],
+                "observation_started_monotonic_ns": 49825877815137,
+                "complete": true,
+                "observation_finished_monotonic_ns": 49825879150908
+              }
+            },
+            "stdout_bytes": 26,
+            "stdout_sha256": "a051b81a0a6be1d1fbe4e260575f2b54c3f3257cf79e33271eef2f3f312dd5a2",
+            "path_count_sha256": "91eebc9626d3301b416d7d4eb44f1638bbfa7f8770fa30de6b3539ff4545f719",
+            "matching_files": 1
+          }
+        ]
+      },
+      "summaries": {
+        "baseline": {
+          "warm-query-replay": {
+            "wall_ms": {
+              "iterations": 1,
+              "median": 3.332975997182075,
+              "p95": 3.332975997182075,
+              "min": 3.332975997182075,
+              "max": 3.332975997182075,
+              "samples": [
+                3.332975997182075
+              ]
+            },
+            "cpu_ms": {
+              "iterations": 1,
+              "median": 3.14,
+              "p95": 3.14,
+              "min": 3.14,
+              "max": 3.14,
+              "samples": [
+                3.14
+              ]
+            },
+            "peak_rss_bytes": {
+              "iterations": 1,
+              "median": 16121856,
+              "p95": 16121856,
+              "min": 16121856,
+              "max": 16121856,
+              "samples": [
+                16121856
+              ]
+            },
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor"
+          }
+        },
+        "current": {
+          "warm-query-replay": {
+            "wall_ms": {
+              "iterations": 1,
+              "median": 3.2568270034971647,
+              "p95": 3.2568270034971647,
+              "min": 3.2568270034971647,
+              "max": 3.2568270034971647,
+              "samples": [
+                3.2568270034971647
+              ]
+            },
+            "cpu_ms": {
+              "iterations": 1,
+              "median": 3.066,
+              "p95": 3.066,
+              "min": 3.066,
+              "max": 3.066,
+              "samples": [
+                3.066
+              ]
+            },
+            "peak_rss_bytes": {
+              "iterations": 1,
+              "median": 16121856,
+              "p95": 16121856,
+              "min": 16121856,
+              "max": 16121856,
+              "samples": [
+                16121856
+              ]
+            },
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor"
+          }
+        },
+        "rg": {
+          "warm-query-replay": {
+            "wall_ms": {
+              "iterations": 1,
+              "median": 7.617947994731367,
+              "p95": 7.617947994731367,
+              "min": 7.617947994731367,
+              "max": 7.617947994731367,
+              "samples": [
+                7.617947994731367
+              ]
+            },
+            "cpu_ms": {
+              "iterations": 1,
+              "median": 8.865,
+              "p95": 8.865,
+              "min": 8.865,
+              "max": 8.865,
+              "samples": [
+                8.865
+              ]
+            },
+            "peak_rss_bytes": {
+              "iterations": 1,
+              "median": 16121856,
+              "p95": 16121856,
+              "min": 16121856,
+              "max": 16121856,
+              "samples": [
+                16121856
+              ]
+            },
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor"
+          }
+        }
+      }
+    },
+    {
+      "query": {
+        "name": "literal",
+        "query": "\"needle_42 = 0;\"",
+        "rg": "needle_42 = 0;",
+        "fixed": true
+      },
+      "mode": "cold",
+      "commands": {
+        "baseline": [
+          "/workspace/scratch/93bfa6b783da/ReSearchify-baseline/build/rs",
+          "find",
+          "\"needle_42 = 0;\"",
+          "--index",
+          "/tmp/researchify-cache-gate-1892ph6m/smoke/fixture/baseline-compact",
+          "--json",
+          "--limit",
+          "0",
+          "--snippets",
+          "0",
+          "--memory-mb",
+          "256",
+          "--regex-steps",
+          "18446744073709551615"
+        ],
+        "current": [
+          "/workspace/scratch/93bfa6b783da/rs-final-integrated",
+          "find",
+          "\"needle_42 = 0;\"",
+          "--index",
+          "/tmp/researchify-cache-gate-1892ph6m/smoke/fixture/current-compact",
+          "--json",
+          "--limit",
+          "0",
+          "--snippets",
+          "0",
+          "--memory-mb",
+          "256",
+          "--regex-steps",
+          "18446744073709551615"
+        ],
+        "rg": [
+          "/opt/codex/codex-path/rg",
+          "--no-config",
+          "--no-ignore",
+          "--hidden",
+          "--text",
+          "--color",
+          "never",
+          "--case-sensitive",
+          "--count-matches",
+          "--null",
+          "--fixed-strings",
+          "--regexp",
+          "needle_42 = 0;",
+          "."
+        ]
+      },
+      "orders": [
+        [
+          "current",
+          "rg",
+          "baseline"
+        ]
+      ],
+      "tools": {
+        "baseline": [
+          {
+            "wall_seconds": 0.01552408300631214,
+            "returncode": 0,
+            "stdout": "{\"api_version\":1,\"execution_complete\":true,\"has_more\":false,\"metrics\":{\"candidates\":64,\"scanned_bytes\":11216,\"seconds\":0.010056304},\"next_cursor\":null,\"output_truncated\":false,\"position_units\":{\"column\":\"utf8_byte\",\"column_base\":1,\"line_base\":1},\"results\":[],\"returned\":0,\"snapshot\":{\"freshness\":\"unknown\",\"generation\":\"1\",\"source\":\"index\"},\"status\":\"ok\",\"total\":1,\"warnings\":[]}\n",
+            "stderr": "",
+            "cpu_seconds": 0.007512,
+            "peak_rss_bytes": 16121856,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "os_io": {
+              "input_block_operations": 536,
+              "output_block_operations": 8,
+              "major_page_faults": 0,
+              "minor_page_faults": 619,
+              "method": "isolated target getrusage(RUSAGE_CHILDREN); OS block-operation counters, not device-byte measurements"
+            },
+            "target_worker_ready_monotonic_ns": 49826332653327,
+            "cache": {
+              "requested": "cold",
+              "label": "verified-cold-file-data-pages",
+              "probe_unavailable": null,
+              "before_advice": {
+                "files": 75,
+                "files_checked": 75,
+                "pages_checked": 75,
+                "resident_pages": 71,
+                "resident_examples": [
+                  {
+                    "path": "catalog-1-105.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-111.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-126.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-138.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-14.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-145.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-152.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-161.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-162.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-174.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-191.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-2.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-205.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-248.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-250.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-26.tbl",
+                    "resident_pages": 1
+                  }
+                ],
+                "errors": [],
+                "observation_started_monotonic_ns": 49826279757065,
+                "complete": true,
+                "observation_finished_monotonic_ns": 49826280762938
+              },
+              "advice": {
+                "attempted_files": 75,
+                "advised_files": 75,
+                "errors": [],
+                "complete": true
+              },
+              "before_target": {
+                "files": 75,
+                "files_checked": 75,
+                "pages_checked": 75,
+                "resident_pages": 0,
+                "resident_examples": [],
+                "errors": [],
+                "observation_started_monotonic_ns": 49826281081448,
+                "complete": true,
+                "observation_finished_monotonic_ns": 49826281761601
+              },
+              "target_ready_monotonic_ns": 49826281761801,
+              "after_target": {
+                "files": 75,
+                "files_checked": 75,
+                "pages_checked": 75,
+                "resident_pages": 67,
+                "resident_examples": [
+                  {
+                    "path": "catalog-1-105.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-111.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-126.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-138.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-14.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-145.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-152.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-161.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-162.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-174.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-191.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-2.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-205.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-248.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-250.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-26.tbl",
+                    "resident_pages": 1
+                  }
+                ],
+                "errors": [],
+                "observation_started_monotonic_ns": 49826359562762,
+                "complete": true,
+                "observation_finished_monotonic_ns": 49826360609257
+              }
+            },
+            "engine_metrics": {
+              "candidates": 64,
+              "scanned_bytes": 11216,
+              "seconds": 0.010056304
+            }
+          }
+        ],
+        "current": [
+          {
+            "wall_seconds": 0.014314146996184718,
+            "returncode": 0,
+            "stdout": "{\"api_version\":1,\"execution_complete\":true,\"has_more\":false,\"metrics\":{\"candidates\":64,\"scanned_bytes\":11216,\"seconds\":0.010402665},\"next_cursor\":null,\"output_truncated\":false,\"position_units\":{\"column\":\"utf8_byte\",\"column_base\":1,\"line_base\":1},\"results\":[],\"returned\":0,\"snapshot\":{\"freshness\":\"unknown\",\"generation\":\"1\",\"source\":\"index\"},\"status\":\"ok\",\"total\":1,\"warnings\":[]}\n",
+            "stderr": "",
+            "cpu_seconds": 0.0074399999999999996,
+            "peak_rss_bytes": 16121856,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "os_io": {
+              "input_block_operations": 568,
+              "output_block_operations": 8,
+              "major_page_faults": 0,
+              "minor_page_faults": 639,
+              "method": "isolated target getrusage(RUSAGE_CHILDREN); OS block-operation counters, not device-byte measurements"
+            },
+            "target_worker_ready_monotonic_ns": 49826176286839,
+            "cache": {
+              "requested": "cold",
+              "label": "verified-cold-file-data-pages",
+              "probe_unavailable": null,
+              "before_advice": {
+                "files": 75,
+                "files_checked": 75,
+                "pages_checked": 75,
+                "resident_pages": 71,
+                "resident_examples": [
+                  {
+                    "path": "catalog-1-105.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-111.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-126.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-138.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-14.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-145.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-152.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-161.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-162.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-174.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-191.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-2.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-205.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-248.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-250.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-26.tbl",
+                    "resident_pages": 1
+                  }
+                ],
+                "errors": [],
+                "observation_started_monotonic_ns": 49826127371954,
+                "complete": true,
+                "observation_finished_monotonic_ns": 49826128624679
+              },
+              "advice": {
+                "attempted_files": 75,
+                "advised_files": 75,
+                "errors": [],
+                "complete": true
+              },
+              "before_target": {
+                "files": 75,
+                "files_checked": 75,
+                "pages_checked": 75,
+                "resident_pages": 0,
+                "resident_examples": [],
+                "errors": [],
+                "observation_started_monotonic_ns": 49826129087957,
+                "complete": true,
+                "observation_finished_monotonic_ns": 49826129903254
+              },
+              "target_ready_monotonic_ns": 49826129903554,
+              "after_target": {
+                "files": 75,
+                "files_checked": 75,
+                "pages_checked": 75,
+                "resident_pages": 71,
+                "resident_examples": [
+                  {
+                    "path": "catalog-1-105.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-111.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-126.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-138.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-14.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-145.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-152.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-161.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-162.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-174.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-191.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-2.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-205.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-248.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-250.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-26.tbl",
+                    "resident_pages": 1
+                  }
+                ],
+                "errors": [],
+                "observation_started_monotonic_ns": 49826200899494,
+                "complete": true,
+                "observation_finished_monotonic_ns": 49826202696859
+              }
+            },
+            "engine_metrics": {
+              "candidates": 64,
+              "scanned_bytes": 11216,
+              "seconds": 0.010402665
+            }
+          }
+        ],
+        "rg": [
+          {
+            "wall_seconds": 0.006475834998127539,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 0.007320999999999999,
+            "peak_rss_bytes": 16121856,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "os_io": {
+              "input_block_operations": 512,
+              "output_block_operations": 0,
+              "major_page_faults": 0,
+              "minor_page_faults": 1065,
+              "method": "isolated target getrusage(RUSAGE_CHILDREN); OS block-operation counters, not device-byte measurements"
+            },
+            "target_worker_ready_monotonic_ns": 49826261999882,
+            "cache": {
+              "requested": "cold",
+              "label": "verified-cold-file-data-pages",
+              "probe_unavailable": null,
+              "before_advice": {
+                "files": 64,
+                "files_checked": 64,
+                "pages_checked": 64,
+                "resident_pages": 64,
+                "resident_examples": [
+                  {
+                    "path": "group_0/module_0.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_1.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_10.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_11.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_12.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_13.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_14.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_15.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_16.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_17.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_18.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_19.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_2.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_20.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_21.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_22.cpp",
+                    "resident_pages": 1
+                  }
+                ],
+                "errors": [],
+                "observation_started_monotonic_ns": 49826205410032,
+                "complete": true,
+                "observation_finished_monotonic_ns": 49826206312590
+              },
+              "advice": {
+                "attempted_files": 64,
+                "advised_files": 64,
+                "errors": [],
+                "complete": true
+              },
+              "before_target": {
+                "files": 64,
+                "files_checked": 64,
+                "pages_checked": 64,
+                "resident_pages": 0,
+                "resident_examples": [],
+                "errors": [],
+                "observation_started_monotonic_ns": 49826207011241,
+                "complete": true,
+                "observation_finished_monotonic_ns": 49826207847680
+              },
+              "target_ready_monotonic_ns": 49826207847941,
+              "after_target": {
+                "files": 64,
+                "files_checked": 64,
+                "pages_checked": 64,
+                "resident_pages": 64,
+                "resident_examples": [
+                  {
+                    "path": "group_0/module_0.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_1.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_10.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_11.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_12.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_13.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_14.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_15.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_16.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_17.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_18.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_19.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_2.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_20.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_21.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_22.cpp",
+                    "resident_pages": 1
+                  }
+                ],
+                "errors": [],
+                "observation_started_monotonic_ns": 49826276268294,
+                "complete": true,
+                "observation_finished_monotonic_ns": 49826277280958
+              }
+            },
+            "stdout_bytes": 26,
+            "stdout_sha256": "ef4dc111fb357aeb86c120a8cab6fdc15965c8ee79fc12ea7821f737c95f1ecc",
+            "path_count_sha256": "2ca22a5edb7265331bf625e3bced5e5c34a60824d9613ed64923ace8b390358b",
+            "matching_files": 1
+          }
+        ]
+      },
+      "summaries": {
+        "baseline": {
+          "verified-cold-file-data-pages": {
+            "wall_ms": {
+              "iterations": 1,
+              "median": 15.52408300631214,
+              "p95": 15.52408300631214,
+              "min": 15.52408300631214,
+              "max": 15.52408300631214,
+              "samples": [
+                15.52408300631214
+              ]
+            },
+            "cpu_ms": {
+              "iterations": 1,
+              "median": 7.512,
+              "p95": 7.512,
+              "min": 7.512,
+              "max": 7.512,
+              "samples": [
+                7.512
+              ]
+            },
+            "peak_rss_bytes": {
+              "iterations": 1,
+              "median": 16121856,
+              "p95": 16121856,
+              "min": 16121856,
+              "max": 16121856,
+              "samples": [
+                16121856
+              ]
+            },
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor"
+          }
+        },
+        "current": {
+          "verified-cold-file-data-pages": {
+            "wall_ms": {
+              "iterations": 1,
+              "median": 14.314146996184718,
+              "p95": 14.314146996184718,
+              "min": 14.314146996184718,
+              "max": 14.314146996184718,
+              "samples": [
+                14.314146996184718
+              ]
+            },
+            "cpu_ms": {
+              "iterations": 1,
+              "median": 7.4399999999999995,
+              "p95": 7.4399999999999995,
+              "min": 7.4399999999999995,
+              "max": 7.4399999999999995,
+              "samples": [
+                7.4399999999999995
+              ]
+            },
+            "peak_rss_bytes": {
+              "iterations": 1,
+              "median": 16121856,
+              "p95": 16121856,
+              "min": 16121856,
+              "max": 16121856,
+              "samples": [
+                16121856
+              ]
+            },
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor"
+          }
+        },
+        "rg": {
+          "verified-cold-file-data-pages": {
+            "wall_ms": {
+              "iterations": 1,
+              "median": 6.475834998127539,
+              "p95": 6.475834998127539,
+              "min": 6.475834998127539,
+              "max": 6.475834998127539,
+              "samples": [
+                6.475834998127539
+              ]
+            },
+            "cpu_ms": {
+              "iterations": 1,
+              "median": 7.321,
+              "p95": 7.321,
+              "min": 7.321,
+              "max": 7.321,
+              "samples": [
+                7.321
+              ]
+            },
+            "peak_rss_bytes": {
+              "iterations": 1,
+              "median": 16121856,
+              "p95": 16121856,
+              "min": 16121856,
+              "max": 16121856,
+              "samples": [
+                16121856
+              ]
+            },
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor"
+          }
+        }
+      }
+    },
+    {
+      "query": {
+        "name": "literal",
+        "query": "\"needle_42 = 0;\"",
+        "rg": "needle_42 = 0;",
+        "fixed": true
+      },
+      "mode": "warm",
+      "commands": {
+        "baseline": [
+          "/workspace/scratch/93bfa6b783da/ReSearchify-baseline/build/rs",
+          "find",
+          "\"needle_42 = 0;\"",
+          "--index",
+          "/tmp/researchify-cache-gate-1892ph6m/smoke/fixture/baseline-compact",
+          "--json",
+          "--limit",
+          "0",
+          "--snippets",
+          "0",
+          "--memory-mb",
+          "256",
+          "--regex-steps",
+          "18446744073709551615"
+        ],
+        "current": [
+          "/workspace/scratch/93bfa6b783da/rs-final-integrated",
+          "find",
+          "\"needle_42 = 0;\"",
+          "--index",
+          "/tmp/researchify-cache-gate-1892ph6m/smoke/fixture/current-compact",
+          "--json",
+          "--limit",
+          "0",
+          "--snippets",
+          "0",
+          "--memory-mb",
+          "256",
+          "--regex-steps",
+          "18446744073709551615"
+        ],
+        "rg": [
+          "/opt/codex/codex-path/rg",
+          "--no-config",
+          "--no-ignore",
+          "--hidden",
+          "--text",
+          "--color",
+          "never",
+          "--case-sensitive",
+          "--count-matches",
+          "--null",
+          "--fixed-strings",
+          "--regexp",
+          "needle_42 = 0;",
+          "."
+        ]
+      },
+      "orders": [
+        [
+          "rg",
+          "current",
+          "baseline"
+        ]
+      ],
+      "tools": {
+        "baseline": [
+          {
+            "wall_seconds": 0.005279384000459686,
+            "returncode": 0,
+            "stdout": "{\"api_version\":1,\"execution_complete\":true,\"has_more\":false,\"metrics\":{\"candidates\":64,\"scanned_bytes\":11216,\"seconds\":0.001803214},\"next_cursor\":null,\"output_truncated\":false,\"position_units\":{\"column\":\"utf8_byte\",\"column_base\":1,\"line_base\":1},\"results\":[],\"returned\":0,\"snapshot\":{\"freshness\":\"unknown\",\"generation\":\"1\",\"source\":\"index\"},\"status\":\"ok\",\"total\":1,\"warnings\":[]}\n",
+            "stderr": "",
+            "cpu_seconds": 0.00509,
+            "peak_rss_bytes": 16121856,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "os_io": {
+              "input_block_operations": 0,
+              "output_block_operations": 8,
+              "major_page_faults": 0,
+              "minor_page_faults": 619,
+              "method": "isolated target getrusage(RUSAGE_CHILDREN); OS block-operation counters, not device-byte measurements"
+            },
+            "target_worker_ready_monotonic_ns": 49826733390993,
+            "cache": {
+              "requested": "warm",
+              "label": "warm-query-replay",
+              "probe_unavailable": null,
+              "before_advice": null,
+              "advice": null,
+              "before_target": {
+                "files": 75,
+                "files_checked": 75,
+                "pages_checked": 75,
+                "resident_pages": 67,
+                "resident_examples": [
+                  {
+                    "path": "catalog-1-105.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-111.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-126.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-138.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-14.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-145.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-152.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-161.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-162.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-174.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-191.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-2.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-205.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-248.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-250.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-26.tbl",
+                    "resident_pages": 1
+                  }
+                ],
+                "errors": [],
+                "observation_started_monotonic_ns": 49826688675426,
+                "complete": true,
+                "observation_finished_monotonic_ns": 49826689846718
+              },
+              "target_ready_monotonic_ns": 49826689847509,
+              "after_target": {
+                "files": 75,
+                "files_checked": 75,
+                "pages_checked": 75,
+                "resident_pages": 67,
+                "resident_examples": [
+                  {
+                    "path": "catalog-1-105.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-111.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-126.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-138.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-14.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-145.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-152.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-161.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-162.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-174.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-191.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-2.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-205.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-248.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-250.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-26.tbl",
+                    "resident_pages": 1
+                  }
+                ],
+                "errors": [],
+                "observation_started_monotonic_ns": 49826747603621,
+                "complete": true,
+                "observation_finished_monotonic_ns": 49826748616345
+              }
+            },
+            "engine_metrics": {
+              "candidates": 64,
+              "scanned_bytes": 11216,
+              "seconds": 0.001803214
+            }
+          }
+        ],
+        "current": [
+          {
+            "wall_seconds": 0.004547153002931736,
+            "returncode": 0,
+            "stdout": "{\"api_version\":1,\"execution_complete\":true,\"has_more\":false,\"metrics\":{\"candidates\":64,\"scanned_bytes\":11216,\"seconds\":0.0016445450000000001},\"next_cursor\":null,\"output_truncated\":false,\"position_units\":{\"column\":\"utf8_byte\",\"column_base\":1,\"line_base\":1},\"results\":[],\"returned\":0,\"snapshot\":{\"freshness\":\"unknown\",\"generation\":\"1\",\"source\":\"index\"},\"status\":\"ok\",\"total\":1,\"warnings\":[]}\n",
+            "stderr": "",
+            "cpu_seconds": 0.004367,
+            "peak_rss_bytes": 16121856,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "os_io": {
+              "input_block_operations": 0,
+              "output_block_operations": 8,
+              "major_page_faults": 0,
+              "minor_page_faults": 639,
+              "method": "isolated target getrusage(RUSAGE_CHILDREN); OS block-operation counters, not device-byte measurements"
+            },
+            "target_worker_ready_monotonic_ns": 49826599284619,
+            "cache": {
+              "requested": "warm",
+              "label": "warm-query-replay",
+              "probe_unavailable": null,
+              "before_advice": null,
+              "advice": null,
+              "before_target": {
+                "files": 75,
+                "files_checked": 75,
+                "pages_checked": 75,
+                "resident_pages": 71,
+                "resident_examples": [
+                  {
+                    "path": "catalog-1-105.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-111.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-126.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-138.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-14.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-145.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-152.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-161.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-162.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-174.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-191.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-2.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-205.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-248.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-250.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-26.tbl",
+                    "resident_pages": 1
+                  }
+                ],
+                "errors": [],
+                "observation_started_monotonic_ns": 49826547961003,
+                "complete": true,
+                "observation_finished_monotonic_ns": 49826549130183
+              },
+              "target_ready_monotonic_ns": 49826549130543,
+              "after_target": {
+                "files": 75,
+                "files_checked": 75,
+                "pages_checked": 75,
+                "resident_pages": 71,
+                "resident_examples": [
+                  {
+                    "path": "catalog-1-105.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-111.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-126.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-138.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-14.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-145.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-152.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-161.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-162.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-174.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-191.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-2.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-205.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-248.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-250.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-26.tbl",
+                    "resident_pages": 1
+                  }
+                ],
+                "errors": [],
+                "observation_started_monotonic_ns": 49826616230184,
+                "complete": true,
+                "observation_finished_monotonic_ns": 49826617816792
+              }
+            },
+            "engine_metrics": {
+              "candidates": 64,
+              "scanned_bytes": 11216,
+              "seconds": 0.001644545
+            }
+          }
+        ],
+        "rg": [
+          {
+            "wall_seconds": 0.005118642999150325,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 0.005651,
+            "peak_rss_bytes": 16121856,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "os_io": {
+              "input_block_operations": 0,
+              "output_block_operations": 0,
+              "major_page_faults": 0,
+              "minor_page_faults": 1054,
+              "method": "isolated target getrusage(RUSAGE_CHILDREN); OS block-operation counters, not device-byte measurements"
+            },
+            "target_worker_ready_monotonic_ns": 49826470008239,
+            "cache": {
+              "requested": "warm",
+              "label": "warm-query-replay",
+              "probe_unavailable": null,
+              "before_advice": null,
+              "advice": null,
+              "before_target": {
+                "files": 64,
+                "files_checked": 64,
+                "pages_checked": 64,
+                "resident_pages": 64,
+                "resident_examples": [
+                  {
+                    "path": "group_0/module_0.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_1.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_10.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_11.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_12.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_13.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_14.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_15.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_16.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_17.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_18.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_19.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_2.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_20.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_21.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_22.cpp",
+                    "resident_pages": 1
+                  }
+                ],
+                "errors": [],
+                "observation_started_monotonic_ns": 49826424933041,
+                "complete": true,
+                "observation_finished_monotonic_ns": 49826426098034
+              },
+              "target_ready_monotonic_ns": 49826426098415,
+              "after_target": {
+                "files": 64,
+                "files_checked": 64,
+                "pages_checked": 64,
+                "resident_pages": 64,
+                "resident_examples": [
+                  {
+                    "path": "group_0/module_0.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_1.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_10.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_11.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_12.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_13.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_14.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_15.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_16.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_17.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_18.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_19.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_2.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_20.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_21.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_22.cpp",
+                    "resident_pages": 1
+                  }
+                ],
+                "errors": [],
+                "observation_started_monotonic_ns": 49826485103275,
+                "complete": true,
+                "observation_finished_monotonic_ns": 49826486065353
+              }
+            },
+            "stdout_bytes": 26,
+            "stdout_sha256": "ef4dc111fb357aeb86c120a8cab6fdc15965c8ee79fc12ea7821f737c95f1ecc",
+            "path_count_sha256": "2ca22a5edb7265331bf625e3bced5e5c34a60824d9613ed64923ace8b390358b",
+            "matching_files": 1
+          }
+        ]
+      },
+      "summaries": {
+        "baseline": {
+          "warm-query-replay": {
+            "wall_ms": {
+              "iterations": 1,
+              "median": 5.279384000459686,
+              "p95": 5.279384000459686,
+              "min": 5.279384000459686,
+              "max": 5.279384000459686,
+              "samples": [
+                5.279384000459686
+              ]
+            },
+            "cpu_ms": {
+              "iterations": 1,
+              "median": 5.09,
+              "p95": 5.09,
+              "min": 5.09,
+              "max": 5.09,
+              "samples": [
+                5.09
+              ]
+            },
+            "peak_rss_bytes": {
+              "iterations": 1,
+              "median": 16121856,
+              "p95": 16121856,
+              "min": 16121856,
+              "max": 16121856,
+              "samples": [
+                16121856
+              ]
+            },
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor"
+          }
+        },
+        "current": {
+          "warm-query-replay": {
+            "wall_ms": {
+              "iterations": 1,
+              "median": 4.547153002931736,
+              "p95": 4.547153002931736,
+              "min": 4.547153002931736,
+              "max": 4.547153002931736,
+              "samples": [
+                4.547153002931736
+              ]
+            },
+            "cpu_ms": {
+              "iterations": 1,
+              "median": 4.367,
+              "p95": 4.367,
+              "min": 4.367,
+              "max": 4.367,
+              "samples": [
+                4.367
+              ]
+            },
+            "peak_rss_bytes": {
+              "iterations": 1,
+              "median": 16121856,
+              "p95": 16121856,
+              "min": 16121856,
+              "max": 16121856,
+              "samples": [
+                16121856
+              ]
+            },
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor"
+          }
+        },
+        "rg": {
+          "warm-query-replay": {
+            "wall_ms": {
+              "iterations": 1,
+              "median": 5.118642999150325,
+              "p95": 5.118642999150325,
+              "min": 5.118642999150325,
+              "max": 5.118642999150325,
+              "samples": [
+                5.118642999150325
+              ]
+            },
+            "cpu_ms": {
+              "iterations": 1,
+              "median": 5.651,
+              "p95": 5.651,
+              "min": 5.651,
+              "max": 5.651,
+              "samples": [
+                5.651
+              ]
+            },
+            "peak_rss_bytes": {
+              "iterations": 1,
+              "median": 16121856,
+              "p95": 16121856,
+              "min": 16121856,
+              "max": 16121856,
+              "samples": [
+                16121856
+              ]
+            },
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor"
+          }
+        }
+      }
+    },
+    {
+      "query": {
+        "name": "broad_regex",
+        "query": "/needle_[0-9]+/",
+        "rg": "needle_[0-9]+"
+      },
+      "mode": "cold",
+      "commands": {
+        "baseline": [
+          "/workspace/scratch/93bfa6b783da/ReSearchify-baseline/build/rs",
+          "find",
+          "/needle_[0-9]+/",
+          "--index",
+          "/tmp/researchify-cache-gate-1892ph6m/smoke/fixture/baseline-compact",
+          "--json",
+          "--limit",
+          "0",
+          "--snippets",
+          "0",
+          "--memory-mb",
+          "256",
+          "--regex-steps",
+          "18446744073709551615"
+        ],
+        "current": [
+          "/workspace/scratch/93bfa6b783da/rs-final-integrated",
+          "find",
+          "/needle_[0-9]+/",
+          "--index",
+          "/tmp/researchify-cache-gate-1892ph6m/smoke/fixture/current-compact",
+          "--json",
+          "--limit",
+          "0",
+          "--snippets",
+          "0",
+          "--memory-mb",
+          "256",
+          "--regex-steps",
+          "18446744073709551615"
+        ],
+        "rg": [
+          "/opt/codex/codex-path/rg",
+          "--no-config",
+          "--no-ignore",
+          "--hidden",
+          "--text",
+          "--color",
+          "never",
+          "--case-sensitive",
+          "--count",
+          "--null",
+          "--regexp",
+          "needle_[0-9]+",
+          "."
+        ]
+      },
+      "orders": [
+        [
+          "baseline",
+          "current",
+          "rg"
+        ]
+      ],
+      "tools": {
+        "baseline": [
+          {
+            "wall_seconds": 0.01449289100128226,
+            "returncode": 0,
+            "stdout": "{\"api_version\":1,\"execution_complete\":true,\"has_more\":false,\"metrics\":{\"candidates\":64,\"scanned_bytes\":11216,\"seconds\":0.010870569},\"next_cursor\":null,\"output_truncated\":false,\"position_units\":{\"column\":\"utf8_byte\",\"column_base\":1,\"line_base\":1},\"results\":[],\"returned\":0,\"snapshot\":{\"freshness\":\"unknown\",\"generation\":\"1\",\"source\":\"index\"},\"status\":\"ok\",\"total\":64,\"warnings\":[]}\n",
+            "stderr": "",
+            "cpu_seconds": 0.006972,
+            "peak_rss_bytes": 16121856,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "os_io": {
+              "input_block_operations": 536,
+              "output_block_operations": 8,
+              "major_page_faults": 0,
+              "minor_page_faults": 621,
+              "method": "isolated target getrusage(RUSAGE_CHILDREN); OS block-operation counters, not device-byte measurements"
+            },
+            "target_worker_ready_monotonic_ns": 49826897923002,
+            "cache": {
+              "requested": "cold",
+              "label": "verified-cold-file-data-pages",
+              "probe_unavailable": null,
+              "before_advice": {
+                "files": 75,
+                "files_checked": 75,
+                "pages_checked": 75,
+                "resident_pages": 67,
+                "resident_examples": [
+                  {
+                    "path": "catalog-1-105.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-111.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-126.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-138.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-14.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-145.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-152.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-161.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-162.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-174.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-191.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-2.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-205.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-248.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-250.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-26.tbl",
+                    "resident_pages": 1
+                  }
+                ],
+                "errors": [],
+                "observation_started_monotonic_ns": 49826846240091,
+                "complete": true,
+                "observation_finished_monotonic_ns": 49826847231453
+              },
+              "advice": {
+                "attempted_files": 75,
+                "advised_files": 75,
+                "errors": [],
+                "complete": true
+              },
+              "before_target": {
+                "files": 75,
+                "files_checked": 75,
+                "pages_checked": 75,
+                "resident_pages": 0,
+                "resident_examples": [],
+                "errors": [],
+                "observation_started_monotonic_ns": 49826847528991,
+                "complete": true,
+                "observation_finished_monotonic_ns": 49826848830710
+              },
+              "target_ready_monotonic_ns": 49826848831050,
+              "after_target": {
+                "files": 75,
+                "files_checked": 75,
+                "pages_checked": 75,
+                "resident_pages": 67,
+                "resident_examples": [
+                  {
+                    "path": "catalog-1-105.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-111.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-126.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-138.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-14.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-145.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-152.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-161.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-162.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-174.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-191.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-2.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-205.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-248.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-250.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-26.tbl",
+                    "resident_pages": 1
+                  }
+                ],
+                "errors": [],
+                "observation_started_monotonic_ns": 49826922677300,
+                "complete": true,
+                "observation_finished_monotonic_ns": 49826923646749
+              }
+            },
+            "engine_metrics": {
+              "candidates": 64,
+              "scanned_bytes": 11216,
+              "seconds": 0.010870569
+            }
+          }
+        ],
+        "current": [
+          {
+            "wall_seconds": 0.015340193996962626,
+            "returncode": 0,
+            "stdout": "{\"api_version\":1,\"execution_complete\":true,\"has_more\":false,\"metrics\":{\"candidates\":64,\"scanned_bytes\":11216,\"seconds\":0.011439304000000001},\"next_cursor\":null,\"output_truncated\":false,\"position_units\":{\"column\":\"utf8_byte\",\"column_base\":1,\"line_base\":1},\"results\":[],\"returned\":0,\"snapshot\":{\"freshness\":\"unknown\",\"generation\":\"1\",\"source\":\"index\"},\"status\":\"ok\",\"total\":64,\"warnings\":[]}\n",
+            "stderr": "",
+            "cpu_seconds": 0.006715,
+            "peak_rss_bytes": 16121856,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "os_io": {
+              "input_block_operations": 536,
+              "output_block_operations": 8,
+              "major_page_faults": 0,
+              "minor_page_faults": 629,
+              "method": "isolated target getrusage(RUSAGE_CHILDREN); OS block-operation counters, not device-byte measurements"
+            },
+            "target_worker_ready_monotonic_ns": 49826997469843,
+            "cache": {
+              "requested": "cold",
+              "label": "verified-cold-file-data-pages",
+              "probe_unavailable": null,
+              "before_advice": {
+                "files": 75,
+                "files_checked": 75,
+                "pages_checked": 75,
+                "resident_pages": 71,
+                "resident_examples": [
+                  {
+                    "path": "catalog-1-105.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-111.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-126.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-138.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-14.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-145.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-152.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-161.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-162.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-174.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-191.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-2.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-205.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-248.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-250.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-26.tbl",
+                    "resident_pages": 1
+                  }
+                ],
+                "errors": [],
+                "observation_started_monotonic_ns": 49826927096410,
+                "complete": true,
+                "observation_finished_monotonic_ns": 49826928186581
+              },
+              "advice": {
+                "attempted_files": 75,
+                "advised_files": 75,
+                "errors": [],
+                "complete": true
+              },
+              "before_target": {
+                "files": 75,
+                "files_checked": 75,
+                "pages_checked": 75,
+                "resident_pages": 0,
+                "resident_examples": [],
+                "errors": [],
+                "observation_started_monotonic_ns": 49826928550628,
+                "complete": true,
+                "observation_finished_monotonic_ns": 49826929414959
+              },
+              "target_ready_monotonic_ns": 49826929415209,
+              "after_target": {
+                "files": 75,
+                "files_checked": 75,
+                "pages_checked": 75,
+                "resident_pages": 67,
+                "resident_examples": [
+                  {
+                    "path": "catalog-1-105.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-111.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-126.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-138.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-14.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-145.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-152.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-161.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-162.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-174.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-191.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-2.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-205.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-248.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-250.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-26.tbl",
+                    "resident_pages": 1
+                  }
+                ],
+                "errors": [],
+                "observation_started_monotonic_ns": 49827022449619,
+                "complete": true,
+                "observation_finished_monotonic_ns": 49827024592314
+              }
+            },
+            "engine_metrics": {
+              "candidates": 64,
+              "scanned_bytes": 11216,
+              "seconds": 0.011439304
+            }
+          }
+        ],
+        "rg": [
+          {
+            "wall_seconds": 0.014463619998423383,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 0.017599,
+            "peak_rss_bytes": 16121856,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "os_io": {
+              "input_block_operations": 512,
+              "output_block_operations": 0,
+              "major_page_faults": 0,
+              "minor_page_faults": 1210,
+              "method": "isolated target getrusage(RUSAGE_CHILDREN); OS block-operation counters, not device-byte measurements"
+            },
+            "target_worker_ready_monotonic_ns": 49827083899484,
+            "cache": {
+              "requested": "cold",
+              "label": "verified-cold-file-data-pages",
+              "probe_unavailable": null,
+              "before_advice": {
+                "files": 64,
+                "files_checked": 64,
+                "pages_checked": 64,
+                "resident_pages": 64,
+                "resident_examples": [
+                  {
+                    "path": "group_0/module_0.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_1.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_10.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_11.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_12.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_13.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_14.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_15.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_16.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_17.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_18.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_19.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_2.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_20.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_21.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_22.cpp",
+                    "resident_pages": 1
+                  }
+                ],
+                "errors": [],
+                "observation_started_monotonic_ns": 49827029300229,
+                "complete": true,
+                "observation_finished_monotonic_ns": 49827030087304
+              },
+              "advice": {
+                "attempted_files": 64,
+                "advised_files": 64,
+                "errors": [],
+                "complete": true
+              },
+              "before_target": {
+                "files": 64,
+                "files_checked": 64,
+                "pages_checked": 64,
+                "resident_pages": 0,
+                "resident_examples": [],
+                "errors": [],
+                "observation_started_monotonic_ns": 49827031428772,
+                "complete": true,
+                "observation_finished_monotonic_ns": 49827032424100
+              },
+              "target_ready_monotonic_ns": 49827032424381,
+              "after_target": {
+                "files": 64,
+                "files_checked": 64,
+                "pages_checked": 64,
+                "resident_pages": 64,
+                "resident_examples": [
+                  {
+                    "path": "group_0/module_0.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_1.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_10.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_11.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_12.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_13.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_14.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_15.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_16.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_17.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_18.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_19.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_2.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_20.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_21.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_22.cpp",
+                    "resident_pages": 1
+                  }
+                ],
+                "errors": [],
+                "observation_started_monotonic_ns": 49827109387480,
+                "complete": true,
+                "observation_finished_monotonic_ns": 49827110516519
+              }
+            },
+            "stdout_bytes": 1654,
+            "stdout_sha256": "e4447c6a87904e7c763f97ba88f6e9aad5a331b024fbff00fb6019a52fbe9e42",
+            "path_count_sha256": "4e7291dc340b09a3701f7bdc721a3e2fa18b5626fca7f70db826388a780b0e3a",
+            "matching_files": 64
+          }
+        ]
+      },
+      "summaries": {
+        "baseline": {
+          "verified-cold-file-data-pages": {
+            "wall_ms": {
+              "iterations": 1,
+              "median": 14.49289100128226,
+              "p95": 14.49289100128226,
+              "min": 14.49289100128226,
+              "max": 14.49289100128226,
+              "samples": [
+                14.49289100128226
+              ]
+            },
+            "cpu_ms": {
+              "iterations": 1,
+              "median": 6.9719999999999995,
+              "p95": 6.9719999999999995,
+              "min": 6.9719999999999995,
+              "max": 6.9719999999999995,
+              "samples": [
+                6.9719999999999995
+              ]
+            },
+            "peak_rss_bytes": {
+              "iterations": 1,
+              "median": 16121856,
+              "p95": 16121856,
+              "min": 16121856,
+              "max": 16121856,
+              "samples": [
+                16121856
+              ]
+            },
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor"
+          }
+        },
+        "current": {
+          "verified-cold-file-data-pages": {
+            "wall_ms": {
+              "iterations": 1,
+              "median": 15.340193996962626,
+              "p95": 15.340193996962626,
+              "min": 15.340193996962626,
+              "max": 15.340193996962626,
+              "samples": [
+                15.340193996962626
+              ]
+            },
+            "cpu_ms": {
+              "iterations": 1,
+              "median": 6.715,
+              "p95": 6.715,
+              "min": 6.715,
+              "max": 6.715,
+              "samples": [
+                6.715
+              ]
+            },
+            "peak_rss_bytes": {
+              "iterations": 1,
+              "median": 16121856,
+              "p95": 16121856,
+              "min": 16121856,
+              "max": 16121856,
+              "samples": [
+                16121856
+              ]
+            },
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor"
+          }
+        },
+        "rg": {
+          "verified-cold-file-data-pages": {
+            "wall_ms": {
+              "iterations": 1,
+              "median": 14.463619998423383,
+              "p95": 14.463619998423383,
+              "min": 14.463619998423383,
+              "max": 14.463619998423383,
+              "samples": [
+                14.463619998423383
+              ]
+            },
+            "cpu_ms": {
+              "iterations": 1,
+              "median": 17.599,
+              "p95": 17.599,
+              "min": 17.599,
+              "max": 17.599,
+              "samples": [
+                17.599
+              ]
+            },
+            "peak_rss_bytes": {
+              "iterations": 1,
+              "median": 16121856,
+              "p95": 16121856,
+              "min": 16121856,
+              "max": 16121856,
+              "samples": [
+                16121856
+              ]
+            },
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor"
+          }
+        }
+      }
+    },
+    {
+      "query": {
+        "name": "broad_regex",
+        "query": "/needle_[0-9]+/",
+        "rg": "needle_[0-9]+"
+      },
+      "mode": "warm",
+      "commands": {
+        "baseline": [
+          "/workspace/scratch/93bfa6b783da/ReSearchify-baseline/build/rs",
+          "find",
+          "/needle_[0-9]+/",
+          "--index",
+          "/tmp/researchify-cache-gate-1892ph6m/smoke/fixture/baseline-compact",
+          "--json",
+          "--limit",
+          "0",
+          "--snippets",
+          "0",
+          "--memory-mb",
+          "256",
+          "--regex-steps",
+          "18446744073709551615"
+        ],
+        "current": [
+          "/workspace/scratch/93bfa6b783da/rs-final-integrated",
+          "find",
+          "/needle_[0-9]+/",
+          "--index",
+          "/tmp/researchify-cache-gate-1892ph6m/smoke/fixture/current-compact",
+          "--json",
+          "--limit",
+          "0",
+          "--snippets",
+          "0",
+          "--memory-mb",
+          "256",
+          "--regex-steps",
+          "18446744073709551615"
+        ],
+        "rg": [
+          "/opt/codex/codex-path/rg",
+          "--no-config",
+          "--no-ignore",
+          "--hidden",
+          "--text",
+          "--color",
+          "never",
+          "--case-sensitive",
+          "--count",
+          "--null",
+          "--regexp",
+          "needle_[0-9]+",
+          "."
+        ]
+      },
+      "orders": [
+        [
+          "rg",
+          "baseline",
+          "current"
+        ]
+      ],
+      "tools": {
+        "baseline": [
+          {
+            "wall_seconds": 0.006516146000649314,
+            "returncode": 0,
+            "stdout": "{\"api_version\":1,\"execution_complete\":true,\"has_more\":false,\"metrics\":{\"candidates\":64,\"scanned_bytes\":11216,\"seconds\":0.0027024969999999999},\"next_cursor\":null,\"output_truncated\":false,\"position_units\":{\"column\":\"utf8_byte\",\"column_base\":1,\"line_base\":1},\"results\":[],\"returned\":0,\"snapshot\":{\"freshness\":\"unknown\",\"generation\":\"1\",\"source\":\"index\"},\"status\":\"ok\",\"total\":64,\"warnings\":[]}\n",
+            "stderr": "",
+            "cpu_seconds": 0.0063019999999999994,
+            "peak_rss_bytes": 16121856,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "os_io": {
+              "input_block_operations": 0,
+              "output_block_operations": 8,
+              "major_page_faults": 0,
+              "minor_page_faults": 621,
+              "method": "isolated target getrusage(RUSAGE_CHILDREN); OS block-operation counters, not device-byte measurements"
+            },
+            "target_worker_ready_monotonic_ns": 49827445271399,
+            "cache": {
+              "requested": "warm",
+              "label": "warm-query-replay",
+              "probe_unavailable": null,
+              "before_advice": null,
+              "advice": null,
+              "before_target": {
+                "files": 75,
+                "files_checked": 75,
+                "pages_checked": 75,
+                "resident_pages": 67,
+                "resident_examples": [
+                  {
+                    "path": "catalog-1-105.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-111.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-126.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-138.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-14.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-145.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-152.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-161.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-162.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-174.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-191.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-2.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-205.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-248.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-250.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-26.tbl",
+                    "resident_pages": 1
+                  }
+                ],
+                "errors": [],
+                "observation_started_monotonic_ns": 49827386071826,
+                "complete": true,
+                "observation_finished_monotonic_ns": 49827386952101
+              },
+              "target_ready_monotonic_ns": 49827386952481,
+              "after_target": {
+                "files": 75,
+                "files_checked": 75,
+                "pages_checked": 75,
+                "resident_pages": 67,
+                "resident_examples": [
+                  {
+                    "path": "catalog-1-105.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-111.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-126.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-138.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-14.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-145.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-152.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-161.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-162.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-174.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-191.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-2.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-205.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-248.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-250.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-26.tbl",
+                    "resident_pages": 1
+                  }
+                ],
+                "errors": [],
+                "observation_started_monotonic_ns": 49827467973944,
+                "complete": true,
+                "observation_finished_monotonic_ns": 49827469233078
+              }
+            },
+            "engine_metrics": {
+              "candidates": 64,
+              "scanned_bytes": 11216,
+              "seconds": 0.002702497
+            }
+          }
+        ],
+        "current": [
+          {
+            "wall_seconds": 0.02013839599385392,
+            "returncode": 0,
+            "stdout": "{\"api_version\":1,\"execution_complete\":true,\"has_more\":false,\"metrics\":{\"candidates\":64,\"scanned_bytes\":11216,\"seconds\":0.010435043},\"next_cursor\":null,\"output_truncated\":false,\"position_units\":{\"column\":\"utf8_byte\",\"column_base\":1,\"line_base\":1},\"results\":[],\"returned\":0,\"snapshot\":{\"freshness\":\"unknown\",\"generation\":\"1\",\"source\":\"index\"},\"status\":\"ok\",\"total\":64,\"warnings\":[]}\n",
+            "stderr": "",
+            "cpu_seconds": 0.019506,
+            "peak_rss_bytes": 16121856,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "os_io": {
+              "input_block_operations": 0,
+              "output_block_operations": 8,
+              "major_page_faults": 0,
+              "minor_page_faults": 630,
+              "method": "isolated target getrusage(RUSAGE_CHILDREN); OS block-operation counters, not device-byte measurements"
+            },
+            "target_worker_ready_monotonic_ns": 49827774741511,
+            "cache": {
+              "requested": "warm",
+              "label": "warm-query-replay",
+              "probe_unavailable": null,
+              "before_advice": null,
+              "advice": null,
+              "before_target": {
+                "files": 75,
+                "files_checked": 75,
+                "pages_checked": 75,
+                "resident_pages": 67,
+                "resident_examples": [
+                  {
+                    "path": "catalog-1-105.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-111.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-126.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-138.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-14.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-145.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-152.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-161.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-162.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-174.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-191.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-2.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-205.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-248.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-250.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-26.tbl",
+                    "resident_pages": 1
+                  }
+                ],
+                "errors": [],
+                "observation_started_monotonic_ns": 49827629293660,
+                "complete": true,
+                "observation_finished_monotonic_ns": 49827630771484
+              },
+              "target_ready_monotonic_ns": 49827630771835,
+              "after_target": {
+                "files": 75,
+                "files_checked": 75,
+                "pages_checked": 75,
+                "resident_pages": 67,
+                "resident_examples": [
+                  {
+                    "path": "catalog-1-105.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-111.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-126.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-138.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-14.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-145.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-152.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-161.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-162.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-174.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-191.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-2.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-205.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-248.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-250.tbl",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "catalog-1-26.tbl",
+                    "resident_pages": 1
+                  }
+                ],
+                "errors": [],
+                "observation_started_monotonic_ns": 49827810020746,
+                "complete": true,
+                "observation_finished_monotonic_ns": 49827811524369
+              }
+            },
+            "engine_metrics": {
+              "candidates": 64,
+              "scanned_bytes": 11216,
+              "seconds": 0.010435043
+            }
+          }
+        ],
+        "rg": [
+          {
+            "wall_seconds": 0.011627673004113603,
+            "returncode": 0,
+            "stderr": "",
+            "cpu_seconds": 0.018867000000000002,
+            "peak_rss_bytes": 16121856,
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor",
+            "os_io": {
+              "input_block_operations": 0,
+              "output_block_operations": 0,
+              "major_page_faults": 0,
+              "minor_page_faults": 1209,
+              "method": "isolated target getrusage(RUSAGE_CHILDREN); OS block-operation counters, not device-byte measurements"
+            },
+            "target_worker_ready_monotonic_ns": 49827270624327,
+            "cache": {
+              "requested": "warm",
+              "label": "warm-query-replay",
+              "probe_unavailable": null,
+              "before_advice": null,
+              "advice": null,
+              "before_target": {
+                "files": 64,
+                "files_checked": 64,
+                "pages_checked": 64,
+                "resident_pages": 64,
+                "resident_examples": [
+                  {
+                    "path": "group_0/module_0.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_1.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_10.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_11.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_12.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_13.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_14.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_15.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_16.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_17.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_18.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_19.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_2.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_20.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_21.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_22.cpp",
+                    "resident_pages": 1
+                  }
+                ],
+                "errors": [],
+                "observation_started_monotonic_ns": 49827202311980,
+                "complete": true,
+                "observation_finished_monotonic_ns": 49827203753840
+              },
+              "target_ready_monotonic_ns": 49827203754471,
+              "after_target": {
+                "files": 64,
+                "files_checked": 64,
+                "pages_checked": 64,
+                "resident_pages": 64,
+                "resident_examples": [
+                  {
+                    "path": "group_0/module_0.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_1.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_10.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_11.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_12.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_13.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_14.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_15.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_16.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_17.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_18.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_19.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_2.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_20.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_21.cpp",
+                    "resident_pages": 1
+                  },
+                  {
+                    "path": "group_0/module_22.cpp",
+                    "resident_pages": 1
+                  }
+                ],
+                "errors": [],
+                "observation_started_monotonic_ns": 49827293208027,
+                "complete": true,
+                "observation_finished_monotonic_ns": 49827294043985
+              }
+            },
+            "stdout_bytes": 1654,
+            "stdout_sha256": "6127e03869439954cfc9306f3e88ee40485d32322d9bcf283fc991be3b70ed0d",
+            "path_count_sha256": "4e7291dc340b09a3701f7bdc721a3e2fa18b5626fca7f70db826388a780b0e3a",
+            "matching_files": 64
+          }
+        ]
+      },
+      "summaries": {
+        "baseline": {
+          "warm-query-replay": {
+            "wall_ms": {
+              "iterations": 1,
+              "median": 6.516146000649314,
+              "p95": 6.516146000649314,
+              "min": 6.516146000649314,
+              "max": 6.516146000649314,
+              "samples": [
+                6.516146000649314
+              ]
+            },
+            "cpu_ms": {
+              "iterations": 1,
+              "median": 6.302,
+              "p95": 6.302,
+              "min": 6.302,
+              "max": 6.302,
+              "samples": [
+                6.302
+              ]
+            },
+            "peak_rss_bytes": {
+              "iterations": 1,
+              "median": 16121856,
+              "p95": 16121856,
+              "min": 16121856,
+              "max": 16121856,
+              "samples": [
+                16121856
+              ]
+            },
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor"
+          }
+        },
+        "current": {
+          "warm-query-replay": {
+            "wall_ms": {
+              "iterations": 1,
+              "median": 20.13839599385392,
+              "p95": 20.13839599385392,
+              "min": 20.13839599385392,
+              "max": 20.13839599385392,
+              "samples": [
+                20.13839599385392
+              ]
+            },
+            "cpu_ms": {
+              "iterations": 1,
+              "median": 19.506,
+              "p95": 19.506,
+              "min": 19.506,
+              "max": 19.506,
+              "samples": [
+                19.506
+              ]
+            },
+            "peak_rss_bytes": {
+              "iterations": 1,
+              "median": 16121856,
+              "p95": 16121856,
+              "min": 16121856,
+              "max": 16121856,
+              "samples": [
+                16121856
+              ]
+            },
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor"
+          }
+        },
+        "rg": {
+          "warm-query-replay": {
+            "wall_ms": {
+              "iterations": 1,
+              "median": 11.627673004113603,
+              "p95": 11.627673004113603,
+              "min": 11.627673004113603,
+              "max": 11.627673004113603,
+              "samples": [
+                11.627673004113603
+              ]
+            },
+            "cpu_ms": {
+              "iterations": 1,
+              "median": 18.867,
+              "p95": 18.867,
+              "min": 18.867,
+              "max": 18.867,
+              "samples": [
+                18.867
+              ]
+            },
+            "peak_rss_bytes": {
+              "iterations": 1,
+              "median": 16121856,
+              "p95": 16121856,
+              "min": 16121856,
+              "max": 16121856,
+              "samples": [
+                16121856
+              ]
+            },
+            "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor"
+          }
+        }
+      }
+    }
+  ],
+  "indexes": {
+    "baseline": {
+      "api_version": 1,
+      "bytes": 11216,
+      "execution_complete": true,
+      "files": 64,
+      "generation": "1",
+      "index_bytes": 38447,
+      "lines": 512,
+      "profile": "compact",
+      "recovered": false,
+      "retained_generations": 1,
+      "root": "/tmp/researchify-cache-gate-1892ph6m/smoke/fixture/source",
+      "segments": 4,
+      "status": "ok",
+      "tokens": 1473,
+      "warnings": []
+    },
+    "current": {
+      "api_version": 1,
+      "bytes": 11216,
+      "execution_complete": true,
+      "files": 64,
+      "generation": "1",
+      "index_bytes": 38452,
+      "lines": 512,
+      "profile": "compact",
+      "recovered": false,
+      "retained_generations": 1,
+      "root": "/tmp/researchify-cache-gate-1892ph6m/smoke/fixture/source",
+      "segments": 4,
+      "status": "ok",
+      "tokens": 1473,
+      "warnings": []
+    }
+  },
+  "ripgrep_version": {
+    "wall_seconds": 0.0015181700000539422,
+    "returncode": 0,
+    "stdout": "ripgrep 15.2.0 (rev e89fff89ac)\n\nfeatures:+pcre2\nsimd(compile):+SSE2,-SSSE3,-AVX2\nsimd(runtime):+SSE2,+SSSE3,+AVX2\n\nPCRE2 10.45 is available (JIT is available)\n",
+    "stderr": "",
+    "cpu_seconds": 0.001093,
+    "peak_rss_bytes": 15728640,
+    "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor"
+  }
+}

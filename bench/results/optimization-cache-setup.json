@@ -1,0 +1,240 @@
+{
+  "format": "researchify-cache-setup-evidence-v1",
+  "search_build_timing_separate": true,
+  "main": {
+    "format": "researchify-cache-preparation-v1",
+    "complete": true,
+    "mode": "main",
+    "setup_excluded_from_search_timings": true,
+    "source_revisions": {
+      "baseline": "eb858348169157686e70104af6b64f9539a39fe8",
+      "current": "228220743f205c370964fcb4475c8daee1f4b3b7"
+    },
+    "builds": {
+      "baseline": {
+        "argv": [
+          "/workspace/scratch/93bfa6b783da/ReSearchify-baseline/build/rs",
+          "create",
+          "--root",
+          "/tmp/researchify-cache-gate-1892ph6m/main/fixture/source",
+          "--index",
+          "/tmp/researchify-cache-gate-1892ph6m/main/fixture/baseline-compact",
+          "--profile",
+          "compact",
+          "--threads",
+          "4",
+          "--memory-mb",
+          "256",
+          "--json"
+        ],
+        "measurement": {
+          "wall_seconds": 10.645975961000659,
+          "returncode": 0,
+          "stdout": "{\"added\":100000,\"api_version\":1,\"bytes\":366645610,\"changed\":0,\"execution_complete\":true,\"files\":100000,\"generation\":\"1\",\"global_scan\":true,\"hashed\":100000,\"lines\":5000000,\"memory_budget_bytes\":268435456,\"removed\":0,\"seconds\":10.642557740000001,\"segments\":16,\"skipped\":0,\"status\":\"ok\",\"tokenized\":100000,\"unchanged\":0,\"warnings\":[],\"workers\":4}\n",
+          "stderr": "",
+          "cpu_seconds": 33.798033000000004,
+          "peak_rss_bytes": 25534464,
+          "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor"
+        }
+      },
+      "current": {
+        "argv": [
+          "/workspace/scratch/93bfa6b783da/rs-final-integrated",
+          "create",
+          "--root",
+          "/tmp/researchify-cache-gate-1892ph6m/main/fixture/source",
+          "--index",
+          "/tmp/researchify-cache-gate-1892ph6m/main/fixture/current-compact",
+          "--profile",
+          "compact",
+          "--threads",
+          "4",
+          "--memory-mb",
+          "256",
+          "--json"
+        ],
+        "measurement": {
+          "wall_seconds": 6.5545279900034075,
+          "returncode": 0,
+          "stdout": "{\"added\":100000,\"api_version\":1,\"bytes\":366645610,\"changed\":0,\"execution_complete\":true,\"files\":100000,\"generation\":\"1\",\"global_scan\":true,\"hashed\":100000,\"lines\":5000000,\"memory_budget_bytes\":268435456,\"removed\":0,\"seconds\":6.5509881439999997,\"segments\":16,\"skipped\":0,\"status\":\"ok\",\"tokenized\":100000,\"unchanged\":0,\"warnings\":[],\"workers\":4}\n",
+          "stderr": "",
+          "cpu_seconds": 25.825201,
+          "peak_rss_bytes": 26189824,
+          "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor"
+        }
+      }
+    },
+    "fixture": "/tmp/researchify-cache-gate-1892ph6m/main/fixture",
+    "binary_sha256": {
+      "baseline": "b0a2c90c2dcaa3a71993751ec895807f32e8959e7439397971880564087e9154",
+      "current": "701c8a34f6578e212336e80628bdd711df6413d6c8f1e0edf7d8b58f8a4b1293"
+    },
+    "generation_binary_sha256": "eb937fdba8daf8b8d07b52b5567eff1c0e6642ebb83d0da817e6ccf3a2529ac5",
+    "generation": {
+      "argv": [
+        "/workspace/scratch/93bfa6b783da/ReSearchify/build/cs_bench",
+        "--phase",
+        "generate",
+        "--work",
+        "/tmp/researchify-cache-gate-1892ph6m/main/fixture",
+        "--files",
+        "100000",
+        "--lines",
+        "50"
+      ],
+      "measurement": {
+        "wall_seconds": 2.6702271519970964,
+        "returncode": 0,
+        "stdout": "CONFIG cpp=20 threads=16 memory_mb=256 profile=compact hardware_concurrency_hint=9\nGENERATE files=100000 lines=5000000 bytes=366645610 seconds=2.667625\n",
+        "stderr": "",
+        "cpu_seconds": 2.615661,
+        "peak_rss_bytes": 15728640,
+        "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor"
+      }
+    },
+    "corpus": {
+      "format": "researchify-cache-corpus-v1",
+      "kind": "synthetic-surrogate",
+      "files": 100000,
+      "lines": 5000000,
+      "bytes": 366645610,
+      "path_and_content_sha256": "2ec655297c4dd2c2d779ecdb191123bdf0278c6dc0724820d4b21a271c659520",
+      "digest_order": "numeric module number",
+      "description": "Owned generated fixture, not a user corpus",
+      "augmentation": null
+    },
+    "scoped_data_cleaning": {
+      "method": "fdatasync each owned fixture source/index file; no global sync",
+      "files_cleaned": 102162,
+      "errors": [],
+      "wall_seconds": 9.313334588005091
+    },
+    "wall_seconds": 31.365635303998715
+  },
+  "smoke": {
+    "format": "researchify-cache-preparation-v1",
+    "complete": true,
+    "mode": "smoke",
+    "setup_excluded_from_search_timings": true,
+    "source_revisions": {
+      "baseline": "eb858348169157686e70104af6b64f9539a39fe8",
+      "current": "228220743f205c370964fcb4475c8daee1f4b3b7"
+    },
+    "builds": {
+      "baseline": {
+        "argv": [
+          "/workspace/scratch/93bfa6b783da/ReSearchify-baseline/build/rs",
+          "create",
+          "--root",
+          "/tmp/researchify-cache-gate-1892ph6m/smoke/fixture/source",
+          "--index",
+          "/tmp/researchify-cache-gate-1892ph6m/smoke/fixture/baseline-compact",
+          "--profile",
+          "compact",
+          "--threads",
+          "4",
+          "--memory-mb",
+          "256",
+          "--json"
+        ],
+        "measurement": {
+          "wall_seconds": 0.009284252999350429,
+          "returncode": 0,
+          "stdout": "{\"added\":64,\"api_version\":1,\"bytes\":11216,\"changed\":0,\"execution_complete\":true,\"files\":64,\"generation\":\"1\",\"global_scan\":true,\"hashed\":64,\"lines\":512,\"memory_budget_bytes\":268435456,\"removed\":0,\"seconds\":0.0065126439999999997,\"segments\":4,\"skipped\":0,\"status\":\"ok\",\"tokenized\":64,\"unchanged\":0,\"warnings\":[],\"workers\":4}\n",
+          "stderr": "",
+          "cpu_seconds": 0.015042,
+          "peak_rss_bytes": 15728640,
+          "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor"
+        }
+      },
+      "current": {
+        "argv": [
+          "/workspace/scratch/93bfa6b783da/rs-final-integrated",
+          "create",
+          "--root",
+          "/tmp/researchify-cache-gate-1892ph6m/smoke/fixture/source",
+          "--index",
+          "/tmp/researchify-cache-gate-1892ph6m/smoke/fixture/current-compact",
+          "--profile",
+          "compact",
+          "--threads",
+          "4",
+          "--memory-mb",
+          "256",
+          "--json"
+        ],
+        "measurement": {
+          "wall_seconds": 0.008784401004959363,
+          "returncode": 0,
+          "stdout": "{\"added\":64,\"api_version\":1,\"bytes\":11216,\"changed\":0,\"execution_complete\":true,\"files\":64,\"generation\":\"1\",\"global_scan\":true,\"hashed\":64,\"lines\":512,\"memory_budget_bytes\":268435456,\"removed\":0,\"seconds\":0.0059085259999999999,\"segments\":4,\"skipped\":0,\"status\":\"ok\",\"tokenized\":64,\"unchanged\":0,\"warnings\":[],\"workers\":4}\n",
+          "stderr": "",
+          "cpu_seconds": 0.013978,
+          "peak_rss_bytes": 15728640,
+          "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor"
+        }
+      }
+    },
+    "fixture": "/tmp/researchify-cache-gate-1892ph6m/smoke/fixture",
+    "binary_sha256": {
+      "baseline": "b0a2c90c2dcaa3a71993751ec895807f32e8959e7439397971880564087e9154",
+      "current": "701c8a34f6578e212336e80628bdd711df6413d6c8f1e0edf7d8b58f8a4b1293"
+    },
+    "generation": {
+      "argv": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "/workspace/scratch/93bfa6b783da/ReSearchify-cache-benchmark/scripts/generate_tiny_corpus.py",
+        "--work",
+        "/tmp/researchify-cache-gate-1892ph6m/smoke/fixture",
+        "--files",
+        "64"
+      ],
+      "measurement": {
+        "wall_seconds": 0.041389220001292415,
+        "returncode": 0,
+        "stdout": "{\"format\": \"researchify-tiny-corpus-v1\", \"kind\": \"synthetic-surrogate\", \"files\": 64, \"lines\": 512, \"bytes\": 11204, \"path_and_content_sha256\": \"c65a81bb80824f2a83cab267ffb18e37a067b584eb15f884b3b1c00e2338ac73\", \"generation_seconds\": 0.002837888001522515}\n",
+        "stderr": "",
+        "cpu_seconds": 0.040819999999999995,
+        "peak_rss_bytes": 15728640,
+        "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor"
+      }
+    },
+    "pristine_generator_manifest": {
+      "format": "researchify-tiny-corpus-v1",
+      "kind": "synthetic-surrogate",
+      "files": 64,
+      "lines": 512,
+      "bytes": 11204,
+      "path_and_content_sha256": "c65a81bb80824f2a83cab267ffb18e37a067b584eb15f884b3b1c00e2338ac73",
+      "generation_seconds": 0.002837888001522515
+    },
+    "augmentation": {
+      "file": "group_0/module_42.cpp",
+      "before_sha256": "8930ff6d19b4a7fa049bad97d76af11680716004a8980c191075602bb5116aee",
+      "after_sha256": "b7f0ba6569b9ea18e25708632d358d89e13318b7a6bc29fba5e1b02945e2a81f",
+      "description": "One existing line has two needle_42 occurrences; term matches=3, broad-regex matching lines=2; all files retain eight lines."
+    },
+    "corpus": {
+      "format": "researchify-cache-corpus-v1",
+      "kind": "synthetic-surrogate",
+      "files": 64,
+      "lines": 512,
+      "bytes": 11216,
+      "path_and_content_sha256": "a8b4189a54f6502997fdde878db4fb1806dbfb455ec6607ab1c52c50a5db7fc0",
+      "digest_order": "numeric module number",
+      "description": "Owned generated fixture, not a user corpus",
+      "augmentation": {
+        "file": "group_0/module_42.cpp",
+        "before_sha256": "8930ff6d19b4a7fa049bad97d76af11680716004a8980c191075602bb5116aee",
+        "after_sha256": "b7f0ba6569b9ea18e25708632d358d89e13318b7a6bc29fba5e1b02945e2a81f",
+        "description": "One existing line has two needle_42 occurrences; term matches=3, broad-regex matching lines=2; all files retain eight lines."
+      }
+    },
+    "scoped_data_cleaning": {
+      "method": "fdatasync each owned fixture source/index file; no global sync",
+      "files_cleaned": 214,
+      "errors": [],
+      "wall_seconds": 0.11496273399825441
+    },
+    "wall_seconds": 0.37475534599798266
+  }
+}
