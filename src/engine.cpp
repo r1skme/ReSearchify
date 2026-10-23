@@ -1288,15 +1288,19 @@ public:
         for (const auto& [segment, descriptor] : source.lists)
             cursors_.emplace(segment, std::make_unique<disk::PostingCursor>(segment_path(snapshot.directory, segment), snapshot.cache, descriptor));
     }
-    const disk::Posting* match(const Record& record) {
-        auto found = cursors_.find(record.segment);
-        if (found == cursors_.end() || !found->second->seek(record.id)) return nullptr;
+    const disk::Posting* raw_match(std::uint64_t segment, std::uint64_t id) {
+        auto found = cursors_.find(segment);
+        if (found == cursors_.end() || !found->second->seek(id)) return nullptr;
         const auto& value = found->second->current();
-        if (value.document != record.id) return nullptr;
-        if (value.line > record.lines || value.column > std::uint64_t(record.max_line) + 1 || (terms_ && value.frequency > record.tokens))
+        return value.document == id ? &value : nullptr;
+    }
+    const disk::Posting* match(const Record& record) {
+        const auto* value = raw_match(record.segment, record.id);
+        if (!value) return nullptr;
+        if (value->line > record.lines || value->column > std::uint64_t(record.max_line) + 1 || (terms_ && value->frequency > record.tokens))
             throw Error("E_INDEX_CORRUPT", "Term posting exceeds document bounds");
         misses_ = 0;
-        return &value;
+        return value;
     }
     std::uint64_t hint_after_miss(std::uint64_t target) {
         // A global raw-posting lower bound can skip a disjoint ID range, but
@@ -1317,6 +1321,7 @@ public:
 class LiveStream {
     DocumentLookup& documents_;
     const std::function<bool()>* cancelled_ = nullptr;
+    const std::vector<std::unique_ptr<ExactStream>>* raw_memberships_ = nullptr;
     std::size_t cancellation_poll_ = 0;
     struct Part { std::uint64_t segment;
     disk::PostingCursor cursor;
@@ -1339,7 +1344,16 @@ class LiveStream {
         while (part.cursor.seek(target)) {
             check_cancelled();
             const auto& value = part.cursor.current();
-            auto r = documents_.get(value.document);
+            // Necessary content anchors can reject this segment's raw posting
+            // before resolving its catalog record. Never mix postings belonging
+            // to different versions of one document. Each part advances only
+            // its own segment's monotone membership cursors; accepted records
+            // still undergo the ordinary liveness and posting-bounds checks.
+            bool accepted = true;
+            if (raw_memberships_) for (const auto& membership : *raw_memberships_) {
+                if (!membership->raw_match(part.segment, value.document)) { accepted = false; break; }
+            }
+            auto r = accepted ? documents_.get(value.document) : nullptr;
             if (r && r->segment == part.segment) {
                 if (value.line > r->lines || value.column > std::uint64_t(r->max_line) + 1 || (terms_ && value.frequency > r->tokens))
                     throw Error("E_INDEX_CORRUPT", "Posting exceeds document bounds");
@@ -1354,8 +1368,10 @@ class LiveStream {
     }
 public:
     LiveStream(const Snapshot& s, DocumentLookup& d, const TermSource& source,
-               const std::function<bool()>* cancelled = nullptr)
-        : documents_(d), cancelled_(cancelled), terms_(!source.term.empty() && source.term.front() == '\2') {
+               const std::function<bool()>* cancelled = nullptr,
+               const std::vector<std::unique_ptr<ExactStream>>* raw_memberships = nullptr)
+        : documents_(d), cancelled_(cancelled), raw_memberships_(raw_memberships),
+          terms_(!source.term.empty() && source.term.front() == '\2') {
         parts_.reserve(source.lists.size());
         for (const auto& [id, descriptor] : source.lists) parts_.push_back({id, disk::PostingCursor(segment_path(s.directory, id), s.cache, descriptor), {}});
     }
@@ -1417,13 +1433,15 @@ class AnchorStream {
     DocumentLookup& documents_;
     const std::function<bool()>* cancelled_ = nullptr;
     std::size_t cancellation_poll_ = 0;
-    std::unique_ptr<LiveStream> term_;
+    // The driver borrows this fixed membership vector and is destroyed first.
     std::vector<std::unique_ptr<ExactStream>> memberships_;
+    std::unique_ptr<LiveStream> term_;
     std::unique_ptr<AnchorStream> left_, right_;
 public:
     AnchorStream(const Snapshot& snapshot, DocumentLookup& documents, const Anchor& anchor,
                  const std::map<std::string, std::shared_ptr<TermSource>>& sources,
-                 const std::function<bool()>* cancelled = nullptr)
+                 const std::function<bool()>* cancelled = nullptr,
+                 bool prefilter_before_record = false)
         : kind_(anchor.kind), documents_(documents), cancelled_(cancelled) {
         if (kind_ == Anchor::Kind::Term) term_ = std::make_unique<LiveStream>(snapshot, documents, *sources.at(anchor.term), cancelled_);
         else {
@@ -1440,15 +1458,21 @@ public:
             };
             if (kind_ == Anchor::Kind::And && collect(anchor)) {
                 const auto cheapest = *std::min_element(terms.begin(), terms.end(), [](const auto* a, const auto* b) { return a->cost < b->cost; });
-                term_ = std::make_unique<LiveStream>(snapshot, documents, *sources.at(cheapest->term), cancelled_);
+                memberships_.reserve(terms.size() - 1);
                 for (const auto* item : terms) if (item != cheapest)
                     memberships_.push_back(std::make_unique<ExactStream>(snapshot, *sources.at(item->term), cancelled_));
+                term_ = std::make_unique<LiveStream>(snapshot, documents, *sources.at(cheapest->term), cancelled_,
+                                                   prefilter_before_record ? &memberships_ : nullptr);
                 return;
             }
             left_ = std::make_unique<AnchorStream>(snapshot, documents, *anchor.left, sources, cancelled_);
             right_ = std::make_unique<AnchorStream>(snapshot, documents, *anchor.right, sources, cancelled_);
         }
     }
+    AnchorStream(const AnchorStream&) = delete;
+    AnchorStream& operator=(const AnchorStream&) = delete;
+    AnchorStream(AnchorStream&&) = delete;
+    AnchorStream& operator=(AnchorStream&&) = delete;
     std::uint64_t seek(std::uint64_t target) {
         if (term_) {
             auto doc = term_->seek(target);
@@ -1695,7 +1719,8 @@ SearchReport do_search(const Snapshot& snapshot, const Query& query, const Searc
     std::vector<std::unique_ptr<ExactStream>> values(query.leaves.size());
     for (std::size_t i = 0; i < exact.size(); ++i) if (exact[i]) values[i] = std::make_unique<ExactStream>(snapshot, *exact[i]);
     if (!anchor.universe) anchors = std::make_unique<AnchorStream>(snapshot, documents, anchor, sources,
-        options.cancelled ? &options.cancelled : nullptr);
+        options.cancelled ? &options.cancelled : nullptr,
+        query.root->kind == NodeKind::Leaf && query.leaves[query.root->leaf].kind != LeafKind::Term);
     std::vector<bool> positive(query.leaves.size(), false), present(query.leaves.size());
     positive_leaves(query.root, false, positive);
     std::vector<std::uint64_t> scratch_counts(query.leaves.size()), scratch_lines(query.leaves.size());

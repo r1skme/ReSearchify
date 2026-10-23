@@ -1,4 +1,5 @@
 #include "test_support.hpp"
+#include "researchify/disk.hpp"
 #include "researchify/query.hpp"
 #include "researchify/storage.hpp"
 #include <algorithm>
@@ -143,6 +144,142 @@ void matches_oracle(const SearchReport& actual, const std::map<std::string, std:
 
 int main() {
     return run({
+        {"raw_content_intersection_keeps_versions_bounds_and_cancellation", [] {
+            Workspace w;
+            Corpus corpus;
+            const std::string unicode = "\xc3\xa9\xe7\xb5\x82\xf0\x9f\x99\x82";
+            const std::string literal = "\"abcDEFghi\"";
+            const std::string legacy_plan = " AND NOT absent_guard";
+            constexpr unsigned matches = 128;
+            for (unsigned n = 0; n < matches; ++n) {
+                corpus.emplace("keep/" + std::to_string(n) + ".cpp", "abcDEFghi\n" + unicode + "\nmarker\n");
+                corpus.emplace("prefix/" + std::to_string(n) + ".cpp",
+                    "abcDEFxxx\n\xc3\xa9\xe7\xb5\x82x\nuvwXYZxxx\nmarker\n");
+                corpus.emplace("suffix/" + std::to_string(n) + ".cpp",
+                    "xxxDEFghi\nx\xe7\xb5\x82\xf0\x9f\x99\x82\nxxxXYZrst\nmarker\n");
+            }
+            for (const auto& [path, text] : corpus) write(w.root / path, text);
+            auto bo = options();
+            bo.profile = "fast";
+            bo.threads = 1;
+            bo.segment_documents = 1024;
+            create_index(w.root, w.index, bo);
+            Index pinned(w.index, 128);
+            const auto original = corpus;
+            auto so = search_options();
+            const auto check = [&](Index& index, const Corpus& expected) {
+                for (const auto& expression : {literal, "\"" + unicode + "\""}) {
+                    const auto actual = index.search(expression, so);
+                    matches_oracle(actual, oracle(expected, expression));
+                    same_result(actual, index.search(expression + legacy_plan, so));
+                }
+                const auto regex = index.search("/abcDEFghi/", so);
+                matches_oracle(regex, oracle(expected, literal));
+                same_result(regex, index.search("/abcDEFghi/" + legacy_plan, so));
+                for (const auto& expression : {"marker", "abcDEFghi OR abcDEFxxx", "marker AND NOT abcDEFghi",
+                        "\"abcDEFghi\" OR \"uvwXYZrst\""})
+                    matches_oracle(index.search(expression, so), oracle(expected, expression));
+            };
+            check(pinned, corpus);
+            const auto initial = pinned.search(literal, so);
+            REQUIRE(initial.candidates == matches);
+            auto limited = so;
+            limited.max_candidates = matches;
+            same_result(initial, pinned.search(literal, limited));
+            limited.max_candidates = matches - 1;
+            rejects([&] { pinned.search(literal, limited); }, "E_BUDGET");
+            limited.max_candidates = 0;
+            limited.max_scan_bytes = 1;
+            rejects([&] { pinned.search(literal, limited); }, "E_BUDGET");
+            // Every necessary gram exists, but no document contains both halves.
+            // Cancellation must still be polled inside a run of raw rejections
+            // that never reaches the content matcher or evaluate().
+            REQUIRE(pinned.search("\"uvwXYZrst\"", so).candidates == 0);
+            limited.max_scan_bytes = 0;
+            std::size_t polls = 0;
+            limited.cancelled = [&] { return ++polls >= 3; };
+            rejects([&] { pinned.search("\"uvwXYZrst\"", limited); }, "E_CANCELLED");
+            REQUIRE(polls == 3);
+
+            fs::path segment;
+            for (const auto& item : fs::directory_iterator(w.index))
+                if (item.is_directory() && item.path().filename().string().starts_with("segment-")) {
+                    REQUIRE(segment.empty());
+                    segment = item.path();
+                }
+            REQUIRE(!segment.empty());
+            const auto postings = segment / "postings.bin";
+            const auto saved_postings = read(postings);
+            auto cache = std::make_shared<disk::PageCache>(1024 * 1024);
+            disk::Table terms(segment / "terms.tbl", cache);
+            const auto descriptor = terms.get(std::string(1, '\1') + "abc");
+            REQUIRE(descriptor.has_value());
+            REQUIRE(descriptor->front() == 1);
+            std::size_t at = 1;
+            const auto begin = disk::get_varint(*descriptor, at);
+            const auto end = disk::get_varint(*descriptor, at);
+            // CRC failure in a required membership stream remains an error.
+            flip(postings, begin + 32);
+            rejects([&] { Index(w.index, 128).search(literal, so); }, "E_INDEX_CORRUPT");
+            write(postings, saved_postings);
+            // Even a valid-CRC posting is checked against the accepted record.
+            // Change its first-line fields to 127 without changing varint widths.
+            auto altered = saved_postings;
+            const auto get32 = [&](std::size_t pos) {
+                std::uint32_t value = 0;
+                for (unsigned n = 0; n < 4; ++n)
+                    value |= std::uint32_t(static_cast<unsigned char>(altered[pos + n])) << (8 * n);
+                return value;
+            };
+            const auto put32 = [&](std::size_t pos, std::uint32_t value) {
+                for (unsigned n = 0; n < 4; ++n) altered[pos + n] = static_cast<char>((value >> (8 * n)) & 255U);
+            };
+            for (auto block = begin; block < end;) {
+                const auto bytes = get32(block), count = get32(block + 4);
+                std::size_t pos = block + 32;
+                for (std::uint32_t n = 0; n < count; ++n) {
+                    (void)disk::get_varint(altered, pos);
+                    (void)disk::get_varint(altered, pos);
+                    const auto line_at = pos;
+                    REQUIRE(disk::get_varint(altered, pos) < 128);
+                    REQUIRE(pos == line_at + 1);
+                    altered[line_at] = 127;
+                    (void)disk::get_varint(altered, pos);
+                }
+                REQUIRE(pos == block + 32 + bytes);
+                put32(block + 24, storage::crc32(std::string_view(altered).substr(block + 32, bytes)));
+                put32(block + 28, storage::crc32(std::string_view(altered).substr(block, 28)));
+                block += 32 + bytes;
+            }
+            write(postings, altered);
+            rejects([&] { Index(w.index, 128).search(literal, so); }, "E_INDEX_CORRUPT");
+            write(postings, saved_postings);
+            const auto bucket = storage::term_hash("keep/0.cpp") & 1023U;
+            const auto catalog = w.index / ("catalog-1-" + std::to_string(bucket) + ".tbl");
+            const auto saved_catalog = read(catalog);
+            flip(catalog, 44);
+            rejects([&] { Index(w.index, 128).search(literal, so); }, "E_INDEX_CORRUPT");
+            write(catalog, saved_catalog);
+
+            for (unsigned n = 0; n < matches; ++n) {
+                const auto path = "prefix/" + std::to_string(n) + ".cpp";
+                corpus[path] = corpus.at("suffix/" + std::to_string(n) + ".cpp");
+                write(w.root / path, corpus.at(path));
+                if (n % 2 == 0) {
+                    const auto keep = "keep/" + std::to_string(n) + ".cpp";
+                    corpus[keep] += "abcDEFghi " + unicode + "\n";
+                    write(w.root / keep, corpus.at(keep));
+                }
+            }
+            REQUIRE(update_index(w.index, bo).changed == matches + matches / 2);
+            Index fresh(w.index, 128);
+            check(fresh, corpus);
+            limited = so;
+            limited.max_candidates = matches;
+            REQUIRE(fresh.search(literal, limited).candidates == matches);
+            check(pinned, original);
+            REQUIRE(fresh.verify().files == corpus.size());
+        }},
         {"single_common_content_anchor_preserves_snapshots_and_work_budgets", [] {
             Workspace w;
             Corpus corpus;
