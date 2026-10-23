@@ -232,6 +232,8 @@ def cases(files: int) -> list[dict]:
         {"name": "broad_term", "query": "common", "rg": r"\bcommon\b"},
         {"name": "broad_literal", "query": '"return common;"', "rg": "return common;", "fixed": True},
         {"name": "broad_regex", "query": "/needle_[0-9]+/", "rg": "needle_[0-9]+"},
+        {"name": "anchored_regex", "query": "/^int needle_[0-9]+ = 0;$/", "rg": "^int needle_[0-9]+ = 0;$"},
+        {"name": "missing_term", "query": "ReSearchify_missing_2026", "rg": r"\bReSearchify_missing_2026\b"},
         {"name": "regex_no_match", "query": "/missing_[0-9]+/", "rg": "missing_[0-9]+"},
     ]
 

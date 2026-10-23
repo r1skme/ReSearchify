@@ -13,6 +13,7 @@ jobs:
   windows:
     name: Windows x64 (MSVC)
     runs-on: windows-2022
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -54,6 +55,55 @@ jobs:
         with:
           name: perf-windows-x64
           path: perf-smoke/measurements.json
+      - name: Check whether tiny-file timing inputs changed
+        id: tiny_perf
+        shell: bash
+        env:
+          PREVIOUS_HEAD: ${{ github.event.before }}
+        run: |
+          set -euo pipefail
+          rerun=true
+          if [[ "$PREVIOUS_HEAD" =~ ^[0-9a-f]{40}$ ]]; then
+            if git fetch --no-tags --depth=1 origin "$PREVIOUS_HEAD"; then
+              if git diff --quiet "$PREVIOUS_HEAD" HEAD -- src include tests CMakeLists.txt cmake scripts .github/workflows bench ':(exclude)bench/results/**'; then
+                rerun=false
+              fi
+            fi
+          fi
+          echo "run=$rerun" >> "$GITHUB_OUTPUT"
+      - name: Check out original Windows performance baseline
+        if: steps.tiny_perf.outputs.run == 'true'
+        uses: actions/checkout@v4
+        with:
+          ref: eb858348169157686e70104af6b64f9539a39fe8
+          path: native-baselines/original
+          persist-credentials: false
+      - name: Build original native Windows comparison binary
+        if: steps.tiny_perf.outputs.run == 'true'
+        shell: pwsh
+        run: |
+          cmake -S native-baselines/original -B native-baselines/original/build -G "Visual Studio 17 2022" -A x64 -DBUILD_TESTING=OFF -DRESEARCHIFY_STATIC_RUNTIME=ON
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          cmake --build native-baselines/original/build --target researchify --config Release --parallel 4
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+      - name: Native 100k tiny-file comparison (correctness gate only)
+        if: steps.tiny_perf.outputs.run == 'true'
+        timeout-minutes: 45
+        shell: pwsh
+        run: |
+          $baselineRevision = git -C native-baselines/original rev-parse HEAD
+          if ($LASTEXITCODE -or $baselineRevision -ne 'eb858348169157686e70104af6b64f9539a39fe8') { throw 'Wrong baseline source revision' }
+          $currentRevision = git rev-parse HEAD
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          python scripts/tiny_comparison.py --baseline native-baselines/original/build/Release/rs.exe --current build/Release/rs.exe --baseline-revision $baselineRevision --current-revision $currentRevision --files 100000 --iterations 21 --session-iterations 1000 --index-threads 4 --rg rg --work tiny-native-perf
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+      - name: Preserve Windows tiny-file evidence, including incomplete runs
+        if: always() && steps.tiny_perf.outputs.run == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-performance-windows-tiny-x64
+          path: tiny-native-perf/results/
+          if-no-files-found: warn
       - name: Quick start check
         shell: pwsh
         run: |
