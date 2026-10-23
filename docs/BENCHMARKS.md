@@ -11,6 +11,11 @@ before/after binaries. Do not multiply gains from separate windows or relabel
 an earlier checkpoint as the final executable. The v1/v2 results later on this
 page are historical.
 
+The [completed CPython comparison](PERFORMANCE_REAL_CPYTHON.md) measures the
+integrated executable on pinned, unmodified real C/H source. It includes all
+14 query/profile rows and their remaining losses to ripgrep, rather than
+selecting only favorable cases.
+
 The development-only Python tools require Python 3.11+; the C++ engine and downloaded CLI do not require Python. `scripts/test_perf_benchmark.py` tests the measurement harness itself.
 
 ### Reproduce a paired comparison

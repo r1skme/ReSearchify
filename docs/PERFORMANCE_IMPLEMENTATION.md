@@ -64,6 +64,7 @@ The retained update report compares old/new binaries within each scope.
 | [Tiny-file planner](PERFORMANCE_TINY_PLANNER.md) | Full-coverage and raw-membership changes, rare-term regressions, 350 MiB and million-file guards. |
 | [Update follow-up](PERFORMANCE_UPDATE_FOLLOWUP.md) | Paired strict/known-path updates, memory tradeoffs, source mutation audits and invalidated experiments. |
 | [NFA initial-transition follow-up](PERFORMANCE_NFA_FOLLOWUP.md) | Accepted real-source gains, exact-budget differential checks, and a rejected first implementation. |
+| [Final integrated CPython comparison](PERFORMANCE_REAL_CPYTHON.md) | Original/final/ripgrep on a pinned real source fixture, full path/count/snippet checks, 21 paired samples and retained tail regressions. |
 | [Native checkpoint measurements](PERFORMANCE_NATIVE.md) | Earlier actual macOS ARM64/Intel measurement windows and their limitations. |
 | [Scoped cache benchmark method](CACHE_BENCHMARK.md) | Per-file Linux page-residency observation, cache-advice scope and conservative labels. |
 
