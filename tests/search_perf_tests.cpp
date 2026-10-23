@@ -144,6 +144,59 @@ void matches_oracle(const SearchReport& actual, const std::map<std::string, std:
 
 int main() {
     return run({
+        {"full_coverage_content_anchor_trees_require_fresh_segments", [] {
+            Workspace w;
+            Corpus corpus;
+            constexpr unsigned count = 96;
+            for (unsigned n = 0; n < count; ++n) {
+                const auto path = std::to_string(n) + ".cpp";
+                corpus.emplace(path, "alpha;\nbeta;\nalpha beta;\n");
+                write(w.root / path, corpus.at(path));
+            }
+            auto bo = options();
+            bo.profile = "fast";
+            bo.threads = 1;
+            bo.segment_documents = 32;
+            create_index(w.root, w.index, bo);
+            Index pinned(w.index, 128);
+            const auto original = corpus;
+            auto so = search_options();
+            const std::string literal = "\"alpha beta;\"";
+            const std::string regex = "/(alpha|beta);/";
+            const std::string legacy_plan = " AND NOT absent_guard";
+            const auto check = [&](Index& index, const Corpus& expected) {
+                const auto content = index.search(literal, so);
+                matches_oracle(content, oracle(expected, literal));
+                same_result(content, index.search(literal + legacy_plan, so));
+                const auto alternative = index.search(regex, so);
+                matches_oracle(alternative, oracle(expected, "\"alpha;\" OR \"beta;\""));
+                same_result(alternative, index.search(regex + legacy_plan, so));
+                const auto one_full_branch = index.search("/(alpha|never_seen);/", so);
+                matches_oracle(one_full_branch, oracle(expected, "\"alpha;\""));
+                same_result(one_full_branch, index.search("/(alpha|never_seen);/" + legacy_plan, so));
+            };
+            check(pinned, corpus);
+            REQUIRE(pinned.search(literal, so).candidates == count);
+            REQUIRE(pinned.search(regex, so).candidates == count);
+            auto limited = so;
+            limited.max_candidates = count - 1;
+            rejects([&] { pinned.search(literal, limited); }, "E_BUDGET");
+            rejects([&] { pinned.search(regex, limited); }, "E_BUDGET");
+            for (unsigned n = 0; n < count / 2; ++n) {
+                const auto path = std::to_string(n) + ".cpp";
+                corpus[path] = "replacement without previous terms\n";
+                write(w.root / path, corpus.at(path));
+            }
+            REQUIRE(update_index(w.index, bo).changed == count / 2);
+            Index fresh(w.index, 128);
+            so.max_candidates = count / 2;
+            check(fresh, corpus);
+            REQUIRE(fresh.search(literal, so).candidates == count / 2);
+            REQUIRE(fresh.search(regex, so).candidates == count / 2);
+            so.max_candidates = count;
+            check(pinned, original);
+            REQUIRE(fresh.verify().files == count);
+        }},
         {"raw_content_intersection_keeps_versions_bounds_and_cancellation", [] {
             Workspace w;
             Corpus corpus;

@@ -1426,6 +1426,16 @@ Anchor or_anchor(Anchor a, Anchor b) {
     out.right = std::make_shared<Anchor>(std::move(b));
     return out;
 }
+// This proof is valid only when every posting belongs to a current-generation
+// segment. Merely frequent lists are not enough: their joint membership may
+// be selective. Exact full coverage composes through AND and OR normally.
+bool anchor_covers_all(const Anchor& anchor, std::uint64_t files) {
+    if (anchor.universe) return true;
+    if (anchor.kind == Anchor::Kind::Term) return anchor.cost == files;
+    if (anchor.kind == Anchor::Kind::And)
+        return anchor_covers_all(*anchor.left, files) && anchor_covers_all(*anchor.right, files);
+    return anchor_covers_all(*anchor.left, files) || anchor_covers_all(*anchor.right, files);
+}
 // Composable monotone cursors: AND leapfrogs sorted lists, OR merges them.
 // No posting list or candidate set is materialized.
 class AnchorStream {
@@ -1691,17 +1701,16 @@ SearchReport do_search(const Snapshot& snapshot, const Query& query, const Searc
         return n->kind == NodeKind::And ? and_anchor(std::move(a), std::move(b)) : or_anchor(std::move(a), std::move(b));
     };
     auto anchor = plan(query.root);
-    // A single content predicate whose one posting driver covers every live
-    // document gains nothing from merging that posting list and looking up the
+    // A single content predicate whose necessary postings cover every live
+    // document gains nothing from merging those lists and looking up the
     // same catalog rows again. The ordered catalog scan visits the identical
     // candidates directly. Only freshly written segments make df exact: after
     // an incremental update, obsolete postings can inflate it arbitrarily.
-    // Keep Boolean/intersection plans intact even when their component lists
-    // are common; their joint membership can still be highly selective.
+    // Keep Boolean query roots and merely common component lists intact.
     if (query.root->kind == NodeKind::Leaf &&
         query.leaves[query.root->leaf].kind != LeafKind::Term &&
-        !anchor.universe && anchor.kind == Anchor::Kind::Term &&
-        snapshot.manifest.files && anchor.cost == snapshot.manifest.files &&
+        !anchor.universe && snapshot.manifest.files &&
+        anchor_covers_all(anchor, snapshot.manifest.files) &&
         std::all_of(snapshot.manifest.segments.begin(), snapshot.manifest.segments.end(),
             [&](const auto& item) { return item.first / SegmentGenerationStride == snapshot.manifest.generation; }))
         anchor = {};
