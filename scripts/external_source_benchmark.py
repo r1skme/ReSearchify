@@ -11,6 +11,7 @@ correctness uses 1024 MiB and keyset pages of 10000 outside all latency samples.
 from __future__ import annotations
 
 import argparse
+from concurrent.futures import ThreadPoolExecutor
 import hashlib
 import json
 import os
@@ -381,8 +382,21 @@ def main():
         for profile_number, profile in enumerate(profiles):
             checked = next((row for row in report["correctness"] if row["case"] == case["name"] and row["profile"] == profile), None)
             if args.phase in ("validate", "all") and not checked:
-                primary = {name: all_counts(executable, index_path(name, profile), case, expected, args.timeout)
-                           for name, executable in executables.items()}
+                # Independent, read-only correctness readers may overlap. The
+                # executor joins both before rank/snippet checks or any warmup
+                # and timing sample; these durations are never evidence.
+                primary, failures = {}, []
+                with ThreadPoolExecutor(max_workers=2) as pool:
+                    pending = {name: pool.submit(all_counts, executable, index_path(name, profile),
+                                                  case, expected, args.timeout)
+                               for name, executable in executables.items()}
+                    for name, future in pending.items():
+                        try:
+                            primary[name] = future.result()
+                        except Exception as error:
+                            failures.append((name, error))
+                if failures:
+                    raise RuntimeError("; ".join(name + ": " + str(error) for name, error in failures)) from failures[0][1]
                 same_index = index_path("current", profile)
                 ranking = {}
                 for name, executable in executables.items():
@@ -395,6 +409,7 @@ def main():
                 snippets = {name: snippet_check(executable, index_path(name, profile), source, case, expected, args.timeout)
                             for name, executable in executables.items()}
                 checked = {"case": case["name"], "profile": profile, "status": "passed", "full_path_counts": primary,
+                           "reader_schedule": "At most 2 independent read-only full-count readers; both joined before other checks, warmups and timing",
                            "same_snapshot_ranking": {"index": str(same_index), "files": len(ranking["baseline"]),
                                                      "sha256": hashlib.sha256(fixture.canonical(ranking["baseline"])).hexdigest()},
                            "snippets": snippets}
