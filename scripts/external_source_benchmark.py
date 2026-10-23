@@ -56,15 +56,6 @@ def measurements(sample: dict) -> dict:
     return {key: sample[key] for key in ("wall_seconds", "cpu_seconds", "peak_rss_bytes", "resource_method")}
 
 
-def storage(index: Path) -> dict:
-    result = bench.index_storage(str(index))
-    # Include additive accelerators introduced after the original harness.
-    extra = sum(path.stat().st_size for path in index.glob("segment-*/literal-small.tbl")
-                if path.is_file() and not path.is_symlink())
-    result["literal_sidecar_bytes"] += extra
-    return result
-
-
 def count_digest(counts: dict[str, int]) -> str:
     return hashlib.sha256(fixture.canonical(counts)).hexdigest()
 
@@ -317,7 +308,7 @@ def main():
                         raise RuntimeError("Built index does not cover the whole captured source fixture")
                     report["builds"].append({"writer": name, "profile": profile, "iteration": iteration,
                                              "pair_order": order, "command": argv, "sample": measurements(measured),
-                                             "engine_report": response, "storage": storage(index)})
+                                             "engine_report": response, "storage": bench.index_storage(str(index))})
                     checkpoint(report_path, report)
                     print(f"Built {manifest['project']} {name}/{profile} {iteration + 1}/{args.build_iterations}", file=sys.stderr, flush=True)
         report["build_summary"] = [{"writer": name, "profile": profile,

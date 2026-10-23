@@ -1,6 +1,6 @@
 """Standard-library tests for archive capture and independent result oracles.
 
-Run explicitly: python -m unittest discover -s tests -p test_external_source_tools.py
+Run explicitly: python -m unittest discover -s scripts -p test_external_source_tools.py
 These tests never invoke ReSearchify/ripgrep or use an external source archive.
 """
 from __future__ import annotations
