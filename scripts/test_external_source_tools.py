@@ -21,7 +21,7 @@ import external_source_benchmark as driver
 
 
 class CaptureTests(unittest.TestCase):
-    def make_archive(self, root: Path) -> Path:
+    def make_archive(self, root: Path, extra_entries=()) -> Path:
         archive = root / "input.tar.gz"
         prefix = "cpython-" + fixture.PROJECTS["cpython"]["commit"]
         with tarfile.open(archive, "w:gz") as bundle:
@@ -35,7 +35,7 @@ class CaptureTests(unittest.TestCase):
                 "../escape.c": b"return;\n",
                 "CON.c": b"return;\n",
             }
-            for name, data in entries.items():
+            for name, data in [*entries.items(), *extra_entries]:
                 member = tarfile.TarInfo(prefix + "/" + name)
                 member.size = len(data)
                 bundle.addfile(member, io.BytesIO(data))
@@ -86,6 +86,36 @@ class CaptureTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "SHA256 differs"):
                 fixture.capture(args)
             self.assertFalse(output.exists())
+
+    def test_case_collision_keeps_first_archive_entry_and_records_skip(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            archive = self.make_archive(root, (("net/xt_HL.c", b"return 1;\n"),
+                                               ("net/xt_hl.c", b"return 2;\n")))
+            output = root / "capture"
+            args = argparse.Namespace(project="cpython", archive=archive, output_dir=output,
+                                      max_file_bytes=1024, max_line_bytes=128, minimum_bytes=1)
+            with patch.dict(fixture.PROJECTS["cpython"], {"archive_sha256": fixture.sha256(archive)}):
+                manifest = fixture.capture(args)
+                self.assertEqual(manifest["file_count"], 3)
+                self.assertEqual((output / "source/net/xt_HL.c").read_bytes(), b"return 1;\n")
+                self.assertEqual([entry["path"] for entry in manifest["files"] if entry["path"].startswith("net/")],
+                                 ["net/xt_HL.c"])
+                self.assertEqual(manifest["skip_counts"]["case_collision"], 1)
+                skipped = next(entry for entry in manifest["skipped"] if entry["reason"] == "case_collision")
+                self.assertTrue(skipped["path"].endswith("/net/xt_hl.c"))
+                self.assertEqual(skipped["bytes"], len(b"return 2;\n"))
+                fixture.validate_fixture(output)
+
+    def test_exact_duplicate_remains_an_error(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            archive = self.make_archive(root, (("src/a.c", b"return 5;\n"),))
+            args = argparse.Namespace(project="cpython", archive=archive, output_dir=root / "capture",
+                                      max_file_bytes=1024, max_line_bytes=128, minimum_bytes=1)
+            with patch.dict(fixture.PROJECTS["cpython"], {"archive_sha256": fixture.sha256(archive)}):
+                with self.assertRaisesRegex(ValueError, "Duplicate selected path"):
+                    fixture.capture(args)
 
 
 class OracleTests(unittest.TestCase):

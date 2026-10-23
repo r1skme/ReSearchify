@@ -154,8 +154,14 @@ def capture(args) -> dict:
             if PurePosixPath(relative).suffix.lower() not in (".c", ".h"):
                 skip(member, "not_c_or_h")
                 continue
-            if relative in seen or relative.casefold() in portable_seen:
-                raise ValueError("Duplicate or case-colliding selected path: " + relative)
+            if relative in seen:
+                raise ValueError("Duplicate selected path: " + relative)
+            if relative.casefold() in portable_seen:
+                # A pinned source tree may contain legitimate case-distinct
+                # files. Retain the first suitable archive entry so the same
+                # captured subset can be created on case-insensitive volumes.
+                skip(member, "case_collision")
+                continue
             if not 0 <= member.size <= args.max_file_bytes:
                 skip(member, "file_size_limit")
                 continue
@@ -208,6 +214,7 @@ def capture(args) -> dict:
         "captured_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
         "capture_seconds_excluding_archive_hash": time.perf_counter() - started,
         "source": str(source), "extensions": [".c", ".h"], "files": entries,
+        "case_collision_policy": "Retain the first suitable regular UTF-8 C/H entry in pinned archive order; record later casefold collisions as skipped",
         "content_manifest_sha256": hashlib.sha256(canonical(entries)).hexdigest(),
         "file_count": len(entries), "bytes": total_bytes,
         "lines": sum(entry["lines"] for entry in entries),
