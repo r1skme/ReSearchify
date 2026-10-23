@@ -15,12 +15,36 @@ jobs:
     runs-on: windows-2022
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
       - name: Configure
         run: cmake -S . -B build -G "Visual Studio 17 2022" -A x64 -DBUILD_TESTING=ON -DRESEARCHIFY_STATIC_RUNTIME=ON
       - name: Build
         run: cmake --build build --config Release --parallel 4
       - name: Test
         run: ctest --test-dir build -C Release --output-on-failure
+      - name: Test measurement harness
+        run: python scripts/test_perf_benchmark.py
+      - name: Benchmark smoke (not a performance gate)
+        shell: pwsh
+        run: |
+          ./build/Release/cs_bench.exe --work perf-smoke --phase generate --files 64 --lines 12
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          ./build/Release/cs_bench.exe --work perf-smoke --phase create --threads 2 --memory-mb 64
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          ./build/Release/cs_bench.exe --work perf-smoke --phase search --memory-mb 64 --repeats 3 --stages 1
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          ./build/Release/cs_bench.exe --work perf-smoke --phase create --index fast --profile fast --threads 2 --memory-mb 64
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          ./build/Release/cs_bench.exe --work perf-smoke --phase search --index fast --memory-mb 64 --repeats 3 --stages 1
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          python scripts/perf_benchmark.py --executable build/Release/rs.exe --index perf-smoke/index --corpus perf-smoke/source --iterations 3 --memory-mb 64 --query literal --query broad_regex --query no_match --output perf-smoke/measurements.json
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: perf-windows-x64
+          path: perf-smoke/measurements.json
       - name: Quick start check
         shell: pwsh
         run: |
@@ -56,12 +80,29 @@ jobs:
             machine: aarch64
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
       - name: Configure
-        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON -DRESEARCHIFY_BUILD_BENCHMARKS=OFF
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON
       - name: Build
         run: cmake --build build --parallel 4
       - name: Test
         run: ctest --test-dir build --output-on-failure
+      - name: Test measurement harness
+        run: python scripts/test_perf_benchmark.py
+      - name: Benchmark smoke (not a performance gate)
+        run: |
+          ./build/cs_bench --work perf-smoke --phase generate --files 64 --lines 12
+          ./build/cs_bench --work perf-smoke --phase create --threads 2 --memory-mb 64
+          ./build/cs_bench --work perf-smoke --phase search --memory-mb 64 --repeats 3 --stages 1
+          ./build/cs_bench --work perf-smoke --phase create --index fast --profile fast --threads 2 --memory-mb 64
+          ./build/cs_bench --work perf-smoke --phase search --index fast --memory-mb 64 --repeats 3 --stages 1
+          python scripts/perf_benchmark.py --executable build/rs --index perf-smoke/index --corpus perf-smoke/source --iterations 3 --memory-mb 64 --query literal --query broad_regex --query no_match --output perf-smoke/measurements.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: perf-linux-${{ matrix.arch }}
+          path: perf-smoke/measurements.json
       - name: Verify architecture, smoke-test and package
         shell: bash
         run: |
@@ -97,12 +138,29 @@ jobs:
             machine: arm64
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
       - name: Configure
-        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_DEPLOYMENT_TARGET=13.3 -DBUILD_TESTING=ON -DRESEARCHIFY_BUILD_BENCHMARKS=OFF
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_DEPLOYMENT_TARGET=13.3 -DBUILD_TESTING=ON
       - name: Build
         run: cmake --build build --parallel 3
       - name: Test
         run: ctest --test-dir build --output-on-failure
+      - name: Test measurement harness
+        run: python scripts/test_perf_benchmark.py
+      - name: Benchmark smoke (not a performance gate)
+        run: |
+          ./build/cs_bench --work perf-smoke --phase generate --files 64 --lines 12
+          ./build/cs_bench --work perf-smoke --phase create --threads 2 --memory-mb 64
+          ./build/cs_bench --work perf-smoke --phase search --memory-mb 64 --repeats 3 --stages 1
+          ./build/cs_bench --work perf-smoke --phase create --index fast --profile fast --threads 2 --memory-mb 64
+          ./build/cs_bench --work perf-smoke --phase search --index fast --memory-mb 64 --repeats 3 --stages 1
+          python scripts/perf_benchmark.py --executable build/rs --index perf-smoke/index --corpus perf-smoke/source --iterations 3 --memory-mb 64 --query literal --query broad_regex --query no_match --output perf-smoke/measurements.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: perf-macos-${{ matrix.arch }}
+          path: perf-smoke/measurements.json
       - name: Verify architecture, smoke-test and package
         shell: bash
         run: |
@@ -124,6 +182,15 @@ jobs:
           path: dist/ReSearchify-macOS-${{ matrix.arch }}.tar.gz
           if-no-files-found: error
 
+  clang:
+    name: Linux x64 (Clang)
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=clang++ -DBUILD_TESTING=ON
+      - run: cmake --build build --parallel 4
+      - run: ctest --test-dir build --output-on-failure
+
   sanitizers:
     name: Address/UB sanitizer
     runs-on: ubuntu-latest
@@ -136,7 +203,7 @@ jobs:
   preview:
     name: Publish tested multi-platform preview
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: [windows, linux, macos, sanitizers]
+    needs: [windows, linux, macos, clang, sanitizers]
     runs-on: ubuntu-22.04
     permissions:
       contents: write
