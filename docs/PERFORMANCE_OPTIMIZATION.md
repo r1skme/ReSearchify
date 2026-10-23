@@ -2,6 +2,20 @@
 
 Date: 2026-10-23. Baseline: `eb858348169157686e70104af6b64f9539a39fe8`.
 
+**Measurement scope:** the original whole-product tables below are frozen at the
+locally measured executable SHA-256
+`86a12b278f1414c81beba973cb67387c34d09b91842f78de5a02af7758c05b4a`;
+the native CI results refer to checkpoint
+`dbcddf76708b614c26e212fa27b48efa33ddfd58`. They are not new measurements of the
+final source after the later macOS-directed follow-ups. Those changes and their
+separate Linux measurements are recorded in [literal-filter lookup and serial
+setup](PERFORMANCE_LITERAL_FOLLOWUP.md) and [verified-content regex
+execution](PERFORMANCE_REGEX_FOLLOWUP.md). Earlier intermediate experiments keep
+their own recorded binary identities. Do not multiply speedup ratios from these
+independent measurement windows. Native macOS paired measurements and validation
+of the combined follow-up head are pending; the older green matrix does not
+establish their outcome.
+
 This report describes implemented code, measured tradeoffs and remaining limits. It is not a claim that ReSearchify beats ripgrep on every query. Historical v1/v2 figures in [BENCHMARKS.md](BENCHMARKS.md) describe different revisions and must not be mixed with these results.
 
 ## What changed
@@ -15,6 +29,8 @@ This report describes implemented code, measured tradeoffs and remaining limits.
 - **Ranking and metadata:** query-level IDF setup, reduced path/content-ID allocations for discarded hits, borrowed catalog iteration and active-segment exact-leaf lookup. Counts, scores and keyset pagination remain exact.
 - **Index construction:** targeted producer/consumer notifications, reused aggregation storage, less repeated suffix work, bounded signature sorting and reusable compaction readers.
 - **Instrumentation:** opt-in search/build stage counters; fresh-process, warm JSONL and update/find measurement tools; CPU/wall/RSS distributions and binary/index identity checks; native CI with rg smoke comparisons.
+- **Later filter/serial follow-up:** a query-local weak cursor reuses checked literal-filter leaves without retaining decoded pages across calls; serial-only queries avoid unused CPU-count discovery. The separate [follow-up report](PERFORMANCE_LITERAL_FOLLOWUP.md) records both gains and remaining tiny-query regressions.
+- **Later regex follow-up:** content callbacks reuse `stream_text`'s UTF-8 validation while public `Regex::find`, integrity checks and exact regex-budget charges remain strict. Its [separate report](PERFORMANCE_REGEX_FOLLOWUP.md) measures the additional improvement from the frozen optimized build, not from the original baseline.
 
 The core stays C++20 and standard-library-only. No new runtime dependency, mandatory SIMD instruction or mandatory disk-format migration was introduced. See [ARCHITECTURE.md](ARCHITECTURE.md), [FORMAT_STORAGE.md](FORMAT_STORAGE.md) and [AGENT_API.md](AGENT_API.md) for contracts and field names.
 
@@ -213,9 +229,9 @@ Every private variant passed 67,688 mixed-size/empty-file, serial/parallel, exac
 
 Both experiments and binary hashes are retained: [locality](../bench/results/optimization-locality.json), [larger batch](../bench/results/optimization-locality-batch.json). The maximum auxiliary order vector contains 2048 indices. Its live payload is accounted, but vector spare capacity and transient allocator behavior are not a hard physical `budget / 64` limit.
 
-## Correctness and native-platform checks
+## Checkpoint correctness and native-platform checks
 
-The final core checkpoint `dbcddf76708b614c26e212fa27b48efa33ddfd58` passed [native CI run 39937206527](https://github.com/r1skme/ReSearchify/actions/runs/39937206527):
+The pre-follow-up core checkpoint `dbcddf76708b614c26e212fa27b48efa33ddfd58` passed [native CI run 39937206527](https://github.com/r1skme/ReSearchify/actions/runs/39937206527):
 
 | Target | Build/test status |
 | --- | --- |
@@ -231,7 +247,7 @@ In that run, Linux/macOS jobs checked the host architecture and ran the extracte
 
 Additional local checks include 484 baseline/current exact result comparisons on shared indexes (scores, counts, snippets, content identities, order and pagination), old/new writer/reader compatibility, and focused ThreadSanitizer concurrent search/cancellation/update/GC tests. CRC tests compare against an independent bitwise oracle over seeds, alignments, tails and chunk boundaries. Regex and content tests include Unicode, first-line BOM, CRLF, line boundaries, NUL and corrupt snapshots/sidecars.
 
-The final integrated binary (SHA-256 `86a12b278f1414c81beba973cb67387c34d09b91842f78de5a02af7758c05b4a`) additionally passed **852 exact result and candidate/read-budget comparisons** against the generic planner on compact/fast indexes across updates/deletions, including punctuation-only documents with zero indexed tokens. All six final search cases also passed ThreadSanitizer with **2,415,676 assertions** and no reported races. Cancellation is checked before search preparation and periodically inside rejected-candidate, stale-posting, generic intersection and global range-hint loops, not only after finding an evaluable candidate. A deterministic native test covers serial/parallel pending empty-file cancellation and successful retries. A compact command/hash/result record is retained in [optimization-validation.json](../bench/results/optimization-validation.json).
+The frozen locally measured binary (SHA-256 `86a12b278f1414c81beba973cb67387c34d09b91842f78de5a02af7758c05b4a`) additionally passed **852 exact result and candidate/read-budget comparisons** against the generic planner on compact/fast indexes across updates/deletions, including punctuation-only documents with zero indexed tokens. All six search cases at that checkpoint also passed ThreadSanitizer with **2,415,676 assertions** and no reported races. Cancellation is checked before search preparation and periodically inside rejected-candidate, stale-posting, generic intersection and global range-hint loops, not only after finding an evaluable candidate. A deterministic native test covers serial/parallel pending empty-file cancellation and successful retries. A compact command/hash/result record is retained in [optimization-validation.json](../bench/results/optimization-validation.json).
 
 The first Windows run found a test fixture named `nul.txt`, a reserved Windows device name. It was renamed to `binary_nul.txt`; the binary-content assertion remains intact. The next complete native matrix passed. This is recorded rather than silently describing the first run as successful.
 
