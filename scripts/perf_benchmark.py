@@ -46,14 +46,17 @@ def distribution(samples: list[float]) -> dict:
 def index_storage(directory: str) -> dict:
     """Logical file bytes; classify leftover transactions separately, never delete."""
     base = Path(directory)
-    committed = scratch = coordination = literal = 0
+    committed = scratch = spill = coordination = literal = 0
     for path in base.rglob("*"):
         if not path.is_file() or path.is_symlink():
             continue
         size = path.stat().st_size
-        first = path.relative_to(base).parts[0]
+        parts = path.relative_to(base).parts
+        first = parts[0]
         if first.startswith("transaction-"):
             scratch += size
+        elif len(parts) >= 3 and first.startswith("segment-") and parts[1] in ("sort", "literal-sort"):
+            spill += size
         elif first in ("pins", "writer.lock"):
             coordination += size
         else:
@@ -61,9 +64,10 @@ def index_storage(directory: str) -> dict:
             if path.name == "literal.tbl":
                 literal += size
     return {"committed_index_bytes": committed, "transaction_scratch_bytes": scratch,
+            "spill_scratch_bytes": spill,
             "coordination_bytes": coordination, "literal_sidecar_bytes": literal,
-            "total_file_bytes": committed + scratch + coordination,
-            "measurement": "logical file sizes; transaction-* scratch and reader/writer coordination separated; no deletion"}
+            "total_file_bytes": committed + scratch + spill + coordination,
+            "measurement": "logical file sizes; transaction-* scratch, nested segment sort/literal-sort spills and reader/writer coordination separated; no deletion"}
 
 
 def windows_handle(pid: int):
@@ -143,6 +147,8 @@ def worker(spec: dict) -> dict:
             try:
                 for line in process.stdout:
                     lines.put(line)
+            except BaseException as error:
+                lines.put(error)
             finally:
                 lines.put(None)
         reader = threading.Thread(target=read_lines, daemon=True)
@@ -155,6 +161,8 @@ def worker(spec: dict) -> dict:
                 process.stdin.flush()
                 line = lines.get(timeout=timeout)
                 latencies.append(time.perf_counter() - begin)
+                if isinstance(line, BaseException):
+                    raise RuntimeError("JSONL stdout reader failed") from line
                 if line is None:
                     raise RuntimeError("JSONL subprocess exited before its response")
                 response = json.loads(line)
@@ -164,7 +172,12 @@ def worker(spec: dict) -> dict:
             process.stdin.close()
             process.wait(timeout=timeout)
             reader.join(timeout=timeout)
-            if reader.is_alive() or lines.get(timeout=timeout) is not None:
+            if reader.is_alive():
+                raise RuntimeError("Unfinished JSONL stdout reader")
+            tail = lines.get(timeout=timeout)
+            if isinstance(tail, BaseException):
+                raise RuntimeError("JSONL stdout reader failed during shutdown") from tail
+            if tail is not None:
                 raise RuntimeError("Unexpected extra JSONL records or incomplete shutdown")
             errors.seek(0)
             error_text = errors.read().decode("utf-8", "replace")
@@ -395,6 +408,8 @@ def main() -> None:
             raise RuntimeError("CLI/JSONL results differ: " + case["name"])
         row["jsonl"] = {"request_wall_ms": distribution([value * 1000 for value in session["request_seconds"][1:]]),
                         "first_request_ms": session["request_seconds"][0] * 1000,
+                        "first_request_engine_metrics": session["responses"][0]["metrics"],
+                        "engine_metrics": [response["metrics"] for response in session["responses"][1:]],
                         "whole_session_wall_ms": session["wall_seconds"] * 1000,
                         "whole_session_cpu_ms": session["cpu_seconds"] * 1000 if session["cpu_seconds"] is not None else None,
                         "whole_session_peak_rss_bytes": session["peak_rss_bytes"]}
