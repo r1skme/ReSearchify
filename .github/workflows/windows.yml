@@ -58,7 +58,9 @@ jobs:
         shell: pwsh
         run: |
           .\build\Release\rs.exe --help
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
           .\build\Release\rs.exe --version
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
       - name: Package portable ZIP
         shell: pwsh
         run: |
@@ -67,6 +69,14 @@ jobs:
           Copy-Item README.md, README.ru.md dist/package/
           Compress-Archive -Path dist/package/* -DestinationPath dist/ReSearchify-Windows-x64.zip -Force
           if (!(Test-Path dist/ReSearchify-Windows-x64.zip)) { throw 'Portable archive missing' }
+          Expand-Archive -Path dist/ReSearchify-Windows-x64.zip -DestinationPath dist/verify
+          $binaryBytes = [System.IO.File]::ReadAllBytes((Resolve-Path dist/verify/rs.exe))
+          $peOffset = [System.BitConverter]::ToInt32($binaryBytes, 0x3c)
+          if ([System.BitConverter]::ToUInt16($binaryBytes, $peOffset + 4) -ne 0x8664) {
+            throw 'Packaged executable is not Windows x86-64'
+          }
+          .\dist\verify\rs.exe --version
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
       - uses: actions/upload-artifact@v4
         with:
           name: researchify-windows-portable
