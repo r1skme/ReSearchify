@@ -18,8 +18,8 @@
     {
       "id": 120490219734,
       "name": "Windows x64 (MSVC)",
-      "status": "in_progress",
-      "conclusion": null,
+      "status": "completed",
+      "conclusion": "success",
       "run_id": 39975881618,
       "logs_url": null,
       "steps": [
@@ -103,51 +103,57 @@
         },
         {
           "name": "Native 100k tiny-file comparison (correctness gate only)",
-          "status": "in_progress",
-          "conclusion": null,
+          "status": "completed",
+          "conclusion": "success",
           "number": 14
         },
         {
           "name": "Preserve Windows tiny-file evidence, including incomplete runs",
-          "status": "pending",
-          "conclusion": null,
+          "status": "completed",
+          "conclusion": "success",
           "number": 15
         },
         {
           "name": "Quick start check",
-          "status": "pending",
-          "conclusion": null,
+          "status": "completed",
+          "conclusion": "success",
           "number": 16
         },
         {
           "name": "Package portable ZIP",
-          "status": "pending",
-          "conclusion": null,
+          "status": "completed",
+          "conclusion": "success",
           "number": 17
         },
         {
           "name": "Run actions/upload-artifact@v4",
-          "status": "pending",
-          "conclusion": null,
+          "status": "completed",
+          "conclusion": "success",
           "number": 18
         },
         {
           "name": "Post Check out original Windows performance baseline",
-          "status": "pending",
-          "conclusion": null,
+          "status": "completed",
+          "conclusion": "success",
           "number": 34
         },
         {
           "name": "Post Run actions/setup-python@v5",
-          "status": "pending",
-          "conclusion": null,
+          "status": "completed",
+          "conclusion": "success",
           "number": 35
         },
         {
           "name": "Post Run actions/checkout@v4",
-          "status": "pending",
-          "conclusion": null,
+          "status": "completed",
+          "conclusion": "success",
           "number": 36
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 37
         }
       ]
     },
@@ -750,6 +756,15 @@
           "number": 25
         }
       ]
+    },
+    {
+      "id": 120523829528,
+      "name": "Publish tested multi-platform preview",
+      "status": "completed",
+      "conclusion": "skipped",
+      "run_id": 39975881618,
+      "logs_url": null,
+      "steps": null
     }
   ],
   "artifacts": [
@@ -1080,6 +1095,100 @@
           "sha256": "09baa1a626e4d355842e911b601aea252a53f4a175d8dd8c504537aba19d154e"
         }
       ]
+    },
+    {
+      "id": 12516045613,
+      "name": "native-performance-windows-tiny-x64",
+      "size_in_bytes": 264096,
+      "url": "https://api.github.com/repos/r1skme/ReSearchify/actions/artifacts/12516045613",
+      "archive_download_url": "https://api.github.com/repos/r1skme/ReSearchify/actions/artifacts/12516045613/zip",
+      "expired": false,
+      "created_at": "2026-10-23T16:17:40Z",
+      "expires_at": "2027-01-21T15:09:45Z",
+      "updated_at": "2026-10-23T16:17:40Z",
+      "digest": "sha256:3027c6e348dee7ea8e7c988bba035f534a723e91101483358cc52b5fd28cc0ec",
+      "workflow_run": {
+        "id": 39975881618,
+        "repository_id": 1427610584,
+        "head_repository_id": 1427610584,
+        "head_branch": "perf/cross-platform-optimization",
+        "head_sha": "5a358ec4a9638cf9285bfbb7fc02a0fbfbae1085"
+      },
+      "local_file": "bench/results/native-tiny-39975881618-windows-x64.zip",
+      "members": [
+        {
+          "name": "compact-process.json",
+          "size_bytes": 102186,
+          "sha256": "777dc45eed0889fbb68a915e2291c67a56ed83d110fd138bbed231e2574f50f2"
+        },
+        {
+          "name": "compact-process.log",
+          "size_bytes": 106752,
+          "sha256": "e347fce02385c2c8999e7c9a5ff1387357fcdb0b1b605f84d86dde88ff9035f7"
+        },
+        {
+          "name": "compact-sessions.json",
+          "size_bytes": 2403240,
+          "sha256": "618d0606c9c6845bb2949d216087de8ce5788d49bb8db8480c7cdd25ff21d4df"
+        },
+        {
+          "name": "compact-sessions.log",
+          "size_bytes": 254,
+          "sha256": "ba95564d3e0bdc7c1dbd4d4fd7193e5e5a7cd6e79e32b8a67fc78faab3887602"
+        },
+        {
+          "name": "compact-updates.json",
+          "size_bytes": 217735,
+          "sha256": "d43057dc2fb0decfe076d5486e76f4ed2e16f23cfb404b2c735e27304e101131"
+        },
+        {
+          "name": "fast-process.log",
+          "size_bytes": 106405,
+          "sha256": "de198afb1e680efa4f32176aef449b380f44668a033690c2477cda7d640f172c"
+        },
+        {
+          "name": "compact-updates.log",
+          "size_bytes": 190,
+          "sha256": "15b09edcbc71195f042d6e0ea4283a66607f366af69263c1088c0f38117525c8"
+        },
+        {
+          "name": "fast-process.json",
+          "size_bytes": 101839,
+          "sha256": "55f979f7aeb803f8964cf48db6128a7c8ae134776a02697686bb81dfa504f99b"
+        },
+        {
+          "name": "fast-sessions.json",
+          "size_bytes": 2402569,
+          "sha256": "17144ddfa5684c07c46595bb73387a958ae747a58da751458ddae432492ec768"
+        },
+        {
+          "name": "fast-sessions.log",
+          "size_bytes": 248,
+          "sha256": "fc70ef1267f8644a52866a570a0b5dbbe1bfc508c721237b0a30586f64401d71"
+        },
+        {
+          "name": "fast-updates.json",
+          "size_bytes": 217543,
+          "sha256": "15259756552675a6532d3cb35146460a5add6aa7e9a4a15c9531c3e8795b69aa"
+        },
+        {
+          "name": "fast-updates.log",
+          "size_bytes": 187,
+          "sha256": "ddfd57b1ff5a1e0c7138a9c5e19258bd8fc7f8d7637eebac72f33937935d2a27"
+        },
+        {
+          "name": "summary.json",
+          "size_bytes": 245697,
+          "sha256": "1641b3d3c49f58191c7d7959ccc996d90f5eb855810df14d51564b14ab8b70ff"
+        },
+        {
+          "name": "update-fixture.json",
+          "size_bytes": 690,
+          "sha256": "dbb24e572746972b0a0fec85198eb3ad1c2d549ca7f2e1fd0778aea5ba616e3d"
+        }
+      ],
+      "local_sha256": "3027c6e348dee7ea8e7c988bba035f534a723e91101483358cc52b5fd28cc0ec",
+      "digest_verified": true
     }
   ],
   "notes": [
@@ -1088,5 +1197,6 @@
     "Only completed native artifact evidence is represented; pending jobs are not claimed to have passed.",
     "No local native benchmark, build or cache operation is involved in collecting this evidence.",
     "Signed download URLs are intentionally omitted."
-  ]
+  ],
+  "windows_evidence_note": "Complete Windows search/session/update window retained; later run39985259365 failed concurrent GC/read-open validation and is not superseded by this earlier pass."
 }

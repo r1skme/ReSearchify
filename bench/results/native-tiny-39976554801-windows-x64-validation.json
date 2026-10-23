@@ -1,0 +1,45 @@
+{
+  "format": "researchify-native-validation-excerpts-v1",
+  "workflow_run_id": 39976554801,
+  "job_id": 120492552092,
+  "job_name": "Windows x64 (MSVC)",
+  "source": "https://api.github.com/repos/r1skme/ReSearchify/actions/jobs/120492552092/logs",
+  "status": "completed",
+  "conclusion": "failure",
+  "ctest": {
+    "passed": 13,
+    "total": 13,
+    "wall_seconds": 46.08
+  },
+  "python": {
+    "passed": 41,
+    "wall_seconds": 0.558
+  },
+  "benchmark_step": {
+    "started_at": "2026-10-23T15:18:12Z",
+    "timeout_minutes": 70,
+    "timeout_message": "The action Native 100k tiny-file comparison (correctness gate only) has timed out after 70 minutes.",
+    "timeout_at": "2026-10-23T16:28:12Z",
+    "completed": false
+  },
+  "log_excerpts": [
+    "2026-10-23T15:14:30.7128305Z Microsoft Windows Server 2022",
+    "2026-10-23T15:14:30.7132248Z Image: windows-2022",
+    "2026-10-23T15:15:17.4624966Z -- The CXX compiler identification is MSVC 19.44.35229.0",
+    "2026-10-23T15:17:21.9664954Z 100% tests passed, 0 tests failed out of 13",
+    "2026-10-23T15:17:21.9665768Z Total Test time (real) =  46.08 sec",
+    "2026-10-23T15:17:25.2856660Z Ran 41 tests in 0.558s",
+    "2026-10-23T15:17:37.2284934Z -- The CXX compiler identification is MSVC 19.44.35229.0",
+    "2026-10-23T16:28:12.8673758Z KeyboardInterrupt",
+    "2026-10-23T16:28:12.9683253Z ##[error]The action 'Native 100k tiny-file comparison (correctness gate only)' has timed out after 70 minutes."
+  ],
+  "note": "Selected decoded log excerpts, not an unchanged full log archive. The artifact retains complete:false; completed search/session stages do not promote the interrupted update suite to a pass.",
+  "independent_artifact_checks": {
+    "distributions": 164,
+    "update_operations": 78,
+    "update_marker_checks": 42,
+    "update_verify_or_rename_checks": 4,
+    "distribution_method": "Recursively recomputed iterations, median, nearest-rank p95, min/max of all retained numeric sample distributions; duplicate representations are counted as distributions, not unique target executions.",
+    "update_marker_method": "Compared every retained baseline/candidate marker result including scores, content identity, paths, counts and snippets exactly; verified all completed operation return codes/status/execution_complete and final non-marker checks."
+  }
+}

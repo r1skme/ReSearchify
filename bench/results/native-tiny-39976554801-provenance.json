@@ -518,8 +518,8 @@
     {
       "id": 120492552092,
       "name": "Windows x64 (MSVC)",
-      "status": "in_progress",
-      "conclusion": null,
+      "status": "completed",
+      "conclusion": "failure",
       "run_id": 39976554801,
       "logs_url": null,
       "steps": [
@@ -603,51 +603,57 @@
         },
         {
           "name": "Native 100k tiny-file comparison (correctness gate only)",
-          "status": "in_progress",
-          "conclusion": null,
+          "status": "completed",
+          "conclusion": "failure",
           "number": 14
         },
         {
           "name": "Preserve Windows tiny-file evidence, including incomplete runs",
-          "status": "pending",
-          "conclusion": null,
+          "status": "completed",
+          "conclusion": "success",
           "number": 15
         },
         {
           "name": "Quick start check",
-          "status": "pending",
-          "conclusion": null,
+          "status": "completed",
+          "conclusion": "skipped",
           "number": 16
         },
         {
           "name": "Package portable ZIP",
-          "status": "pending",
-          "conclusion": null,
+          "status": "completed",
+          "conclusion": "skipped",
           "number": 17
         },
         {
           "name": "Run actions/upload-artifact@v4",
-          "status": "pending",
-          "conclusion": null,
+          "status": "completed",
+          "conclusion": "skipped",
           "number": 18
         },
         {
           "name": "Post Check out original Windows performance baseline",
-          "status": "pending",
-          "conclusion": null,
+          "status": "completed",
+          "conclusion": "success",
           "number": 34
         },
         {
           "name": "Post Run actions/setup-python@v5",
-          "status": "pending",
-          "conclusion": null,
+          "status": "completed",
+          "conclusion": "skipped",
           "number": 35
         },
         {
           "name": "Post Run actions/checkout@v4",
-          "status": "pending",
-          "conclusion": null,
+          "status": "completed",
+          "conclusion": "success",
           "number": 36
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 37
         }
       ]
     },
@@ -750,6 +756,15 @@
           "number": 25
         }
       ]
+    },
+    {
+      "id": 120528838653,
+      "name": "Publish tested multi-platform preview",
+      "status": "completed",
+      "conclusion": "skipped",
+      "run_id": 39976554801,
+      "logs_url": null,
+      "steps": null
     }
   ],
   "artifacts": [
@@ -1080,6 +1095,100 @@
           "sha256": "0c39248e50ed2d61cec14eec32f505cc44a878c84da995f41b67b122327f0bea"
         }
       ]
+    },
+    {
+      "id": 12515838009,
+      "name": "native-performance-windows-tiny-x64",
+      "size_in_bytes": 244887,
+      "url": "https://api.github.com/repos/r1skme/ReSearchify/actions/artifacts/12515838009",
+      "archive_download_url": "https://api.github.com/repos/r1skme/ReSearchify/actions/artifacts/12515838009/zip",
+      "expired": false,
+      "created_at": "2026-10-23T16:28:14Z",
+      "expires_at": "2027-01-21T15:14:25Z",
+      "updated_at": "2026-10-23T16:28:14Z",
+      "digest": "sha256:59bb53b0a28e11351d005ae7b949dd60a7b3ee5775f03a2f3b5500a314a9cb4e",
+      "workflow_run": {
+        "id": 39976554801,
+        "repository_id": 1427610584,
+        "head_repository_id": 1427610584,
+        "head_branch": "perf/cross-platform-optimization",
+        "head_sha": "8a917c53a090b3cc3b75a9bc7e085b2c2d0adf57"
+      },
+      "local_file": "bench/results/native-tiny-39976554801-windows-x64.zip",
+      "members": [
+        {
+          "name": "compact-process.json",
+          "size_bytes": 102168,
+          "sha256": "cceb0e59a13a4e301cf4ace80ca6607199802c2778bfc5159952786a06875a01"
+        },
+        {
+          "name": "compact-process.log",
+          "size_bytes": 106734,
+          "sha256": "a9cda3130583c7147436db5178c0d85a981b36a65c482ae2c291669023e8db56"
+        },
+        {
+          "name": "compact-sessions.json",
+          "size_bytes": 2401734,
+          "sha256": "9b64e05b1dfe35c257a34f89b443e0db1d66e1eb58029f1a058da702e13935c4"
+        },
+        {
+          "name": "compact-sessions.log",
+          "size_bytes": 254,
+          "sha256": "ba95564d3e0bdc7c1dbd4d4fd7193e5e5a7cd6e79e32b8a67fc78faab3887602"
+        },
+        {
+          "name": "compact-updates.json",
+          "size_bytes": 217740,
+          "sha256": "4c848e3fdb0770e8b3d89fccf792af976e871f965ca899d161957db024918670"
+        },
+        {
+          "name": "compact-updates.log",
+          "size_bytes": 190,
+          "sha256": "15b09edcbc71195f042d6e0ea4283a66607f366af69263c1088c0f38117525c8"
+        },
+        {
+          "name": "fast-process.json",
+          "size_bytes": 101849,
+          "sha256": "c4732052e897d6b0146213cf665369813ada595a56cd0db2efd06f75768336a1"
+        },
+        {
+          "name": "fast-process.log",
+          "size_bytes": 106415,
+          "sha256": "ef55e96e258eb4267cac0778487edc0135d818b778a7f4e7e11bd8819768361a"
+        },
+        {
+          "name": "fast-sessions.json",
+          "size_bytes": 2403081,
+          "sha256": "d55d6a48809424676ddc8aa6b873e89403e7021118af5229e4ff4142dadbcd70"
+        },
+        {
+          "name": "fast-sessions.log",
+          "size_bytes": 248,
+          "sha256": "fc70ef1267f8644a52866a570a0b5dbbe1bfc508c721237b0a30586f64401d71"
+        },
+        {
+          "name": "fast-updates.json",
+          "size_bytes": 19519,
+          "sha256": "b542a162217169d362ce0c702c34e30322c8fe334d8a79083b5fc9761f231593"
+        },
+        {
+          "name": "fast-updates.log",
+          "size_bytes": 2030,
+          "sha256": "fa8d7bb3e9ba8f452670e2e4df0722b54cdc0ca3179b2b2e3e1ef0c64c85155b"
+        },
+        {
+          "name": "summary.json",
+          "size_bytes": 244979,
+          "sha256": "1cff6ca439f799876c63bd11d9a75c1ac62cb477229b4e416b37b10eba4de9ad"
+        },
+        {
+          "name": "update-fixture.json",
+          "size_bytes": 698,
+          "sha256": "3b11bc7d0918f55c4f44cab5905487f4c27f61aef5ae58b2309201fc599f218a"
+        }
+      ],
+      "local_sha256": "59bb53b0a28e11351d005ae7b949dd60a7b3ee5775f03a2f3b5500a314a9cb4e",
+      "digest_verified": true
     }
   ],
   "notes": [
@@ -1099,5 +1208,6 @@
     ],
     "native_core_and_drivers_unchanged": true,
     "verification": "git diff --name-only c052262 78fcf570; explicit git diff --exit-code over src/include/CMake/cmake/bench (excluding results) and native drivers/workflow was empty"
-  }
+  },
+  "windows_evidence_note": "Seventy-minute step timeout at2026-10-23T16:28:12Z. All search/session/process batches completed; compact updates completed70operations/46checks; fast updates interrupted after8strict-noopoperations/0checks. Both sources restored. This incomplete window is retained separately from complete run18."
 }
