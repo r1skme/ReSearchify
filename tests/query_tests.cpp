@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <functional>
 #include <iostream>
+#include <limits>
 #include <random>
 #include <regex>
 #include <string>
@@ -295,7 +296,8 @@ void regex_prefix_and_class_fast_paths() {
         "a{0}abc", "(abc){2,3}", "a?bc", "a*bc", "ab(c|d)", "(ab|a)b", "a.*b",
         "abc|", "a{0}", "^$", "", "\\b世界\\b", "привет.+", "😀[a-z]+", "a$bc",
         std::string(70, 'a') + "b", long_unicode_prefix + "[0-9]+", "abc\\x00def",
-        "[\\D0]", "[^\\s]", "[a-z\\W]"
+        "[\\D0]", "[^\\s]", "[a-z\\W]", "(return|if|while)[ \\t]",
+        "([ab]?)*c", "(a?|b?)*c", "(^a|b)", "(a|b\\b)"
     };
     const std::vector<std::string> fixed_inputs{
         "", "abc", "xabc abc!", "xxabcdef abcd", "needle_x needle_42 needle_43", "ababcd",
@@ -404,6 +406,50 @@ void regex_validated_input_budget() {
     }
 }
 
+void regex_initial_rejection_budget() {
+    using namespace researchify;
+    // Neither alternative can accept these subjects. The unchanged NFA work
+    // contract is validation + initial closure + (loop, two threads, closure)
+    // per remaining scalar. The second pattern's seven closure pops include
+    // an already-visited epsilon-loop ID, which must still consume one unit.
+    for (const auto& [pattern, closure] : std::vector<std::pair<std::string, std::uint64_t>>{
+             {"(a|b)", 3}, {"(a?)*b", 7}}) {
+        const Regex regex(pattern);
+        RegexWorkspace workspace;
+        for (const auto& input : {std::string(), std::string("xxx"), std::string(" \r\n"),
+                                  std::string("x\0x", 3), std::string("😀πxx")}) {
+            for (std::size_t start = 0; start <= input.size(); ++start) {
+                if (start < input.size() && (static_cast<unsigned char>(input[start]) & 0xc0) == 0x80) continue;
+                std::uint64_t scalars = 0;
+                for (auto at = start; at < input.size(); ++at)
+                    if ((static_cast<unsigned char>(input[at]) & 0xc0) != 0x80) ++scalars;
+                const auto validation = static_cast<std::uint64_t>(input.size()) + 1;
+                const auto cost = validation + closure + (3 + closure) * scalars;
+                for (std::uint64_t limit = 0; limit <= cost + 1; ++limit) {
+                    // Force epoch wrap with reused populated workspace too.
+                    workspace.epoch = (std::numeric_limits<std::size_t>::max)();
+                    auto budget = limit;
+                    RegexMatch match;
+                    bool found = false;
+                    std::string error;
+                    try { found = regex.find(input, match, budget, workspace, start); }
+                    catch (const Error& e) { error = e.code(); }
+                    require(!found, "first-character rejection preserves nonmatch");
+                    require(error == (limit < cost ? "E_BUDGET" : ""), "initial rejection exact budget boundary");
+                    const auto expected = limit < validation ? limit : limit < cost ? 0 : limit - cost;
+                    require(budget == expected, "initial rejection preserves remaining budget on success and exhaustion");
+                }
+            }
+        }
+    }
+    const Regex regex("(a|b)");
+    RegexWorkspace workspace;
+    RegexMatch result;
+    std::uint64_t budget = 10000;
+    rejects([&] { regex.find(std::string("xxx\xff", 4), result, budget, workspace); },
+            "initial rejection does not bypass public UTF-8 validation");
+}
+
 void concurrency() {
     const researchify::Regex regex("^([a-z]+|[а-я]+)_[0-9]{2}$");
     std::vector<std::thread> workers;
@@ -430,6 +476,7 @@ int main() {
         {"regex_matching", regex_matching}, {"regex_errors_and_budget", regex_rejections_and_budget},
         {"regex_differential", differential_boolean_regex}, {"regex_fast_paths", regex_prefix_and_class_fast_paths},
         {"regex_validated_input_budget", regex_validated_input_budget},
+        {"regex_initial_rejection_budget", regex_initial_rejection_budget},
         {"regex_concurrency", concurrency}};
     try {
         for (const auto& test : tests) {

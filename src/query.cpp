@@ -601,6 +601,9 @@ struct Regex::Impl {
     std::size_t start = 0;
     std::string prefix;
     std::shared_ptr<const RegexFilter> filter;
+    std::array<std::uint64_t, 2> initial_ascii{};
+    std::uint64_t initial_closure_steps = 0;
+    std::uint64_t initial_threads = 0;
 };
 
 Regex::Regex(const std::string& pattern) {
@@ -622,6 +625,48 @@ Regex::Regex(const std::string& pattern) {
         else if (state.op != Op::Epsilon && state.op != Op::Bol && state.op != Op::Eol &&
                  state.op != Op::Boundary && state.op != Op::NotBoundary) break;
         prefix_state = state.next;
+    }
+    // A fresh, assertion-free initial closure can be rejected without creating
+    // threads when none can consume the next ASCII scalar. Retain its exact
+    // pop/thread costs: this avoids bookkeeping, not execution-budget charges.
+    // Nullable paths and assertions always use the ordinary closure.
+    if (impl->prefix.empty()) {
+        std::vector<bool> visited(impl->states.size(), false);
+        std::vector<std::size_t> pending{impl->start};
+        std::array<std::uint64_t, 2> first{};
+        std::uint64_t closure_steps = 0, threads = 0;
+        bool eligible = true;
+        while (!pending.empty() && eligible) {
+            const auto id = pending.back(); pending.pop_back();
+            ++closure_steps;
+            if (id == absent || visited[id]) continue;
+            visited[id] = true;
+            const auto& state = impl->states[id];
+            switch (state.op) {
+            case Op::Split: pending.push_back(state.alternate); pending.push_back(state.next); break;
+            case Op::Epsilon: pending.push_back(state.next); break;
+            case Op::Literal:
+                ++threads;
+                if (state.literal < 128) first[state.literal / 64] |= std::uint64_t{1} << (state.literal % 64);
+                break;
+            case Op::Any:
+                ++threads;
+                first[0] |= ~((std::uint64_t{1} << '\n') | (std::uint64_t{1} << '\r'));
+                first[1] = ~std::uint64_t{0};
+                break;
+            case Op::Class:
+                ++threads;
+                first[0] |= impl->classes[state.class_id].ascii[0];
+                first[1] |= impl->classes[state.class_id].ascii[1];
+                break;
+            default: eligible = false; break;
+            }
+        }
+        if (eligible && threads) {
+            impl->initial_ascii = first;
+            impl->initial_closure_steps = closure_steps;
+            impl->initial_threads = threads;
+        }
     }
     // Necessary conditions only. Unknown constructs weaken the filter to true.
     using F = RegexFilter;
@@ -676,6 +721,16 @@ bool Regex::find(std::string_view text, RegexMatch& match, std::uint64_t& steps_
 }
 bool Regex::find_impl(std::string_view text, RegexMatch& match, std::uint64_t& steps_left,
                       RegexWorkspace& workspace, std::size_t start, bool input_validated) const {
+    // Dispatch once per line. Prefix, assertion and nullable patterns retain
+    // the original loop without rejection flags or per-scalar branches.
+    if (impl_->prefix.empty() && impl_->initial_closure_steps)
+        return find_specialized<true>(text, match, steps_left, workspace, start, input_validated);
+    return find_specialized<false>(text, match, steps_left, workspace, start, input_validated);
+}
+
+template<bool UseSeedReject>
+bool Regex::find_specialized(std::string_view text, RegexMatch& match, std::uint64_t& steps_left,
+                             RegexWorkspace& workspace, std::size_t start, bool input_validated) const {
     if (start > text.size()) throw Error("regex start offset is outside the text");
     if (start < text.size() && (static_cast<unsigned char>(text[start]) & 0xc0) == 0x80)
         throw Error("regex start offset is inside a UTF-8 character");
@@ -684,7 +739,7 @@ bool Regex::find_impl(std::string_view text, RegexMatch& match, std::uint64_t& s
     // the same budget charge: avoiding a duplicate pass does not change limits.
     if (!input_validated && !valid_utf8(text)) throw Error("regex input is not valid UTF-8");
     const auto& machine = *impl_;
-    if (!machine.prefix.empty()) {
+    if constexpr (!UseSeedReject) if (!machine.prefix.empty()) {
         const auto candidate = text.find(machine.prefix, start);
         // The validation pass is charged above. Charge skipped search bytes as
         // well, rather than making the accelerator a budget-free scan. These
@@ -739,11 +794,30 @@ bool Regex::find_impl(std::string_view text, RegexMatch& match, std::uint64_t& s
         }
     };
 
+    // Bulk debit only when it succeeds. On exhaustion the scalar debit path
+    // preserves the exact remaining budget and error of the original NFA.
+    [[maybe_unused]] auto charge_units = [&](std::uint64_t amount) {
+        if (steps_left >= amount) { steps_left -= amount; return; }
+        while (amount) { charge(steps_left); --amount; }
+    };
+    [[maybe_unused]] std::uint64_t rejected_threads = 0;
+    [[maybe_unused]] auto initial_closure = [&](std::size_t position, bool left_word, bool right_word,
+                               char32_t scalar, bool has_scalar, std::vector<Thread>& out, bool fresh) {
+        if (fresh && has_scalar && scalar < 128 &&
+            !(machine.initial_ascii[scalar / 64] & (std::uint64_t{1} << (scalar % 64)))) {
+            charge_units(machine.initial_closure_steps);
+            rejected_threads = machine.initial_threads;
+        } else closure(machine.start, position, position, left_word, right_word, out);
+    };
+
     std::size_t position = start;
     char32_t cp = 0;
     auto following = position;
     const bool has_cp = decode(text, following, cp);
-    closure(machine.start, start, start, has_previous && word(previous), has_cp && word(cp), current);
+    if constexpr (UseSeedReject)
+        initial_closure(start, has_previous && word(previous), has_cp && word(cp), cp, has_cp, current, true);
+    else
+        closure(machine.start, start, start, has_previous && word(previous), has_cp && word(cp), current);
     while (true) {
         if (found && (current.empty() || current.front().origin >= best.begin)) { match = best; return true; }
         if (position == text.size()) break;
@@ -755,6 +829,11 @@ bool Regex::find_impl(std::string_view text, RegexMatch& match, std::uint64_t& s
         const bool has_after = decode(text, after_position, after);
         next.clear();
         if (++epoch == 0) { std::fill(visited.begin(), visited.end(), 0); epoch = 1; }
+        if constexpr (UseSeedReject) {
+            charge_units(rejected_threads);
+            rejected_threads = 0;
+        }
+        [[maybe_unused]] bool advanced = false;
         for (const auto& thread : current) {
             charge(steps_left);
             if (found && thread.origin >= best.begin) continue;
@@ -766,9 +845,17 @@ bool Regex::find_impl(std::string_view text, RegexMatch& match, std::uint64_t& s
             case Op::Class: accepts = machine.classes[state.class_id].matches(cp); break;
             default: throw Error("internal regex transition error");
             }
-            if (accepts) closure(state.next, thread.origin, following, word(cp), has_after && word(after), next);
+            if (accepts) {
+                if constexpr (UseSeedReject) advanced = true;
+                closure(state.next, thread.origin, following, word(cp), has_after && word(after), next);
+            }
         }
-        if (!found) closure(machine.start, following, following, word(cp), has_after && word(after), next);
+        if (!found) {
+            if constexpr (UseSeedReject)
+                initial_closure(following, word(cp), has_after && word(after), after, has_after, next, !advanced);
+            else
+                closure(machine.start, following, following, word(cp), has_after && word(after), next);
+        }
         current.swap(next);
         position = following;
     }

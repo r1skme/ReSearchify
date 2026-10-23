@@ -42,6 +42,9 @@ private:
     friend struct detail::ValidatedRegexAccess;
     bool find_impl(std::string_view text, RegexMatch& match, std::uint64_t& steps_left,
                    RegexWorkspace& workspace, std::size_t start, bool input_validated) const;
+    template<bool UseSeedReject>
+    bool find_specialized(std::string_view text, RegexMatch& match, std::uint64_t& steps_left,
+                          RegexWorkspace& workspace, std::size_t start, bool input_validated) const;
     struct Impl;
     std::shared_ptr<const Impl> impl_;
 };
