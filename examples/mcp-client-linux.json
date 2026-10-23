@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "researchify": {
+      "command": "/home/YOUR_USERNAME/Tools/ReSearchify/rs",
+      "args": [
+        "mcp",
+        "--stdio",
+        "--root",
+        "/home/YOUR_USERNAME/Projects/MyProject"
+      ]
+    }
+  }
+}

@@ -9,11 +9,8 @@ $repo = 'r1skme/ReSearchify'
 if (-not (Get-Command gh -ErrorAction SilentlyContinue)) {
     throw 'GitHub CLI (gh) is required. Or download the ZIP manually from the repository Releases page.'
 }
-& gh auth status *> $null
-if ($LASTEXITCODE -ne 0) { throw 'Sign in first: gh auth login. The GitHub account must have access to this private repository.' }
-
 $info = & gh release list --repo $repo --limit 1 --json tagName 2>&1
-if ($LASTEXITCODE -ne 0) { throw "Cannot list releases: $info" }
+if ($LASTEXITCODE -ne 0) { throw "Cannot list releases: $info. If GitHub CLI requires sign-in, run gh auth login; otherwise download the public release manually." }
 $releases = @($info | ConvertFrom-Json)
 if ($releases.Count -eq 0 -or -not $releases[0].tagName) {
     throw 'No ready Windows release yet. Check GitHub Actions or build from source.'
@@ -27,9 +24,12 @@ try {
     $zip = Join-Path $temp 'ReSearchify-Windows-x64.zip'
     $sums = Join-Path $temp 'SHA256SUMS.txt'
     if (-not (Test-Path $zip) -or -not (Test-Path $sums)) { throw 'Archive or checksum file missing.' }
-    $line = [System.IO.File]::ReadAllText($sums).Trim()
-    if ($line -notmatch '^([0-9a-fA-F]{64})\s+\*?ReSearchify-Windows-x64\.zip$') { throw 'Invalid checksum format.' }
-    $expected = $Matches[1].ToLowerInvariant()
+    # SHA256SUMS.txt lists all five platforms; select exactly one named Windows asset.
+    $sumLines = @(
+        Get-Content -LiteralPath $sums | Where-Object { $_ -match '^([0-9a-fA-F]{64})\s+\*?ReSearchify-Windows-x64\.zip$' }
+    )
+    if ($sumLines.Count -ne 1) { throw 'Missing or duplicate Windows x64 entry in SHA256SUMS.txt.' }
+    $expected = ($sumLines[0] -split '\s+')[0].ToLowerInvariant()
     $actual = (Get-FileHash -LiteralPath $zip -Algorithm SHA256).Hash.ToLowerInvariant()
     if ($actual -ne $expected) { throw 'SHA-256 mismatch. Nothing installed.' }
     $expanded = Join-Path $temp 'unpacked'
@@ -51,7 +51,8 @@ try {
         if (($env:Path -split ';') -notcontains $InstallDir) { $env:Path += ";$InstallDir" }
     }
     Write-Host "Installed ReSearchify $tag to $InstallDir"
-    Write-Host 'Open a terminal in your source project, then run: rs -i .  and  rs -s RenderFrame'
+    Write-Host 'Next: select your source project explicitly, then run: rs init "FULL_PROJECT_PATH"'
+    Write-Host 'Confirm with: rs status --root "FULL_PROJECT_PATH". Do not index Downloads by accident.'
     & (Join-Path $InstallDir 'rs.exe') --version
 } finally {
     Remove-Item -LiteralPath $temp -Recurse -Force -ErrorAction SilentlyContinue
