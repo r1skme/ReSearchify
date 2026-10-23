@@ -119,6 +119,20 @@ class CaptureTests(unittest.TestCase):
 
 
 class OracleTests(unittest.TestCase):
+    def test_timing_plan_is_fixed_before_samples_and_cannot_change_on_resume(self):
+        report = {"queries": []}
+        cases = [{"name": "common_term"}, {"name": "wide_regex"}]
+        self.assertEqual(driver.set_timing_plan(report, cases, 21, 7),
+                         {"common_term": 21, "wide_regex": 7})
+        self.assertEqual(driver.set_timing_plan(report, cases, 21, 7), report["timing_plan"])
+        for count in (None, 11, 21):
+            with self.subTest(count=count), self.assertRaisesRegex(ValueError, "Timing plan differs"):
+                driver.set_timing_plan(report, cases, 21, count)
+        self.assertEqual(driver.set_timing_plan({}, cases, 21, None),
+                         {"common_term": 21, "wide_regex": 21})
+        with self.assertRaisesRegex(ValueError, "no frozen timing plan"):
+            driver.set_timing_plan({"queries": [{"name": "wide_regex"}]}, cases, 21, 7)
+
     def check_count_pages(self, responses, expected):
         pages = iter(responses)
         class FakeService:

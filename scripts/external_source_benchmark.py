@@ -207,6 +207,21 @@ def snippet_check(executable: str, index: Path, source: Path, case: dict,
             "status": "passed", "results_sha256": hashlib.sha256(fixture.canonical(response["results"])).hexdigest()}
 
 
+def set_timing_plan(report: dict, cases: list[dict], iterations: int,
+                    wide_regex_iterations: int | None) -> dict[str, int]:
+    # Build and correctness phases need no timing count. Freeze every case's
+    # count before the first measured sample, and refuse later changes.
+    plan = {case["name"]: wide_regex_iterations if case["name"] == "wide_regex" and wide_regex_iterations is not None
+            else iterations for case in cases}
+    existing = report.get("timing_plan")
+    if existing is None and report.get("queries"):
+        raise ValueError("Existing measurements have no frozen timing plan")
+    if existing is not None and existing != plan:
+        raise ValueError("Timing plan differs from the plan frozen before measurement")
+    report["timing_plan"] = plan
+    return plan
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--fixture-dir", type=Path, required=True)
@@ -221,6 +236,8 @@ def main():
     parser.add_argument("--profile", choices=("compact", "fast"), action="append")
     parser.add_argument("--query", action="append")
     parser.add_argument("--iterations", type=int, default=21)
+    parser.add_argument("--wide-regex-iterations", type=int,
+                        help="Optional predeclared count for expensive wide_regex; frozen before first timing sample")
     parser.add_argument("--build-iterations", type=int, default=1)
     parser.add_argument("--warmups", type=int, default=1)
     parser.add_argument("--index-threads", type=int, default=8)
@@ -229,7 +246,9 @@ def main():
     parser.add_argument("--seed", type=int, default=7727)
     parser.add_argument("--timeout", type=float, default=3600)
     args = parser.parse_args()
-    if (not 1 <= args.iterations <= 10000 or not 1 <= args.build_iterations <= 3 or
+    if (not 1 <= args.iterations <= 10000 or
+            (args.wide_regex_iterations is not None and not 1 <= args.wide_regex_iterations <= 10000) or
+            not 1 <= args.build_iterations <= 3 or
             not 0 <= args.warmups <= 100 or not 16 <= args.memory_mb <= 1048576 or
             not 1 <= args.index_threads <= 256 or args.rg_threads < 1 or args.timeout <= 0):
         parser.error("Invalid iteration, worker, memory or timeout option")
@@ -288,6 +307,11 @@ def main():
                       "coverage": "This host/compiler and two explicit pinned source subsets only; no claim of user fixture reproduction or unexecuted platform testing",
                   }, "builds": [], "oracles": [], "correctness": [], "queries": [], "phases": {}}
         report["ripgrep_version"] = bench.command([rg, "--version"], args.timeout)["stdout"].splitlines()[0]
+        checkpoint(report_path, report)
+
+    timing_plan = None
+    if args.phase in ("measure", "all"):
+        timing_plan = set_timing_plan(report, suites, args.iterations, args.wide_regex_iterations)
         checkpoint(report_path, report)
 
     def index_path(name, profile, iteration=0):
@@ -405,7 +429,8 @@ def main():
                     run(name)
             rng = random.Random(args.seed + 1009 * case_number + 37 * profile_number)
             orders = []
-            for iteration in range(args.iterations):
+            iterations = timing_plan[case["name"]]
+            for iteration in range(iterations):
                 order = list(commands)
                 rng.shuffle(order)
                 orders.append(order)
@@ -414,8 +439,8 @@ def main():
                     if name in metrics:
                         metrics[name].append(measured["engine_metrics"])
                     samples[name].append(measurements(measured))
-                print(f"{manifest['project']} {profile}/{case['name']}: pair {iteration + 1}/{args.iterations}", file=sys.stderr, flush=True)
-            report["queries"].append({**case, "profile": profile, "matching_files": len(expected), "matches": sum(expected.values()),
+                print(f"{manifest['project']} {profile}/{case['name']}: pair {iteration + 1}/{iterations}", file=sys.stderr, flush=True)
+            report["queries"].append({**case, "profile": profile, "iterations": iterations, "matching_files": len(expected), "matches": sum(expected.values()),
                                        "commands": commands, "order": orders, "engine_metrics": metrics,
                                        "tools": {name: bench.metric_summary(values) for name, values in samples.items()}})
             checkpoint(report_path, report)
