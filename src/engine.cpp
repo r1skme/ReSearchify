@@ -1723,10 +1723,15 @@ SearchReport do_search(const Snapshot& snapshot, const Query& query, const Searc
     // Finite query-wide NFA work is charged in document order. Keep regex
     // queries serial rather than changing their budget contract with races or
     // speculative per-worker limits. Term-only queries already use postings.
-    const auto desired = options.threads ? options.threads : (std::min)(std::size_t(8), std::size_t((std::max)(1U, std::thread::hardware_concurrency())));
     const auto per_worker = 2 * snapshot.manifest.policy.max_line_bytes + IoBytes + 256 * 1024;
-    const auto workers = has_content && !has_regex && estimated >= 512 && snapshot.manifest.bytes >= MiB
-        ? (std::max)(std::size_t(1), (std::min)({desired, std::size_t(16), (budget / 8) / per_worker})) : std::size_t(1);
+    std::size_t workers = 1;
+    if (has_content && !has_regex && estimated >= 512 && snapshot.manifest.bytes >= MiB) {
+        // On some standard libraries this asks the operating system on every
+        // call. Posting-only and small searches cannot use workers, so do not
+        // pay that setup cost for their otherwise microsecond-sized workload.
+        const auto desired = options.threads ? options.threads : (std::min)(std::size_t(8), std::size_t((std::max)(1U, std::thread::hardware_concurrency())));
+        workers = (std::max)(std::size_t(1), (std::min)({desired, std::size_t(16), (budget / 8) / per_worker}));
+    }
     struct Pending {
         Record file;
         std::vector<std::uint64_t> counts, lines;
