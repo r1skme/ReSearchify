@@ -672,11 +672,17 @@ bool Regex::find(std::string_view text, RegexMatch& match, std::uint64_t& steps_
     RegexWorkspace workspace; return find(text, match, steps_left, workspace, start);
 }
 bool Regex::find(std::string_view text, RegexMatch& match, std::uint64_t& steps_left, RegexWorkspace& workspace, std::size_t start) const {
+    return find_impl(text, match, steps_left, workspace, start, false);
+}
+bool Regex::find_impl(std::string_view text, RegexMatch& match, std::uint64_t& steps_left,
+                      RegexWorkspace& workspace, std::size_t start, bool input_validated) const {
     if (start > text.size()) throw Error("regex start offset is outside the text");
     if (start < text.size() && (static_cast<unsigned char>(text[start]) & 0xc0) == 0x80)
         throw Error("regex start offset is inside a UTF-8 character");
     charge(steps_left, static_cast<std::uint64_t>(text.size()) + 1);
-    if (!valid_utf8(text)) throw Error("regex input is not valid UTF-8");
+    // ContentReader has already validated these bytes before its callback. Keep
+    // the same budget charge: avoiding a duplicate pass does not change limits.
+    if (!input_validated && !valid_utf8(text)) throw Error("regex input is not valid UTF-8");
     const auto& machine = *impl_;
     if (!machine.prefix.empty()) {
         const auto candidate = text.find(machine.prefix, start);

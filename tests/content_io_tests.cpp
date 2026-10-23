@@ -72,6 +72,17 @@ int main() {
                 REQUIRE(hit.snippets.size() == 1);
                 REQUIRE(hit.snippets[0].text.find("MARK!") != std::string::npos);
             }
+            const auto regex = index.search("/MARK!/", search_options());
+            REQUIRE(regex.total_matches == result.total_matches);
+            REQUIRE(regex.hits.size() == result.hits.size());
+            for (std::size_t n = 0; n < regex.hits.size(); ++n) {
+                REQUIRE(regex.hits[n].path == result.hits[n].path);
+                REQUIRE(regex.hits[n].matches == result.hits[n].matches);
+                REQUIRE(regex.hits[n].snippets.size() == 1);
+                REQUIRE(regex.hits[n].snippets[0].line == result.hits[n].snippets[0].line);
+                REQUIRE(regex.hits[n].snippets[0].column == result.hits[n].snippets[0].column);
+                REQUIRE(regex.hits[n].snippets[0].text == result.hits[n].snippets[0].text);
+            }
         }},
         {"stream_keeps_validation_and_maximum_line_contract", [] {
             Workspace w;
@@ -129,6 +140,26 @@ int main() {
             REQUIRE(index.search("\"!\"").total_matches == 1);
             flip(content_file(w.index), 0);
             rejects([&] { index.search("\"!\""); }, "E_INDEX_CORRUPT");
+        }},
+        {"regex_does_not_bypass_stream_utf8_validation", [] {
+            Workspace w;
+            write(w.root / path_from_utf8("исходник.txt"), "first\nмир!\n");
+            create_index(w.root, w.index, options());
+            Index index(w.index, 64);
+            const auto found = index.search("/\\bмир!$/", search_options());
+            REQUIRE(found.total_matches == 1);
+            REQUIRE(found.hits[0].matches == 1);
+            REQUIRE(found.hits[0].snippets[0].line == 2);
+            REQUIRE(found.hits[0].snippets[0].column == 1);
+            REQUIRE(found.hits[0].snippets[0].text == "мир!");
+            std::fstream stream(content_file(w.index), std::ios::binary | std::ios::in | std::ios::out);
+            REQUIRE(bool(stream));
+            stream.put(static_cast<char>(0xff));
+            stream.close();
+            REQUIRE(bool(stream));
+            // A broad regex forces content verification even with a literal
+            // sidecar. Validation runs before any unchecked regex callback.
+            rejects([&] { index.search("/.*/", search_options()); }, "E_INDEX_CORRUPT");
         }},
         {"serial_queries_reuse_the_segment_handle_without_changing_results", [] {
             Workspace w;

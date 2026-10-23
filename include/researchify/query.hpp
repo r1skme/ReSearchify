@@ -8,6 +8,7 @@
 #include <vector>
 
 namespace researchify {
+namespace detail { struct ValidatedRegexAccess; }
 // UTF-8 is validated strictly. Words comprise ASCII letters/digits/underscore
 // and non-ASCII scalar values. Matching is case-sensitive, without normalization.
 bool valid_utf8(std::string_view text);
@@ -38,6 +39,9 @@ public:
     std::shared_ptr<const RegexFilter> prefilter() const;
     std::size_t state_count() const;
 private:
+    friend struct detail::ValidatedRegexAccess;
+    bool find_impl(std::string_view text, RegexMatch& match, std::uint64_t& steps_left,
+                   RegexWorkspace& workspace, std::size_t start, bool input_validated) const;
     struct Impl;
     std::shared_ptr<const Impl> impl_;
 };

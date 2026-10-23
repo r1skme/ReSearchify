@@ -3,6 +3,7 @@
 #include "researchify/query.hpp"
 #include "researchify/storage.hpp"
 #include "researchify/literal_filter.hpp"
+#include "query_internal.hpp"
 #include <algorithm>
 #include <array>
 #include <atomic>
@@ -1762,7 +1763,7 @@ SearchReport do_search(const Snapshot& snapshot, const Query& query, const Searc
                     }
                 } else if (leaf.kind == LeafKind::Regex) {
                     RegexMatch match;
-                    if (leaf.regex->find(text, match, steps, regex_work[i])) {
+                    if (detail::ValidatedRegexAccess::find(*leaf.regex, text, match, steps, regex_work[i])) {
                         ++counts[i];
                         if (!first_line[i]) first_line[i] = line;
                     }
@@ -1967,7 +1968,7 @@ SearchReport do_search(const Snapshot& snapshot, const Query& query, const Searc
                     if (at != text.npos) column = (std::min)(column, at);
                     }
                     else if (l.kind == LeafKind::Regex) { RegexMatch match;
-                    if (l.regex->find(text, match, steps, regex_work[i])) column = (std::min)(column, match.begin);
+                    if (detail::ValidatedRegexAccess::find(*l.regex, text, match, steps, regex_work[i])) column = (std::min)(column, match.begin);
                     }
                 }
                 if (column != (std::numeric_limits<std::size_t>::max)()) snippets.push_back({line, column + 1, snippet_text(text, column, options.snippet_bytes)});

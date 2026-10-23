@@ -1,5 +1,6 @@
 #include "researchify/query.hpp"
 #include "researchify/engine.hpp"
+#include "../src/query_internal.hpp"
 
 #include <algorithm>
 #include <cstdint>
@@ -304,7 +305,7 @@ void regex_prefix_and_class_fast_paths() {
     std::mt19937 random(20261023);
     for (const auto& pattern : patterns) {
         const Regex fast(pattern), reference("(" + pattern + ")|(\\b\\B)");
-        RegexWorkspace fast_work, reference_work;
+        RegexWorkspace fast_work, reference_work, validated_work;
         for (std::size_t trial = 0; trial < fixed_inputs.size() + 100; ++trial) {
             std::string input;
             if (trial < fixed_inputs.size()) input = fixed_inputs[trial];
@@ -314,13 +315,19 @@ void regex_prefix_and_class_fast_paths() {
             }
             for (std::size_t start = 0; start <= input.size(); ++start) {
                 if (start < input.size() && (static_cast<unsigned char>(input[start]) & 0xc0) == 0x80) continue;
-                std::uint64_t fast_budget = 10000000, reference_budget = 10000000;
-                RegexMatch actual, expected;
+                std::uint64_t fast_budget = 10000000, reference_budget = 10000000, validated_budget = 10000000;
+                RegexMatch actual, expected, validated;
                 const bool actual_found = fast.find(input, actual, fast_budget, fast_work, start);
                 const bool expected_found = reference.find(input, expected, reference_budget, reference_work, start);
+                const bool validated_found = detail::ValidatedRegexAccess::find(
+                    fast, input, validated, validated_budget, validated_work, start);
                 require(actual_found == expected_found, "prefix boolean differential: " + pattern);
+                require(actual_found == validated_found && fast_budget == validated_budget,
+                        "validated input preserves results and work budget: " + pattern);
                 if (actual_found) require(actual.begin == expected.begin && actual.end == expected.end,
                                           "prefix byte range differential: " + pattern);
+                if (actual_found) require(actual.begin == validated.begin && actual.end == validated.end,
+                                          "validated input preserves byte ranges: " + pattern);
             }
         }
     }
@@ -349,6 +356,54 @@ void regex_prefix_and_class_fast_paths() {
     rejects([&] { prefixed.find("no match", result, budget); }, "prefix scan charges skipped bytes");
 }
 
+void regex_validated_input_budget() {
+    using namespace researchify;
+    // Check every budget boundary for several actual NFA executions. This also
+    // covers failure after workspace reuse, nullable patterns and UTF-8 offsets.
+    const std::vector<std::pair<std::string, std::string>> cases{
+        {"needle_[0-9]+", "no match"}, {"needle_[0-9]+", "xneedle_42"},
+        {"\\b世界\\b", " 世界!"}, {"^a.*b$", "aaab"}, {"a*", "ba"}, {"[а-я]+", " яя!"}
+    };
+    for (const auto& [pattern, input] : cases) {
+        const Regex regex(pattern);
+        RegexWorkspace strict_work, validated_work;
+        for (std::size_t start = 0; start <= input.size(); ++start) {
+            for (std::uint64_t limit = 0; limit < 256; ++limit) {
+                std::uint64_t strict_left = limit, validated_left = limit;
+                RegexMatch strict_match, validated_match;
+                bool strict_found = false, validated_found = false;
+                std::string strict_error, validated_error;
+                try { strict_found = regex.find(input, strict_match, strict_left, strict_work, start); }
+                catch (const Error& e) { strict_error = e.code() + ":" + e.what(); }
+                try { validated_found = detail::ValidatedRegexAccess::find(
+                    regex, input, validated_match, validated_left, validated_work, start); }
+                catch (const Error& e) { validated_error = e.code() + ":" + e.what(); }
+                require(strict_error == validated_error, "validated input preserves budget/offset error");
+                require(strict_left == validated_left, "validated input preserves remaining work units");
+                require(strict_found == validated_found, "validated input preserves budgeted result");
+                if (strict_found) require(strict_match.begin == validated_match.begin && strict_match.end == validated_match.end,
+                                          "validated input preserves budgeted byte range");
+            }
+        }
+    }
+    // Neither public overload can inherit a validated state from reused storage
+    // or workspace. Reject invalid bytes before and after an otherwise valid hit.
+    const Regex regex("needle_[0-9]+");
+    RegexWorkspace workspace;
+    RegexMatch match;
+    std::string input = "needle_42";
+    std::uint64_t budget = 10000;
+    require(regex.find(input, match, budget, workspace), "strict input warm-up");
+    for (const auto& invalid : {std::string("\xff", 1) + "needle_42", "needle_42" + std::string("\xff", 1),
+                               std::string("no match\xc3", 9)}) {
+        input = invalid;
+        budget = 10000;
+        rejects([&] { regex.find(input, match, budget, workspace); }, "strict reused workspace rejects invalid UTF-8");
+        budget = 10000;
+        rejects([&] { regex.find(input, match, budget); }, "strict public overload rejects invalid UTF-8");
+    }
+}
+
 void concurrency() {
     const researchify::Regex regex("^([a-z]+|[а-я]+)_[0-9]{2}$");
     std::vector<std::thread> workers;
@@ -374,6 +429,7 @@ int main() {
         {"utf8_and_tokens", utf8_and_tokens}, {"query_parser", parser}, {"three_valued_truth_tables", truth_tables},
         {"regex_matching", regex_matching}, {"regex_errors_and_budget", regex_rejections_and_budget},
         {"regex_differential", differential_boolean_regex}, {"regex_fast_paths", regex_prefix_and_class_fast_paths},
+        {"regex_validated_input_budget", regex_validated_input_budget},
         {"regex_concurrency", concurrency}};
     try {
         for (const auto& test : tests) {
