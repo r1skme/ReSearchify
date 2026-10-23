@@ -1770,17 +1770,13 @@ SearchReport do_search(const Snapshot& snapshot, const Query& query, const Searc
         score_document(file, scratch_counts, scratch_lines);
     };
     if (anchor.universe) {
-        // Records are copied before advancing any other cursor, which can evict a shard.
+        // evaluate() never advances the anchor or accesses DocumentLookup.
+        // Exact term cursors, content readers and literal filters have separate
+        // state; pending work and retained hits make their own owning copies.
+        // Therefore one decoded shard stays valid throughout this traversal.
         for (std::size_t b = 0; b < Buckets; ++b) {
-            std::uint64_t from = std::uint64_t(b) << 54;
-            for (;;) {
-                const auto& rows = documents.shard(b);
-                auto it = std::lower_bound(rows.begin(), rows.end(), from, [](const Record& r, auto id) { return r.id < id; });
-                if (it == rows.end()) break;
-                auto record = *it;
-                from = record.id + 1;
-                evaluate(record);
-            }
+            const auto& rows = documents.shard(b);
+            for (const auto& record : rows) evaluate(record);
         }
     } else {
         std::uint64_t from = 0;
@@ -1789,8 +1785,9 @@ SearchReport do_search(const Snapshot& snapshot, const Query& query, const Searc
             if (doc == EndDoc) break;
             auto found = documents.get(doc);
             if (!found) throw Error("E_INDEX_CORRUPT", "Live posting has no document");
-            auto record = *found;
-            evaluate(record);
+            // Consume the borrowed record before the next anchor seek can
+            // evict its decoded shard (or replace sparse lookup's held row).
+            evaluate(*found);
             from = doc + 1;
         }
     }
