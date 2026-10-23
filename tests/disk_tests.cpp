@@ -1,5 +1,6 @@
 #include "test_support.hpp"
 #include "researchify/disk.hpp"
+#include "researchify/storage.hpp"
 #include <algorithm>
 #include <limits>
 #include <map>
@@ -73,6 +74,100 @@ int main() {
             unsigned n = 0;
             table.each([&](auto k, auto) { REQUIRE(k.starts_with("I")); ++n; }, "I");
             REQUIRE(n == 2);
+        }},
+        {"btree_cursor_borrowed_values_random_order_and_table_identity", [] {
+            Workspace w;
+            auto cache = std::make_shared<d::PageCache>(8192);
+            const auto first_path = w.base / "first", second_path = w.base / "second";
+            for (const auto& path : {first_path, second_path}) {
+                d::TableWriter writer(path, 1024);
+                for (std::uint64_t i = 0; i < 600; ++i)
+                    writer.add(key(i * 2), path.filename().string() + "-" + std::to_string(i));
+                writer.finish();
+            }
+            d::Table first(first_path, cache), second(second_path, cache);
+            d::Table::Cursor cursor;
+            auto lookup = [&](const d::Table& table, const std::string& wanted) {
+                std::optional<std::string> found;
+                const auto present = table.get(wanted, cursor, [&](std::string_view value) { found = value; });
+                REQUIRE(present == found.has_value());
+                REQUIRE(found == table.get(wanted));
+            };
+            // Sequential documents, missing keys inside/between leaves, then
+            // reverse/random access. A reusable cursor is not monotone-only.
+            for (std::uint64_t i = 0; i < 1202; ++i) lookup(first, key(i));
+            for (std::uint64_t i = 1202; i; --i) lookup(first, key(i - 1));
+            std::mt19937 random(519);
+            for (unsigned i = 0; i < 1000; ++i) {
+                lookup(i % 2 ? first : second, key(random() % 1202));
+                if (i % 17 == 0) cache->clear();
+            }
+            lookup(first, "absent-before-first");
+            lookup(first, "zz-after-last");
+            // The active callback owns its view even if cache eviction/clear
+            // occurs while the visitor is using it.
+            REQUIRE(first.get(key(400), cursor, [&](std::string_view value) {
+                const std::string expected(value);
+                cache->clear();
+                lookup(second, key(600));
+                REQUIRE(value == expected);
+            }));
+            const auto empty_path = w.base / "empty";
+            { d::TableWriter writer(empty_path); writer.finish(); }
+            d::Table empty(empty_path, cache);
+            lookup(empty, key(0));
+            lookup(first, key(0));
+        }},
+        {"btree_cursor_releases_evicted_pages_and_checks_corruption", [] {
+            Workspace w;
+            const auto path = w.base / "tree";
+            { d::TableWriter writer(path); writer.add("a", std::string(4000, 'v')); writer.finish(); }
+            auto cache = std::make_shared<d::PageCache>(16384);
+            d::Table table(path, cache);
+            d::Table::Cursor cursor;
+            REQUIRE(table.get("a", cursor, [](std::string_view value) { REQUIRE(value.size() == 4000); }));
+            // The cursor must not pin its last leaf outside the page cache's
+            // budget. Clearing that cache must force a fresh checked read.
+            cache->clear();
+            flip(path, 44);
+            rejects([&] { table.get("a", cursor, [](auto) {}); }, "E_INDEX_CORRUPT");
+        }},
+        {"btree_cursor_checks_leaf_range_before_reuse", [] {
+            Workspace w;
+            const auto path = w.base / "tree";
+            {
+                d::TableWriter writer(path, 1024);
+                for (const auto* text : {"a", "b", "c", "d"}) writer.add(text, std::string(400, 'v'));
+                writer.finish();
+            }
+            auto encoded = read(path);
+            std::size_t at = 8;
+            const auto root = static_cast<std::size_t>(d::get_u64(encoded, at));
+            auto body = encoded.substr(root + 8);
+            REQUIRE(body.front() == '\1');
+            at = 1;
+            REQUIRE(d::get_varint(body, at) == 2);
+            std::string replacement(1, '\1');
+            d::varint(replacement, 2);
+            for (unsigned i = 0; i < 2; ++i) {
+                REQUIRE(d::get_varint(body, at) == 0);
+                auto separator = d::get_string(body, at);
+                const auto child = d::get_string(body, at);
+                if (i == 1) { REQUIRE(separator == "c"); separator = "b"; }
+                d::varint(replacement, 0);
+                d::string(replacement, separator);
+                d::string(replacement, child);
+            }
+            REQUIRE(replacement.size() == body.size());
+            encoded.replace(root + 8, body.size(), replacement);
+            const auto crc = storage::crc32(replacement);
+            for (unsigned i = 0; i < 4; ++i) encoded[root + 4 + i] = static_cast<char>((crc >> (8 * i)) & 255U);
+            write(path, encoded); // Valid CRC, but the first leaf spans its sibling separator.
+            auto cache = std::make_shared<d::PageCache>(16384);
+            d::Table table(path, cache);
+            d::Table::Cursor cursor;
+            rejects([&] { table.get("a", cursor, [](auto) {}); }, "E_INDEX_CORRUPT");
+            rejects([&] { table.verify(); }, "E_INDEX_CORRUPT");
         }},
         {"btree_checksum_and_truncation", [] {
             Workspace w;

@@ -43,15 +43,28 @@ private:
     std::unique_ptr<Impl> impl_;
 };
 class Table {
+    struct Impl;
 public:
+    // One consumer owns each cursor. It only remembers a weak reference to a
+    // checked leaf: cache eviction releases its memory without waiting for the
+    // cursor or the search to finish. The immutable table identity prevents a
+    // cursor reused with another Table from serving values from its old leaf.
+    class Cursor {
+        friend class Table;
+        std::shared_ptr<const Impl> owner_;
+        std::weak_ptr<const DecodedPage> leaf_;
+    };
     Table(const fs::path&, std::shared_ptr<PageCache>);
     std::optional<std::string> get(std::string_view key) const;
+    // The value is borrowed only for the duration of visitor. Non-monotone
+    // lookups and expired/out-of-range leaves use the normal root traversal.
+    bool get(std::string_view key, Cursor&,
+             const std::function<void(std::string_view)>& visitor) const;
     void each(const std::function<void(std::string_view, std::string_view)>& visitor,
               std::string_view prefix = {}) const;
     std::uint64_t verify() const;
     std::uint64_t count() const;
 private:
-    struct Impl;
     std::shared_ptr<Impl> impl_;
 };
 // Runs are private to one transaction. Duplicate keys are combined on every pass.

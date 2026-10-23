@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <array>
 #include <fstream>
+#include <iterator>
 #include <limits>
 #include <list>
 #include <map>
@@ -417,6 +418,55 @@ std::optional<std::string> Table::get(std::string_view key) const {
         auto child = get_u64(it->second, at);
         if (child >= off) corrupt("Non-decreasing B+tree child offset");
         off = child;
+    }
+    corrupt("B+tree depth limit exceeded");
+}
+bool Table::get(std::string_view key, Cursor& cursor,
+                const std::function<void(std::string_view)>& visitor) const {
+    auto visit = [&](const DecodedPage& page) {
+        const auto found = std::lower_bound(page.entries.begin(), page.entries.end(), key,
+            [](const Entry& entry, std::string_view wanted) { return entry.first < wanted; });
+        if (found == page.entries.end() || found->first != key) return false;
+        visitor(found->second);
+        return true;
+    };
+    if (cursor.owner_.get() == impl_.get()) {
+        auto page = cursor.leaf_.lock();
+        if (page && !page->entries.empty() && key >= page->entries.front().first && key <= page->entries.back().first)
+            return visit(*page);
+    }
+    const auto& table = *impl_;
+    auto offset = table.root;
+    std::string lower;
+    std::optional<std::string> upper;
+    for (unsigned depth = 0; depth < 32; ++depth) {
+        auto holder = table.cache->node(table.path, offset, table.size);
+        const auto& page = *holder;
+        if (!page.internal) {
+            // A cached leaf is reusable only when its whole key range belongs
+            // to this root-to-leaf route. Check separators once when entering
+            // the leaf, rather than bypassing a corrupt sibling separator on a
+            // later adjacent lookup. Page contents/CRC were checked by node().
+            if (!page.entries.empty() && (page.entries.front().first < lower ||
+                    (upper && page.entries.back().first >= *upper)))
+                corrupt("B+tree leaf exceeds separator bounds");
+            cursor.owner_ = impl_;
+            cursor.leaf_ = holder;
+            return visit(page);
+        }
+        auto found = std::lower_bound(page.entries.begin(), page.entries.end(), key,
+            [](const Entry& entry, std::string_view wanted) { return entry.first < wanted; });
+        if (found == page.entries.end() || found->first != key) {
+            if (found == page.entries.begin()) return false;
+            --found;
+        }
+        if (found->first > lower) lower = found->first;
+        const auto next = std::next(found);
+        if (next != page.entries.end() && (!upper || next->first < *upper)) upper = next->first;
+        std::size_t at = 0;
+        const auto child = get_u64(found->second, at);
+        if (child >= offset) corrupt("Non-decreasing B+tree child offset");
+        offset = child;
     }
     corrupt("B+tree depth limit exceeded");
 }

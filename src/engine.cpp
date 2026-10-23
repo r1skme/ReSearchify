@@ -581,7 +581,11 @@ ReadInfo read_content(const Snapshot& s, const Record& r,
 // to its document identity; it is never an authority for positive matches.
 class LiteralLookup {
     const Snapshot& snapshot_;
-    std::map<std::uint64_t, std::shared_ptr<disk::Table>> tables_;
+    struct Segment {
+        std::shared_ptr<disk::Table> table;
+        disk::Table::Cursor cursor;
+    };
+    std::map<std::uint64_t, Segment> tables_;
 public:
     explicit LiteralLookup(const Snapshot& snapshot) : snapshot_(snapshot) {}
     std::optional<LiteralFilter> get(const Record& record) {
@@ -591,18 +595,20 @@ public:
             const auto path = segment_path(snapshot_.directory, record.segment) / "literal.tbl";
             std::shared_ptr<disk::Table> table;
             if (fs::exists(path)) table = std::make_shared<disk::Table>(path, snapshot_.cache);
-            found = tables_.emplace(record.segment, std::move(table)).first;
+            found = tables_.emplace(record.segment, Segment{std::move(table), {}}).first;
         }
-        if (!found->second) return {};
-        auto value = found->second->get(disk::ordered(record.id));
-        if (!value) return {};
-        if (value->size() != 157 || !value->starts_with("RSLF1")) throw Error("E_INDEX_CORRUPT", "Invalid literal-filter version or size");
-        std::size_t at = 5;
-        const auto a = disk::get_u64(*value, at), b = disk::get_u64(*value, at), crc = disk::get_u64(*value, at);
-        if (a != record.fingerprint.a || b != record.fingerprint.b || crc != record.crc)
-            throw Error("E_INDEX_CORRUPT", "Literal-filter document identity mismatch");
-        const auto filter = LiteralFilter::decode(std::string_view(*value).substr(at));
-        if (!filter) throw Error("E_INDEX_CORRUPT", "Invalid literal-filter payload");
+        auto& segment = found->second;
+        if (!segment.table) return {};
+        std::optional<LiteralFilter> filter;
+        segment.table->get(disk::ordered(record.id), segment.cursor, [&](std::string_view value) {
+            if (value.size() != 157 || !value.starts_with("RSLF1")) throw Error("E_INDEX_CORRUPT", "Invalid literal-filter version or size");
+            std::size_t at = 5;
+            const auto a = disk::get_u64(value, at), b = disk::get_u64(value, at), crc = disk::get_u64(value, at);
+            if (a != record.fingerprint.a || b != record.fingerprint.b || crc != record.crc)
+                throw Error("E_INDEX_CORRUPT", "Literal-filter document identity mismatch");
+            filter = LiteralFilter::decode(value.substr(at));
+            if (!filter) throw Error("E_INDEX_CORRUPT", "Invalid literal-filter payload");
+        });
         return filter;
     }
 };
