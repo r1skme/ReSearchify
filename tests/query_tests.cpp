@@ -65,6 +65,13 @@ void utf8_and_tokens() {
     require(tokens.empty(), "punctuation is not an identifier");
     for_each_token("abc", [&](Token t) { tokens.emplace_back(t.text); });
     require(tokens == std::vector<std::string>{"abc"}, "final token without delimiter");
+    for (std::size_t padding = 0; padding < 24; ++padding) {
+        const std::string prefix(padding, 'a');
+        require(valid_utf8(prefix + "😀" + std::string(24 - padding, 'b')), "Unicode scalar at varied byte offsets");
+        require(!valid_utf8(prefix + std::string("\xed\xa0\x80", 3)), "surrogate rejection at varied byte offsets");
+        require(!valid_utf8(prefix + std::string("\xf0\x80\x80\x80", 4)), "overlong rejection at varied byte offsets");
+        require(!valid_utf8(prefix + std::string("\xf0\x90\x80", 3)), "truncated tail at varied byte offsets");
+    }
 }
 
 void parser() {
@@ -274,6 +281,74 @@ void differential_boolean_regex() {
     }
 }
 
+void regex_prefix_and_class_fast_paths() {
+    using namespace researchify;
+    std::string long_unicode_prefix;
+    for (unsigned i = 0; i < 31; ++i) long_unicode_prefix += "я";
+    long_unicode_prefix += "😀";
+    // A never-accepting alternative prevents prefix extraction. The two NFAs
+    // must still return identical leftmost / earliest-end byte ranges, at every
+    // valid start offset, including assertions and nullable constructions.
+    const std::vector<std::string> patterns{
+        "needle_[0-9]+", "^abc", "abc$", "\\babc", "\\Babc", "abc\\bdef", "ab\\Bcd",
+        "a{0}abc", "(abc){2,3}", "a?bc", "a*bc", "ab(c|d)", "(ab|a)b", "a.*b",
+        "abc|", "a{0}", "^$", "", "\\b世界\\b", "привет.+", "😀[a-z]+", "a$bc",
+        std::string(70, 'a') + "b", long_unicode_prefix + "[0-9]+", "abc\\x00def",
+        "[\\D0]", "[^\\s]", "[a-z\\W]"
+    };
+    const std::vector<std::string> fixed_inputs{
+        "", "abc", "xabc abc!", "xxabcdef abcd", "needle_x needle_42 needle_43", "ababcd",
+        "abcabcabc", "\nabc\r", " 世界!", "a世界世界", "😀abc", "xпривет мир", std::string(90, 'a') + "b",
+        std::string("ab\0abc", 6), std::string("xabc\0def", 8), "x" + long_unicode_prefix + "42"
+    };
+    std::mt19937 random(20261023);
+    for (const auto& pattern : patterns) {
+        const Regex fast(pattern), reference("(" + pattern + ")|(\\b\\B)");
+        RegexWorkspace fast_work, reference_work;
+        for (std::size_t trial = 0; trial < fixed_inputs.size() + 100; ++trial) {
+            std::string input;
+            if (trial < fixed_inputs.size()) input = fixed_inputs[trial];
+            else {
+                const auto length = random() % 20;
+                for (unsigned i = 0; i < length; ++i) input += "abc !012_\r\n"[random() % 11];
+            }
+            for (std::size_t start = 0; start <= input.size(); ++start) {
+                if (start < input.size() && (static_cast<unsigned char>(input[start]) & 0xc0) == 0x80) continue;
+                std::uint64_t fast_budget = 10000000, reference_budget = 10000000;
+                RegexMatch actual, expected;
+                const bool actual_found = fast.find(input, actual, fast_budget, fast_work, start);
+                const bool expected_found = reference.find(input, expected, reference_budget, reference_work, start);
+                require(actual_found == expected_found, "prefix boolean differential: " + pattern);
+                if (actual_found) require(actual.begin == expected.begin && actual.end == expected.end,
+                                          "prefix byte range differential: " + pattern);
+            }
+        }
+    }
+    // Independent oracle for every ASCII class member, including controls and
+    // NUL. Non-ASCII is covered separately by the Unicode tests above.
+    for (const auto* pattern : {"[a-z]", "[a-zA-Z0-9_]", "[^a-z]", "[\\D0]", "[\\s]", "[^\\w]", "[a-z\\W]"}) {
+        const Regex actual(pattern);
+        const std::regex expected(pattern);
+        for (unsigned cp = 0; cp < 128; ++cp) {
+            const std::string input(1, static_cast<char>(cp));
+            RegexMatch result;
+            std::uint64_t budget = 10000;
+            require(actual.find(input, result, budget) == std::regex_search(input, expected), "ASCII class bitmap differential");
+        }
+    }
+    Regex prefixed("needle_[0-9]+");
+    RegexMatch result;
+    std::uint64_t budget = 10000;
+    rejects([&] { prefixed.find(std::string(32, 'x') + std::string("\xff", 1), result, budget); },
+            "prefix must not bypass invalid UTF-8 without a match");
+    rejects([&] { prefixed.find("needle_42" + std::string("\xff", 1), result, budget); },
+            "prefix must not bypass invalid UTF-8 after a match");
+    budget = 0;
+    rejects([&] { prefixed.find("no match", result, budget); }, "prefix must not bypass zero budget");
+    budget = 10;
+    rejects([&] { prefixed.find("no match", result, budget); }, "prefix scan charges skipped bytes");
+}
+
 void concurrency() {
     const researchify::Regex regex("^([a-z]+|[а-я]+)_[0-9]{2}$");
     std::vector<std::thread> workers;
@@ -298,7 +373,8 @@ int main() {
     const std::vector<std::pair<const char*, std::function<void()>>> tests{
         {"utf8_and_tokens", utf8_and_tokens}, {"query_parser", parser}, {"three_valued_truth_tables", truth_tables},
         {"regex_matching", regex_matching}, {"regex_errors_and_budget", regex_rejections_and_budget},
-        {"regex_differential", differential_boolean_regex}, {"regex_concurrency", concurrency}};
+        {"regex_differential", differential_boolean_regex}, {"regex_fast_paths", regex_prefix_and_class_fast_paths},
+        {"regex_concurrency", concurrency}};
     try {
         for (const auto& test : tests) {
             std::cout << "[RUN ] " << test.first << '\n';

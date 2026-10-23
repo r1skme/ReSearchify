@@ -48,13 +48,26 @@ bool whitespace(char32_t cp) {
 }
 bool digit(char32_t cp) { return cp >= U'0' && cp <= U'9'; }
 
+void append_utf8(std::string& text, char32_t scalar) {
+    const auto cp = static_cast<std::uint32_t>(scalar);
+    if (cp < 0x80) text += static_cast<char>(cp);
+    else if (cp < 0x800) { text += static_cast<char>(0xc0 | (cp >> 6)); text += static_cast<char>(0x80 | (cp & 63)); }
+    else if (cp < 0x10000) { text += static_cast<char>(0xe0 | (cp >> 12)); text += static_cast<char>(0x80 | ((cp >> 6) & 63)); text += static_cast<char>(0x80 | (cp & 63)); }
+    else { text += static_cast<char>(0xf0 | (cp >> 18)); text += static_cast<char>(0x80 | ((cp >> 12) & 63)); text += static_cast<char>(0x80 | ((cp >> 6) & 63)); text += static_cast<char>(0x80 | (cp & 63)); }
+}
+
 enum class AstKind { Empty, Literal, Any, Class, Concat, Alternate, Repeat, Bol, Eol, Boundary, NotBoundary };
 struct CharClass {
     std::vector<std::pair<char32_t, char32_t>> ranges;
+    std::array<std::uint64_t, 2> ascii{};
     // Each category bit means a union member; uppercase escapes use inverse bits.
     unsigned categories = 0;
     bool negative = false;
     bool matches(char32_t cp) const {
+        if (cp < 128) return (ascii[cp / 64] & (std::uint64_t{1} << (cp % 64))) != 0;
+        return matches_general(cp);
+    }
+    bool matches_general(char32_t cp) const {
         bool found = false;
         if ((categories & 1U) != 0 && digit(cp)) found = true;
         if ((categories & 2U) != 0 && !digit(cp)) found = true;
@@ -71,6 +84,11 @@ struct CharClass {
             if (cp <= range.second) found = true;
         }
         return negative ? !found : found;
+    }
+    void prepare_ascii() {
+        ascii = {};
+        for (char32_t cp = 0; cp < 128; ++cp)
+            if (matches_general(cp)) ascii[cp / 64] |= std::uint64_t{1} << (cp % 64);
     }
     void normalize() {
         std::sort(ranges.begin(), ranges.end());
@@ -581,6 +599,7 @@ struct Regex::Impl {
     std::vector<State> states;
     std::vector<CharClass> classes;
     std::size_t start = 0;
+    std::string prefix;
     std::shared_ptr<const RegexFilter> filter;
 };
 
@@ -592,6 +611,18 @@ Regex::Regex(const std::string& pattern) {
     impl->start = compiler.compile(root);
     impl->states = std::move(compiler.states);
     impl->classes = std::move(parser.classes);
+    for (auto& character_class : impl->classes) character_class.prepare_ascii();
+    // Only an unbranched initial path proves a prefix. Assertions still run in
+    // the NFA; nullable paths and alternatives stop this conservative analysis.
+    // Cap the prefix so searching it cannot add unbounded per-byte work.
+    auto prefix_state = impl->start;
+    for (std::size_t seen = 0; seen < impl->states.size() && impl->prefix.size() < 64; ++seen) {
+        const auto& state = impl->states[prefix_state];
+        if (state.op == Op::Literal) append_utf8(impl->prefix, state.literal);
+        else if (state.op != Op::Epsilon && state.op != Op::Bol && state.op != Op::Eol &&
+                 state.op != Op::Boundary && state.op != Op::NotBoundary) break;
+        prefix_state = state.next;
+    }
     // Necessary conditions only. Unknown constructs weaken the filter to true.
     using F = RegexFilter;
     struct Necessary { std::optional<std::string> exact; std::shared_ptr<const F> filter; };
@@ -607,11 +638,8 @@ Regex::Regex(const std::string& pattern) {
         if (n.kind == AstKind::Empty || n.kind == AstKind::Bol || n.kind == AstKind::Eol ||
             n.kind == AstKind::Boundary || n.kind == AstKind::NotBoundary) return {std::string(), always};
         if (n.kind == AstKind::Literal) {
-            std::string text; const auto cp = static_cast<std::uint32_t>(n.literal);
-            if (cp < 0x80) text += static_cast<char>(cp);
-            else if (cp < 0x800) { text += static_cast<char>(0xc0 | (cp >> 6)); text += static_cast<char>(0x80 | (cp & 63)); }
-            else if (cp < 0x10000) { text += static_cast<char>(0xe0 | (cp >> 12)); text += static_cast<char>(0x80 | ((cp >> 6) & 63)); text += static_cast<char>(0x80 | (cp & 63)); }
-            else { text += static_cast<char>(0xf0 | (cp >> 18)); text += static_cast<char>(0x80 | ((cp >> 12) & 63)); text += static_cast<char>(0x80 | ((cp >> 6) & 63)); text += static_cast<char>(0x80 | (cp & 63)); }
+            std::string text;
+            append_utf8(text, n.literal);
             return {text, literal_filter(text)};
         }
         if (n.kind == AstKind::Concat || n.kind == AstKind::Alternate) {
@@ -650,6 +678,15 @@ bool Regex::find(std::string_view text, RegexMatch& match, std::uint64_t& steps_
     charge(steps_left, static_cast<std::uint64_t>(text.size()) + 1);
     if (!valid_utf8(text)) throw Error("regex input is not valid UTF-8");
     const auto& machine = *impl_;
+    if (!machine.prefix.empty()) {
+        const auto candidate = text.find(machine.prefix, start);
+        // The validation pass is charged above. Charge skipped search bytes as
+        // well, rather than making the accelerator a budget-free scan. These
+        // are work units, not a promise to reproduce the old NFA step count.
+        charge(steps_left, (candidate == std::string_view::npos ? text.size() : candidate) - start + 1);
+        if (candidate == std::string_view::npos) return false;
+        start = candidate;
+    }
     using Thread = RegexWorkspace::Thread;
     auto& current = workspace.current; auto& next = workspace.next;
     auto& stack = workspace.stack; auto& visited = workspace.visited;
