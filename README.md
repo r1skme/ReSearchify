@@ -39,6 +39,7 @@ After indexing an explicitly selected project, these examples work from its root
 | `rs -f "*.cpp"` | List matching filenames | Find files by extension/name |
 | `rs -r src/main.cpp --lines 20:45` | Read lines 20–45 from the indexed snapshot | Inspect a result without opening an editor |
 | `rs -u` | Scan for changes and update the index | After editing files |
+| `rs -u --changed-file src/main.cpp --strict` | Update one explicitly known changed file | After an editor/agent edits that file |
 | `rs -st` | Show file, line, token and index-size statistics | Check index coverage and disk use |
 | `rs verify` | Validate the saved index | Diagnose corruption |
 | `rs --help` | List all commands and options | Discover anything else |
@@ -48,6 +49,15 @@ The short forms are optional: `rs init`, `rs find`, `rs read`, `rs update`, `rs 
 **Search rules:** terms match whole identifiers and are case-sensitive. `AND`, `OR`, `NOT` and parentheses combine **files**, not adjacent words on the same line. Use `-l` for exact punctuation and `-rs` for patterns. An index lives in `.researchify/` at your project root; `-u` checks existing content for changes, while `--trust-mtime` opts into a faster, less strict check.
 
 ### Examples
+
+**Update the files you just edited:**
+
+```powershell
+rs update --changed-file src/main.cpp --strict
+rs update --changed-file src/old.cpp --changed-file src/new.cpp --strict
+```
+
+The first command checks only `src/main.cpp`. The second handles a rename: supply both the old (deleted) and new path. Repeat `--changed-file` for the complete list of known edits, additions and deletions, using paths relative to the indexed project. Excluded files remain excluded. A successful targeted update reports `global_scan:false`; it does not check other workspace changes. If another tool may have changed files outside that list, use `rs update --strict` for a full content check. Both operations retain their respective correctness guarantees; their timings measure different amounts of work.
 
 **Find an implementation but exclude old code:**
 

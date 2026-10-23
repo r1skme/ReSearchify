@@ -18,6 +18,9 @@ struct DecodedPage {
     std::vector<Entry> entries;
     std::uint64_t next = 0;
 };
+std::size_t Table::Cursor::retained_owner_bytes() noexcept {
+    return sizeof(DecodedPage) + 256; // shared allocation/control-block allowance
+}
 namespace {
 constexpr std::uint64_t header_size = 36;
 constexpr std::size_t max_page = 262144, max_field = 65536;

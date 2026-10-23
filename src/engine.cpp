@@ -668,6 +668,41 @@ struct WorkerReport { std::uint64_t added = 0, changed = 0, unchanged = 0, skipp
 std::vector<std::string> warnings;
 BuildProfile profile;
 };
+// Each update worker owns its cursors. Tables share the immutable snapshot and
+// its accounted page cache; weak cursors cannot keep evicted leaves resident.
+// Keep path and record cursors separate because both key namespaces share a
+// catalog. A fixed number of lightweight slots bounds per-worker metadata.
+class BuildCatalogLookup {
+    struct Shard {
+        std::shared_ptr<disk::Table> table;
+        disk::Table::Cursor paths, records;
+    };
+    const Snapshot& snapshot_;
+    std::array<Shard, Buckets> shards_;
+public:
+    // Expired weak owners can retain make_shared control/object storage after
+    // entries have been freed. Budget that bounded overhead as well as slots;
+    // live decoded entries remain in the snapshot's shared PageCache budget.
+    static std::size_t working_bytes() {
+        return sizeof(std::array<Shard, Buckets>) + 2 * Buckets * disk::Table::Cursor::retained_owner_bytes();
+    }
+    explicit BuildCatalogLookup(const Snapshot& snapshot) : snapshot_(snapshot) {}
+    std::optional<Record> by_path(const std::string& path) {
+        const auto bucket = bucket_of(path);
+        if (!snapshot_.manifest.catalogs[bucket]) return {};
+        auto& shard = shards_[bucket];
+        if (!shard.table) shard.table = snapshot_.table(bucket);
+        std::optional<std::uint64_t> id;
+        shard.table->get("P" + path, shard.paths, [&](std::string_view value) { id = disk::ordered(value); });
+        if (!id) return {};
+        if (bucket_of(*id) != bucket) throw Error("E_INDEX_CORRUPT", "Path directory bucket mismatch");
+        std::optional<Record> result;
+        shard.table->get("I" + disk::ordered(*id), shard.records, [&](std::string_view value) { result = decode_record(value); });
+        if (!result || result->id != *id || result->path != path || !snapshot_.manifest.segments.contains(result->segment))
+            throw Error("E_INDEX_CORRUPT", "Path directory document identity mismatch");
+        return result;
+    }
+};
 class BuildStageTimer {
     double* destination_;
     Clock::time_point started_;
@@ -745,11 +780,14 @@ BuildReport build(const fs::path& source, const fs::path& requested, const Build
         + (old ? (std::min)(budget / 4, std::size_t(64 * MiB)) : 0);
     const std::size_t gram_memory = options.profile == "fast" ? 3 * MemoryMiB : 0;
     const std::size_t literal_memory = options.profile == "compact" ? MemoryMiB / 4 : 0;
-    const std::size_t per_worker = 2 * options.max_line_bytes + 3 * MemoryMiB + gram_memory + literal_memory;
-    std::size_t workers = (std::min)(options.threads, (std::max)(std::size_t(1), budget > fixed ? (budget - fixed) / per_worker : 0));
+    const std::size_t catalog_memory = old && !compacting ? BuildCatalogLookup::working_bytes() : 0;
+    const std::size_t per_worker = 2 * options.max_line_bytes + 3 * MemoryMiB + gram_memory + literal_memory + catalog_memory;
+    const auto requested_workers = options.changed_only
+        ? (std::min)(options.threads, (std::max)(std::size_t(1), options.changed_files.size())) : options.threads;
+    std::size_t workers = (std::min)(requested_workers, (std::max)(std::size_t(1), budget > fixed ? (budget - fixed) / per_worker : 0));
     if (fixed + per_worker > budget) throw Error("E_BUDGET", "Memory budget too small for line buffers and metadata");
     auto sorter_budget = (std::min)(std::size_t(4 * MemoryMiB),
-        (budget - fixed) / workers - 2 * options.max_line_bytes - 2 * MemoryMiB - gram_memory - literal_memory);
+        (budget - fixed) / workers - 2 * options.max_line_bytes - 2 * MemoryMiB - gram_memory - literal_memory - catalog_memory);
     sorter_budget = (std::max)(std::size_t(MemoryMiB / 4), sorter_budget);
     disk::Sorter deltas(transaction / "changes", 2 * MiB, [](std::string&, const std::string&) { throw Error("E_ARGUMENT", "Duplicate changed document"); });
     std::mutex deltas_mutex, failure_mutex, segments_mutex;
@@ -781,8 +819,7 @@ BuildReport build(const fs::path& source, const fs::path& requested, const Build
     if (!failure) failure = std::current_exception();
     queue.close(true);
     };
-    for (std::size_t worker = 0; worker < workers; ++worker) {
-        pool.emplace_back([&, worker] {
+    auto run_worker = [&](std::size_t worker) {
             try {
                 auto& report = reports[worker];
                 report.profile.enabled = options.profile_stages;
@@ -827,7 +864,6 @@ BuildReport build(const fs::path& source, const fs::path& requested, const Build
                 };
                 std::vector<std::uint64_t> gram_bits;
                 std::vector<std::uint32_t> gram_words;
-                if (options.profile == "fast") gram_bits.resize(1U << 18);
                 // Preserve the bounded bucket allocation across small documents.
                 // Entries still leave the aggregate at every spill/document.
                 std::unordered_map<std::string, disk::Posting, PostingKeyHash, PostingKeyEqual> aggregate;
@@ -835,9 +871,15 @@ BuildReport build(const fs::path& source, const fs::path& requested, const Build
                 std::unique_ptr<ContentReader> saved_content;
                 if (compacting) saved_content = std::make_unique<ContentReader>(*old,
                     (std::max)(std::size_t(1), (std::min)(std::size_t(16), std::size_t(128) / workers)));
+                std::unique_ptr<BuildCatalogLookup> catalogs;
+                if (old && !compacting) catalogs = std::make_unique<BuildCatalogLookup>(*old);
                 Job job;
                 while (queue.pop(job, options.profile_stages ? &report.profile.queue_wait_seconds : nullptr)) {
-                    auto prior = job.saved ? job.saved : old ? old->by_path(job.path) : std::optional<Record>();
+                    std::optional<Record> prior;
+                    {
+                        BuildStageTimer timer(options.profile_stages ? &report.profile.metadata_lookup_seconds : nullptr);
+                        prior = job.saved ? job.saved : catalogs ? catalogs->by_path(job.path) : std::optional<Record>();
+                    }
                     if (prior && !seen.empty()) {
                         auto id = prior->id & SerialMask;
                         if (id >= old->manifest.next_id) throw Error("E_INDEX_CORRUPT", "Document serial out of bounds");
@@ -898,6 +940,10 @@ BuildReport build(const fs::path& source, const fs::path& requested, const Build
                             } else found->second.frequency = checked_add(found->second.frequency, 1);
                             if (aggregate_bytes >= MiB / 2) spill();
                         };
+                        // Strict no-op updates and idle workers do not need a
+                        // 2 MiB trigram bitmap. Allocate it only when capturing
+                        // the first changed/new document in this worker.
+                        if (options.profile == "fast" && gram_bits.empty()) gram_bits.resize(1U << 18);
                         for (auto word : gram_words) gram_bits[word] = 0;
                         gram_words.clear();
                         // Small documents are cheaper to verify directly. This
@@ -969,8 +1015,13 @@ BuildReport build(const fs::path& source, const fs::path& requested, const Build
                 finish_segment();
             } catch (...) { fail();
             }
-        });
-    }
+    };
+    // This producer can enqueue at most one job, so it cannot block waiting
+    // for a consumer. Keep one-file editor updates on the caller's thread.
+    // Larger supplied lists still start consumers before bounded queue pushes.
+    const bool inline_worker = options.changed_only && options.changed_files.size() <= 1 && workers == 1;
+    if (!inline_worker) for (std::size_t worker = 0; worker < workers; ++worker)
+        pool.emplace_back([&, worker] { run_worker(worker); });
     // Group a bounded window of update jobs by metadata shard. This avoids
     // random page-cache thrashing without materializing the whole file tree.
     std::vector<Job> pending_jobs;
@@ -1029,6 +1080,7 @@ BuildReport build(const fs::path& source, const fs::path& requested, const Build
     } catch (...) { fail();
     }
     const auto enumeration_seconds = stage_elapsed(enumeration_started);
+    if (inline_worker && !failure && !queue.jobs.empty()) run_worker(0);
     for (auto& thread : pool) thread.join();
     if (failure) std::rethrow_exception(failure);
     if (old && !compacting && !options.changed_only) {
@@ -1049,6 +1101,7 @@ BuildReport build(const fs::path& source, const fs::path& requested, const Build
     if (options.changed_only) report.warnings.push_back("Only supplied paths were checked; other workspace changes may be absent");
     for (const auto& r : reports) {
         report.profile.queue_wait_seconds += r.profile.queue_wait_seconds;
+        report.profile.metadata_lookup_seconds += r.profile.metadata_lookup_seconds;
         report.profile.validation_seconds += r.profile.validation_seconds;
         report.profile.capture_seconds += r.profile.capture_seconds;
         report.profile.posting_write_seconds += r.profile.posting_write_seconds;

@@ -64,7 +64,7 @@ const std::vector<Command>& registry() {
         c.push_back({"init", "Create ROOT/.researchify; default ROOT is current directory", false, build_fields()});
         c.push_back({"create", "Legacy create ROOT INDEX, using the v2 format", false, build_fields()});
         auto update = build_fields();
-        update.push_back(strings("changed_files", "Only check these relative files/deletions; not a global scan"));
+        update.push_back(strings("changed_files", "Check this complete list of known edits/additions/deletions; rename needs old+new paths; not a global scan"));
         c.push_back({"update", "Incrementally update changed contents and small catalog shards", false, std::move(update)});
         c.push_back({"find", "Exact file-scoped boolean search, phrases and bounded Unicode regex", true,
             {{"query", "Text query or {term|phrase|regex|and|or|not: ...} tree", Type::Query, 0, 0, nullptr, {}, true},
@@ -442,7 +442,8 @@ J build_json(const J& request, const BuildReport& r) {
     if (r.profile.enabled) {
         const auto& p = r.profile;
         out["stage_profile"] = O{{"enumeration_seconds", p.enumeration_seconds},
-            {"queue_wait_seconds", p.queue_wait_seconds}, {"validation_seconds", p.validation_seconds},
+            {"queue_wait_seconds", p.queue_wait_seconds}, {"metadata_lookup_seconds", p.metadata_lookup_seconds},
+            {"validation_seconds", p.validation_seconds},
             {"capture_seconds", p.capture_seconds}, {"posting_write_seconds", p.posting_write_seconds},
             {"catalog_seconds", p.catalog_seconds}, {"commit_seconds", p.commit_seconds}};
     }
@@ -821,6 +822,10 @@ void help(const std::string& name = "") {
     if (c.name == "find") std::cout << "\nConvenience: positional QUERY; --literal TEXT; --regex PATTERN; --query-file FILE.\n"
         << "AND/OR/NOT and parentheses apply to whole files. Terms are case-sensitive whole words.\n"
         << "Phrases and regex stay on one line. Columns are 1-based UTF-8 byte offsets.\n";
+    if (c.name == "update") std::cout << "\nKnown edit: rs update --changed-file src/main.cpp --strict\n"
+        << "Repeat --changed-file for every edited, added or deleted relative file. Rename: include old and new paths.\n"
+        << "Only listed files are checked; global_scan=false does not establish whole-workspace freshness.\n"
+        << "For external/unknown changes, run rs update --strict without --changed-file.\n";
     std::cout << "\n--json selects machine output; --help prints this help without opening an index.\n";
 }
 void print_human(const std::string& command, const J& result) {

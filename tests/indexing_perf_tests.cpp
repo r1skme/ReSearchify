@@ -4,6 +4,7 @@
 #include "researchify/storage.hpp"
 #include <algorithm>
 #include <map>
+#include <thread>
 
 using namespace test;
 
@@ -269,6 +270,122 @@ int main() {
             build_options.checkpoint = {};
             const auto noop = update_index(workspace.index, build_options);
             REQUIRE(noop.tokenized == 0 && noop.unchanged == count);
+        }},
+        {"known_edit_updates_bound_workers_and_preserve_strict_scope", [] {
+            Workspace workspace;
+            write(workspace.root / "a.cpp", "alpha\n");
+            write(workspace.root / "b.cpp", "bravo\n");
+            auto build_options = options();
+            build_options.threads = 16;
+            build_options.max_line_bytes = 16384;
+            create_index(workspace.root, workspace.index, build_options);
+            Index pinned(workspace.index, 64);
+            const auto stamp = fs::last_write_time(workspace.root / "b.cpp");
+            write(workspace.root / "a.cpp", "omega\n");
+            write(workspace.root / "b.cpp", "delta\n");
+            fs::last_write_time(workspace.root / "b.cpp", stamp);
+            build_options.changed_only = true;
+            build_options.changed_files = {"a.cpp"};
+            build_options.profile_stages = true;
+            build_options.checkpoint = [](const std::string& stage) {
+                if (stage == "before_source_read") throw Error("E_TEST_CANCEL", "Cancel inline update");
+            };
+            rejects([&] { update_index(workspace.index, build_options); }, "E_TEST_CANCEL");
+            REQUIRE(Index(workspace.index, 64).generation() == pinned.generation());
+            REQUIRE(!fs::exists(workspace.index / "writer.lock"));
+            const auto caller = std::this_thread::get_id();
+            bool read_on_caller = false;
+            build_options.checkpoint = [&](const std::string& stage) {
+                if (stage == "before_source_read") read_on_caller = std::this_thread::get_id() == caller;
+            };
+            const auto changed = update_index(workspace.index, build_options);
+            build_options.checkpoint = {};
+            REQUIRE(changed.workers == 1 && !changed.global_scan);
+            REQUIRE(read_on_caller);
+            REQUIRE(changed.changed == 1 && changed.hashed == 1 && changed.files == 2);
+            REQUIRE(changed.profile.metadata_lookup_seconds > 0);
+            REQUIRE(Index(workspace.index, 64).search("bravo").total_matches == 1);
+            REQUIRE(Index(workspace.index, 64).search("delta").total_matches == 0);
+            REQUIRE(pinned.search("alpha").total_matches == 1);
+            build_options.changed_only = false;
+            build_options.changed_files.clear();
+            const auto strict = update_index(workspace.index, build_options);
+            REQUIRE(strict.global_scan && strict.hashed == 2 && strict.changed == 1);
+            REQUIRE(Index(workspace.index, 64).search("delta").total_matches == 1);
+            REQUIRE(pinned.search("bravo").total_matches == 1);
+            const auto renamed = path_from_utf8("nested/новое.cpp");
+            fs::create_directory(workspace.root / "nested");
+            fs::rename(workspace.root / "a.cpp", workspace.root / renamed);
+            build_options.changed_only = true;
+            build_options.changed_files = {"a.cpp", path_to_utf8(renamed)};
+            const auto moved = update_index(workspace.index, build_options);
+            REQUIRE(moved.workers == 2 && moved.hashed == 1 && moved.added == 1 && moved.removed == 1);
+            check_hit(Index(workspace.index, 64), "omega", path_to_utf8(renamed), 1, 1, 1);
+            build_options.changed_files = {path_to_utf8(renamed)};
+            build_options.exclude_paths.push_back(path_to_utf8(renamed));
+            const auto excluded = update_index(workspace.index, build_options);
+            REQUIRE(excluded.workers == 1 && excluded.hashed == 0 && excluded.removed == 1 && excluded.files == 1);
+            fs::remove(workspace.root / "b.cpp");
+            build_options.changed_files = {"b.cpp"};
+            const auto removed = update_index(workspace.index, build_options);
+            REQUIRE(removed.workers == 1 && removed.hashed == 0 && removed.removed == 1 && removed.files == 0);
+            build_options.changed_files.clear();
+            const auto empty = update_index(workspace.index, build_options);
+            REQUIRE(empty.workers == 1 && !empty.global_scan && empty.hashed == 0 && empty.files == 0);
+            REQUIRE(Index(workspace.index, 64).verify().files == 0);
+            REQUIRE(pinned.verify().files == 2);
+        }},
+        {"update_catalog_cursors_respect_small_memory_budgets", [] {
+            for (const auto& profile : {std::string("compact"), std::string("fast")}) {
+                Workspace workspace;
+                write(workspace.root / "a.cpp", "alpha\n");
+                write(workspace.root / "b.cpp", "bravo\n");
+                auto build_options = options();
+                build_options.profile = profile;
+                build_options.max_line_bytes = 16384;
+                build_options.threads = 16;
+                create_index(workspace.root, workspace.index, build_options);
+                write(workspace.root / "a.cpp", "omega\n");
+                build_options.changed_only = true;
+                build_options.changed_files = {"a.cpp"};
+                build_options.memory_mb = profile == "compact" ? 16 : 24;
+                const auto changed = update_index(workspace.index, build_options);
+                REQUIRE(changed.workers == 1 && changed.changed == 1 && changed.hashed == 1);
+                REQUIRE(changed.memory_budget_bytes == build_options.memory_mb * 1024ULL * 1024ULL);
+                build_options.changed_only = false;
+                build_options.changed_files.clear();
+                build_options.memory_mb = profile == "compact" ? 24 : 32;
+                const auto global = update_index(workspace.index, build_options);
+                REQUIRE(global.workers == 1 && global.global_scan && global.hashed == 2 && global.changed == 0);
+                REQUIRE(Index(workspace.index, 64).verify().files == 2);
+                check_hit(Index(workspace.index, 64), "omega", "a.cpp", 1, 1, 1);
+            }
+        }},
+        {"update_catalog_cursor_rejects_valid_crc_wrong_path_identity", [] {
+            Workspace workspace;
+            write(workspace.root / "a.cpp", "alpha\n");
+            write(workspace.root / "b.cpp", "bravo\n");
+            auto build_options = options();
+            const auto created = create_index(workspace.root, workspace.index, build_options);
+            const auto bucket = storage::term_hash("a.cpp") & 1023U;
+            const auto catalog = workspace.index / ("catalog-" + std::to_string(created.generation) + "-" + std::to_string(bucket) + ".tbl");
+            std::map<std::string, std::string> rows;
+            {
+                disk::Table table(catalog, std::make_shared<disk::PageCache>(1024 * 1024));
+                table.each([&](auto key, auto value) { rows.emplace(key, value); });
+            }
+            // Keep a valid page CRC but make the path directory refer to an
+            // impossible record. Lookup must fail without publishing a commit.
+            rows.at("Pa.cpp") = disk::ordered((bucket << 54) | ((1ULL << 54) - 2));
+            {
+                disk::TableWriter table(catalog);
+                for (const auto& [key, value] : rows) table.add(key, value);
+                table.finish();
+            }
+            build_options.changed_only = true;
+            build_options.changed_files = {"a.cpp"};
+            rejects([&] { update_index(workspace.index, build_options); }, "E_INDEX_CORRUPT");
+            REQUIRE(Index(workspace.index, 64).generation() == created.generation);
         }}
     });
 }

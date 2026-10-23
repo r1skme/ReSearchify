@@ -53,6 +53,9 @@ public:
         friend class Table;
         std::shared_ptr<const Impl> owner_;
         std::weak_ptr<const DecodedPage> leaf_;
+    public:
+        // Conservatively budget storage retained by an expired weak page owner.
+        static std::size_t retained_owner_bytes() noexcept;
     };
     Table(const fs::path&, std::shared_ptr<PageCache>);
     std::optional<std::string> get(std::string_view key) const;

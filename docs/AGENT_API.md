@@ -55,11 +55,25 @@ Worker-stage timings are summed across workers and can exceed elapsed time. Cand
 
 ### Build diagnostics and memory
 
-For `init`, `create` and `update`, `profile` remains the string `compact` or `fast`. A separate boolean `profile_stages` (CLI `--profile-stages`) opts into a top-level `stage_profile` object containing `enumeration_seconds`, `queue_wait_seconds`, `validation_seconds`, `capture_seconds`, `posting_write_seconds`, `catalog_seconds` and `commit_seconds`. This instrumentation option is per invocation and is not saved as index build policy. The current `compact` command does not expose `profile_stages`.
+For `init`, `create` and `update`, `profile` remains the string `compact` or `fast`. A separate boolean `profile_stages` (CLI `--profile-stages`) opts into a top-level `stage_profile` object containing `enumeration_seconds`, `queue_wait_seconds`, `metadata_lookup_seconds`, `validation_seconds`, `capture_seconds`, `posting_write_seconds`, `catalog_seconds` and `commit_seconds`. `metadata_lookup_seconds` measures the worker's lookup of previous document metadata; `catalog_seconds` measures construction of the new catalog shards. This instrumentation option is per invocation and is not saved as index build policy. The current `compact` command does not expose `profile_stages`.
 
 Build phase counters overlap and worker times are sums: enumeration includes producer backpressure, while capture includes tokenization and writing. Top-level `seconds` is the build elapsed time, not the sum of `stage_profile` values.
 
 Common `memory_mb` defaults to 256 and controls accounted workspaces, not a hard process RSS cap. Shared `Index` snapshot caches and per-query buffers have separate lifetimes; overlapping C++ searches add their workspaces. Thread stacks, allocator/stream overhead and the host application require headroom. A `Service` recreates its cached `Index` if the memory setting changes. Do not interpret a report's `memory_budget_bytes` as measured peak RSS.
+
+### Updating after known edits
+
+When an editor or agent knows the complete list of files it changed, send that list through the existing `changed_files` field. Each entry is a safe relative filename, including deleted files; directories are not expanded and wildcard characters are treated literally. A rename requires **both** the old and new filename. Exclusion rules still apply. Omitted paths are not checked, and `global_scan:false` must not be interpreted as whole-workspace freshness. An empty list checks no files. After external changes or an incomplete notification stream, omit `changed_files` and use `mode:"strict"` for a complete content scan; this detects same-size edits even when timestamps were preserved.
+
+For an explicitly writable JSONL session (`rs serve --stdio --allow-write --root ABSOLUTE_PROJECT_PATH`):
+
+```jsonl
+{"id":1,"command":"update","changed_files":["src/main.cpp"],"mode":"strict"}
+{"id":2,"command":"find","query":"NewIdentifier","limit":8}
+{"id":3,"command":"update","changed_files":["src/old.cpp","src/new.cpp"],"mode":"strict"}
+```
+
+`update` invalidates that session's previous cached snapshot, so the following unpinned `find` opens the committed generation. Other sessions still need `refresh:true`; explicitly pinned generations and existing continuation cursors remain on their own snapshots. MCP remains read-only, so an MCP client performs an authorized update through CLI/JSONL and then refreshes its read session. Small supplied-path lists cap the build worker count; `threads` remains an upper bound. Strict global scans still inspect every included source file.
 
 ## Files and read
 

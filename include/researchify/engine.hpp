@@ -41,7 +41,7 @@ struct BuildProfile {
     bool enabled = false;
     // Thread-stage sums can overlap. Capture includes tokenization and writes;
     // enumeration includes producer backpressure. Do not add them to wall time.
-    double enumeration_seconds = 0, queue_wait_seconds = 0, validation_seconds = 0;
+    double enumeration_seconds = 0, queue_wait_seconds = 0, metadata_lookup_seconds = 0, validation_seconds = 0;
     double capture_seconds = 0, posting_write_seconds = 0, catalog_seconds = 0, commit_seconds = 0;
 };
 struct BuildReport {

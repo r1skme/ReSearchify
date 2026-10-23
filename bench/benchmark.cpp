@@ -111,6 +111,7 @@ void build_report(const std::string& phase, const BuildReport& r, double cpu_sec
         const auto& p = r.profile;
         std::cout << "BUILD_PROFILE phase=" << phase << " overlapping_thread_sums=true instrumentation_overhead=true"
                   << " enumeration_seconds=" << p.enumeration_seconds << " queue_wait_seconds=" << p.queue_wait_seconds
+                  << " metadata_lookup_seconds=" << p.metadata_lookup_seconds
                   << " validation_seconds=" << p.validation_seconds << " capture_seconds=" << p.capture_seconds
                   << " posting_write_seconds=" << p.posting_write_seconds << " catalog_seconds=" << p.catalog_seconds
                   << " commit_seconds=" << p.commit_seconds << '\n';
