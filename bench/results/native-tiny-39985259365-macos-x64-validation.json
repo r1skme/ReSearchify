@@ -1,0 +1,57 @@
+{
+  "format": "researchify-native-validation-excerpts-v1",
+  "workflow_run_id": 39985259365,
+  "job_id": 120522640541,
+  "job_name": "macOS x64 (Clang)",
+  "source": "https://api.github.com/repos/r1skme/ReSearchify/actions/jobs/120522640541/logs",
+  "status": "completed",
+  "conclusion": "failure",
+  "ctest": {
+    "passed": 13,
+    "total": 13,
+    "wall_seconds": 24.28
+  },
+  "python": {
+    "tests_run": 45,
+    "passed": 32,
+    "failed": 4,
+    "skipped": 9,
+    "wall_seconds": 0.896,
+    "failed_module": "test_tiny_update_comparison",
+    "failure_location": "scripts/test_tiny_update_comparison.py:45",
+    "cause": "The mock compared the canonical driver executable path /private/var/... with unresolved temporary path /var/...; all four assertions failed before mocked updates."
+  },
+  "performance_step": {
+    "executed": false,
+    "status": "skipped",
+    "reason": "Python harness failed"
+  },
+  "decoded_log": {
+    "file": "native-tiny-39985259365-macos-x64-job.log",
+    "utf8_bytes": 36798,
+    "sha256": "cb54474660047d9263b80af071886ab641d7f38970593a020c6e183bc3cd6b3d",
+    "note": "Exact UTF-8 encoding of decoded connector log text; not an original binary GitHub log archive."
+  },
+  "log_excerpts": [
+    "2026-10-23T16:17:15.2488460Z 100% tests passed out of 13",
+    "2026-10-23T16:17:15.2489050Z Total Test time (real) =  24.28 sec",
+    "2026-10-23T16:17:16.8537950Z FAIL: test_full_corpus_check_rejects_unexpected_file_despite_child_claim (test_tiny_update_comparison.UpdateOnlyJobTests.test_full_corpus_check_rejects_unexpected_file_despite_child_claim)",
+    "2026-10-23T16:17:16.8575080Z AssertionError: '/private/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/tmp7xfkrrrk/after' != '/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/tmp7xfkrrrk/after'",
+    "2026-10-23T16:17:16.8582330Z FAIL: test_incomplete_build_preserves_sample_and_stops_before_updates (test_tiny_update_comparison.UpdateOnlyJobTests.test_incomplete_build_preserves_sample_and_stops_before_updates)",
+    "2026-10-23T16:17:16.8608580Z AssertionError: '/private/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/tmpth2y2rl5/after' != '/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/tmpth2y2rl5/after'",
+    "2026-10-23T16:17:16.8615690Z FAIL: test_interrupted_update_keeps_error_partial_artifact_and_restore_result (test_tiny_update_comparison.UpdateOnlyJobTests.test_interrupted_update_keeps_error_partial_artifact_and_restore_result)",
+    "2026-10-23T16:17:16.8644290Z AssertionError: '/private/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/tmpg883f7cv/after' != '/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/tmpg883f7cv/after'",
+    "2026-10-23T16:17:16.8650870Z FAIL: test_update_only_scope_builds_current_profiles_and_preserves_seven_pairs (test_tiny_update_comparison.UpdateOnlyJobTests.test_update_only_scope_builds_current_profiles_and_preserves_seven_pairs)",
+    "2026-10-23T16:17:16.8679870Z AssertionError: '/private/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/tmp47snqoyi/after' != '/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/tmp47snqoyi/after'",
+    "2026-10-23T16:17:16.8684520Z Ran 45 tests in 0.896s",
+    "2026-10-23T16:17:16.8684980Z FAILED (failures=4, skipped=9)"
+  ],
+  "repair": {
+    "scope": "Test-only canonical expected path; runtime driver and C++ unchanged by this harness repair.",
+    "local_test_command": "python3 -m unittest discover -s scripts -p 'test_tiny_update_comparison.py' -v",
+    "local_tests_passed": 5,
+    "local_wall_seconds": 0.09,
+    "negative_control": "New POSIX directory-alias test fails with the previous unresolved-path assertion: exactly one failure and zero errors. Every target command was mocked; no native build or benchmark ran.",
+    "native_macos_after_fix": "pending"
+  }
+}

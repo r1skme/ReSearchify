@@ -42,7 +42,7 @@ class UpdateOnlyJobTests(unittest.TestCase):
                 path.write_bytes(generator.contents(i))
             response = {"format": "researchify-tiny-corpus-v1", **updates.corpus_state(source, self.args.files)}
         else:
-            self.assertEqual(argv[0], str(self.after))
+            self.assertEqual(argv[0], str(self.after.resolve()))
             self.assertEqual(argv[1], "create")
             source = self.args.work / "fixture/source"
             response = {"status": "ok", "execution_complete": not self.incomplete_build,
@@ -78,6 +78,26 @@ class UpdateOnlyJobTests(unittest.TestCase):
         self.assertEqual([row["profile"] for row in result["builds"]], ["compact", "fast"])
         self.assertEqual([row["operations"] for row in result["update_reports"]], [70, 70])
         self.assertIn("Independent update-only runner", result["conditions"]["window"])
+
+    @unittest.skipIf(sys.platform == "win32", "Directory symlinks may require Windows privileges")
+    def test_directory_alias_keeps_canonical_binary_identity(self):
+        actual = self.root / "actual"
+        actual.mkdir()
+        self.before.replace(actual / "before")
+        self.after.replace(actual / "after")
+        alias = self.root / "alias"
+        alias.symlink_to(actual, target_is_directory=True)
+        self.before = alias / "before"
+        self.after = alias / "after"
+        self.args.baseline = self.before
+        self.args.current = self.after
+        self.args.work = alias / "run"
+        result = self.execute(self.complete_updates)
+        self.assertTrue(result["complete"])
+        self.assertTrue(result["source_restoration"]["restored"])
+        self.assertEqual(result["binaries"]["current"]["path"], str((actual / "after").resolve()))
+        self.assertEqual(result["binaries"]["baseline"]["path"], str((actual / "before").resolve()))
+        self.assertEqual(len(self.commands), 3)
 
     def test_interrupted_update_keeps_error_partial_artifact_and_restore_result(self):
         def interrupted(args, binaries, work, reports, summary):

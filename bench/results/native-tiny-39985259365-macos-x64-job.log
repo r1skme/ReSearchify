@@ -1,0 +1,429 @@
+﻿2026-10-23T16:15:30.4436700Z Current runner version: '2.338.0'
+2026-10-23T16:15:30.4463490Z ##[group]Runner Image Provisioner
+2026-10-23T16:15:30.4464560Z Hosted Compute Agent
+2026-10-23T16:15:30.4465370Z Version: 20260819.586
+2026-10-23T16:15:30.4466210Z Commit: 3cc4a88dfa507ef76119ad1bb3eccc6378bb2b76
+2026-10-23T16:15:30.4467180Z Build Date: 2026-08-18T23:20:18Z
+2026-10-23T16:15:30.4468180Z Worker ID: {78937c4a-4c36-46e4-bcb2-ff9a165641ac}
+2026-10-23T16:15:30.4469160Z Azure Region: westus
+2026-10-23T16:15:30.4469930Z ##[endgroup]
+2026-10-23T16:15:30.4471940Z ##[group]Operating System
+2026-10-23T16:15:30.4472760Z macOS
+2026-10-23T16:15:30.4473470Z 15.7.9
+2026-10-23T16:15:30.4474140Z 24G830
+2026-10-23T16:15:30.4474830Z ##[endgroup]
+2026-10-23T16:15:30.4475560Z ##[group]Runner Image
+2026-10-23T16:15:30.4476340Z Image: macos-15
+2026-10-23T16:15:30.4477130Z Version: 20260824.0482.1
+2026-10-23T16:15:30.4478820Z Included Software: https://github.com/actions/runner-images/blob/macos-15/20260824.0482/images/macos/macos-15-Readme.md
+2026-10-23T16:15:30.4481110Z Image Release: https://github.com/actions/runner-images/releases/tag/macos-15%2F20260824.0482
+2026-10-23T16:15:30.4482530Z ##[endgroup]
+2026-10-23T16:15:30.4484080Z ##[group]GITHUB_TOKEN Permissions
+2026-10-23T16:15:30.4486200Z Contents: read
+2026-10-23T16:15:30.4487010Z Metadata: read
+2026-10-23T16:15:30.4487740Z ##[endgroup]
+2026-10-23T16:15:30.4490680Z Secret source: Actions
+2026-10-23T16:15:30.4491940Z Cache mode: write
+2026-10-23T16:15:30.4492870Z Prepare workflow directory
+2026-10-23T16:15:30.4938200Z Prepare all required actions
+2026-10-23T16:15:30.4999310Z Getting action download info
+2026-10-23T16:15:31.0130240Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-10-23T16:15:31.1846100Z Download action repository 'actions/setup-python@v5' (SHA:a26af69be951a213d495a4c3e4e4022e16d87065)
+2026-10-23T16:15:31.3125040Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-10-23T16:15:31.6673200Z Complete job name: macOS x64 (Clang)
+2026-10-23T16:15:31.7716710Z ##[group]Run actions/checkout@v4
+2026-10-23T16:15:31.7718040Z with:
+2026-10-23T16:15:31.7718680Z   repository: r1skme/ReSearchify
+2026-10-23T16:15:31.7724880Z   token: ***
+2026-10-23T16:15:31.7725520Z   ssh-strict: true
+2026-10-23T16:15:31.7726180Z   ssh-user: git
+2026-10-23T16:15:31.7726830Z   persist-credentials: true
+2026-10-23T16:15:31.7727560Z   clean: true
+2026-10-23T16:15:31.7728220Z   sparse-checkout-cone-mode: true
+2026-10-23T16:15:31.7729000Z   fetch-depth: 1
+2026-10-23T16:15:31.7729640Z   fetch-tags: false
+2026-10-23T16:15:31.7730310Z   show-progress: true
+2026-10-23T16:15:31.7730980Z   lfs: false
+2026-10-23T16:15:31.7731740Z   submodules: false
+2026-10-23T16:15:31.7732420Z   set-safe-directory: true
+2026-10-23T16:15:31.7733180Z   allow-unsafe-pr-checkout: false
+2026-10-23T16:15:31.7734540Z ##[endgroup]
+2026-10-23T16:15:32.0669070Z Syncing repository: r1skme/ReSearchify
+2026-10-23T16:15:32.0672020Z ##[group]Getting Git version info
+2026-10-23T16:15:32.0673520Z Working directory is '/Users/runner/work/ReSearchify/ReSearchify'
+2026-10-23T16:15:32.0675340Z [command]/usr/local/bin/git version
+2026-10-23T16:15:32.0981950Z git version 2.55.0
+2026-10-23T16:15:32.1004830Z ##[endgroup]
+2026-10-23T16:15:32.1019240Z Copying '/Users/runner/.gitconfig' to '/Users/runner/work/_temp/5d05d4e8-f482-47ed-b449-8afeab24d979/.gitconfig'
+2026-10-23T16:15:32.1034740Z Temporarily overriding HOME='/Users/runner/work/_temp/5d05d4e8-f482-47ed-b449-8afeab24d979' before making global git config changes
+2026-10-23T16:15:32.1037210Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-23T16:15:32.1041510Z [command]/usr/local/bin/git config --global --add safe.directory /Users/runner/work/ReSearchify/ReSearchify
+2026-10-23T16:15:32.1189130Z Deleting the contents of '/Users/runner/work/ReSearchify/ReSearchify'
+2026-10-23T16:15:32.1194880Z ##[group]Initializing the repository
+2026-10-23T16:15:32.1200240Z [command]/usr/local/bin/git init /Users/runner/work/ReSearchify/ReSearchify
+2026-10-23T16:15:32.1537170Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-23T16:15:32.1539150Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-23T16:15:32.1540860Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-23T16:15:32.1542210Z hint: call:
+2026-10-23T16:15:32.1543110Z hint:
+2026-10-23T16:15:32.1544010Z hint: 	git config --global init.defaultBranch <name>
+2026-10-23T16:15:32.1545160Z hint:
+2026-10-23T16:15:32.1546350Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-23T16:15:32.1548120Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-23T16:15:32.1549470Z hint:
+2026-10-23T16:15:32.1550230Z hint: 	git branch -m <name>
+2026-10-23T16:15:32.1551060Z hint:
+2026-10-23T16:15:32.1552140Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-23T16:15:32.1554200Z Initialized empty Git repository in /Users/runner/work/ReSearchify/ReSearchify/.git/
+2026-10-23T16:15:32.1557310Z [command]/usr/local/bin/git remote add origin https://github.com/r1skme/ReSearchify
+2026-10-23T16:15:32.1671820Z ##[endgroup]
+2026-10-23T16:15:32.1673220Z ##[group]Disabling automatic garbage collection
+2026-10-23T16:15:32.1675860Z [command]/usr/local/bin/git config --local gc.auto 0
+2026-10-23T16:15:32.1775060Z ##[endgroup]
+2026-10-23T16:15:32.1776400Z ##[group]Setting up auth
+2026-10-23T16:15:32.1784910Z [command]/usr/local/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-23T16:15:32.1888180Z [command]/usr/local/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-23T16:15:32.3281000Z [command]/usr/local/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-23T16:15:32.3370000Z [command]/usr/local/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-23T16:15:32.4687090Z [command]/usr/local/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-23T16:15:32.4801540Z [command]/usr/local/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-23T16:15:32.6314250Z [command]/usr/local/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-23T16:15:32.6432080Z ##[endgroup]
+2026-10-23T16:15:32.6433660Z ##[group]Fetching the repository
+2026-10-23T16:15:32.6442430Z [command]/usr/local/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +d5ecb3abc6d63241c78870ee8263750dda73cb84:refs/remotes/pull/2/merge
+2026-10-23T16:15:33.8913820Z From https://github.com/r1skme/ReSearchify
+2026-10-23T16:15:33.8920290Z  * [new ref]         d5ecb3abc6d63241c78870ee8263750dda73cb84 -> pull/2/merge
+2026-10-23T16:15:33.8928290Z ##[endgroup]
+2026-10-23T16:15:33.8930800Z ##[group]Determining the checkout info
+2026-10-23T16:15:33.8932940Z ##[endgroup]
+2026-10-23T16:15:33.8935440Z [command]/usr/local/bin/git sparse-checkout disable
+2026-10-23T16:15:33.9053200Z [command]/usr/local/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-23T16:15:33.9159960Z ##[group]Checking out the ref
+2026-10-23T16:15:33.9164740Z [command]/usr/local/bin/git checkout --progress --force refs/remotes/pull/2/merge
+2026-10-23T16:15:34.0713080Z HEAD is now at d5ecb3a Merge 108ff41d2016abcc931bc8bd9418e288fd9d2677 into f06dfbcca862407167a672cb42a6df8653c86791
+2026-10-23T16:15:34.0743600Z ##[endgroup]
+2026-10-23T16:15:34.0899910Z [command]/usr/local/bin/git log -1 --format=%H
+2026-10-23T16:15:34.1003370Z d5ecb3abc6d63241c78870ee8263750dda73cb84
+2026-10-23T16:15:34.1389440Z ##[group]Run actions/setup-python@v5
+2026-10-23T16:15:34.1390680Z with:
+2026-10-23T16:15:34.1391100Z   python-version: 3.12
+2026-10-23T16:15:34.1391560Z   check-latest: false
+2026-10-23T16:15:34.1396440Z   token: ***
+2026-10-23T16:15:34.1396860Z   update-environment: true
+2026-10-23T16:15:34.1397370Z   allow-prereleases: false
+2026-10-23T16:15:34.1397850Z   freethreaded: false
+2026-10-23T16:15:34.1398280Z ##[endgroup]
+2026-10-23T16:15:34.3545930Z ##[group]Installed versions
+2026-10-23T16:15:34.3615680Z (node:1111) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-23T16:15:34.3617980Z Successfully set up CPython (3.12.10)
+2026-10-23T16:15:34.3620220Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-23T16:15:34.3621710Z ##[endgroup]
+2026-10-23T16:15:34.3919490Z ##[group]Run if ! command -v rg >/dev/null; then
+2026-10-23T16:15:34.3920520Z [36;1mif ! command -v rg >/dev/null; then[0m
+2026-10-23T16:15:34.3921400Z [36;1m  brew install ripgrep[0m
+2026-10-23T16:15:34.3922100Z [36;1mfi[0m
+2026-10-23T16:15:34.3922560Z [36;1mrg --version[0m
+2026-10-23T16:15:34.4010220Z shell: /bin/bash -e {0}
+2026-10-23T16:15:34.4010800Z env:
+2026-10-23T16:15:34.4011460Z   pythonLocation: /Users/runner/hostedtoolcache/Python/3.12.10/x64
+2026-10-23T16:15:34.4012610Z   PKG_CONFIG_PATH: /Users/runner/hostedtoolcache/Python/3.12.10/x64/lib/pkgconfig
+2026-10-23T16:15:34.4013740Z   Python_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/x64
+2026-10-23T16:15:34.4014740Z   Python2_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/x64
+2026-10-23T16:15:34.4015740Z   Python3_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/x64
+2026-10-23T16:15:34.4016550Z ##[endgroup]
+2026-10-23T16:15:38.6638510Z [32m==>[0m [1mDownloading bottle manifests[0m
+2026-10-23T16:15:38.6921850Z ✔︎ Bottle Manifest ripgrep (15.2.0)
+2026-10-23T16:15:38.6924600Z [34m==>[0m [1mWould install 1 formula:[0m
+2026-10-23T16:15:38.6925450Z ripgrep
+2026-10-23T16:15:38.8022760Z [32m==>[0m [1mFetching downloads for: [32mripgrep[39m[0m
+2026-10-23T16:15:39.1905070Z ✔︎ Bottle ripgrep (15.2.0)
+2026-10-23T16:15:39.2184440Z [34m==>[0m [1mPouring ripgrep--15.2.0.sonoma.bottle.tar.gz[0m
+2026-10-23T16:15:39.5263980Z 🍺  /usr/local/Cellar/ripgrep/15.2.0: 14 files, 6.9MB
+2026-10-23T16:15:39.5277980Z [32m==>[0m [1mCaveats[0m
+2026-10-23T16:15:39.5278690Z Bash completion has been installed to:
+2026-10-23T16:15:39.5279320Z   /usr/local/etc/bash_completion.d
+2026-10-23T16:15:39.5642770Z ripgrep 15.2.0
+2026-10-23T16:15:39.5643250Z 
+2026-10-23T16:15:39.5643510Z features:+pcre2
+2026-10-23T16:15:39.5644030Z simd(compile):+SSE2,+SSSE3,-AVX2
+2026-10-23T16:15:39.5644610Z simd(runtime):+SSE2,+SSSE3,+AVX2
+2026-10-23T16:15:39.5644960Z 
+2026-10-23T16:15:39.5645210Z PCRE2 10.45 is available (JIT is available)
+2026-10-23T16:15:39.5717710Z ##[group]Run cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_DEPLOYMENT_TARGET=13.3 -DBUILD_TESTING=ON
+2026-10-23T16:15:39.5719330Z [36;1mcmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_DEPLOYMENT_TARGET=13.3 -DBUILD_TESTING=ON[0m
+2026-10-23T16:15:39.5779220Z shell: /bin/bash -e {0}
+2026-10-23T16:15:39.5779700Z env:
+2026-10-23T16:15:39.5780280Z   pythonLocation: /Users/runner/hostedtoolcache/Python/3.12.10/x64
+2026-10-23T16:15:39.5781300Z   PKG_CONFIG_PATH: /Users/runner/hostedtoolcache/Python/3.12.10/x64/lib/pkgconfig
+2026-10-23T16:15:39.5782330Z   Python_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/x64
+2026-10-23T16:15:39.5783270Z   Python2_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/x64
+2026-10-23T16:15:39.5784180Z   Python3_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/x64
+2026-10-23T16:15:39.5784900Z ##[endgroup]
+2026-10-23T16:15:41.7581970Z -- The CXX compiler identification is AppleClang 17.0.0.17000013
+2026-10-23T16:15:42.5871600Z -- Detecting CXX compiler ABI info
+2026-10-23T16:15:43.6961720Z -- Detecting CXX compiler ABI info - done
+2026-10-23T16:15:43.7264170Z -- Check for working CXX compiler: /usr/bin/c++ - skipped
+2026-10-23T16:15:43.7280740Z -- Detecting CXX compile features
+2026-10-23T16:15:43.7296640Z -- Detecting CXX compile features - done
+2026-10-23T16:15:43.7446070Z -- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+2026-10-23T16:15:44.1688020Z -- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+2026-10-23T16:15:44.1716260Z -- Found Threads: TRUE
+2026-10-23T16:15:44.2360200Z -- Configuring done (4.6s)
+2026-10-23T16:15:45.2557990Z -- Generating done (1.0s)
+2026-10-23T16:15:45.2603230Z -- Build files have been written to: /Users/runner/work/ReSearchify/ReSearchify/build
+2026-10-23T16:15:45.2677250Z ##[group]Run cmake --build build --parallel 3
+2026-10-23T16:15:45.2677980Z [36;1mcmake --build build --parallel 3[0m
+2026-10-23T16:15:45.2740480Z shell: /bin/bash -e {0}
+2026-10-23T16:15:45.2740980Z env:
+2026-10-23T16:15:45.2741560Z   pythonLocation: /Users/runner/hostedtoolcache/Python/3.12.10/x64
+2026-10-23T16:15:45.2742610Z   PKG_CONFIG_PATH: /Users/runner/hostedtoolcache/Python/3.12.10/x64/lib/pkgconfig
+2026-10-23T16:15:45.2743680Z   Python_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/x64
+2026-10-23T16:15:45.2744640Z   Python2_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/x64
+2026-10-23T16:15:45.2745580Z   Python3_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/x64
+2026-10-23T16:15:45.2746330Z ##[endgroup]
+2026-10-23T16:15:45.4282510Z [  3%] Building CXX object CMakeFiles/researchify_core.dir/src/engine.cpp.o
+2026-10-23T16:15:45.4512250Z [  6%] Building CXX object CMakeFiles/researchify_core.dir/src/query.cpp.o
+2026-10-23T16:15:45.4616590Z [  9%] Building CXX object CMakeFiles/researchify_core.dir/src/storage.cpp.o
+2026-10-23T16:15:51.0879320Z [ 12%] Building CXX object CMakeFiles/researchify_core.dir/src/disk.cpp.o
+2026-10-23T16:15:51.4288930Z [ 15%] Building CXX object CMakeFiles/researchify_core.dir/src/json.cpp.o
+2026-10-23T16:15:56.8568730Z [ 18%] Building CXX object CMakeFiles/researchify_core.dir/src/api.cpp.o
+2026-10-23T16:16:09.7892810Z [ 21%] Linking CXX static library libresearchify_core.a
+2026-10-23T16:16:12.0105850Z [ 21%] Built target researchify_core
+2026-10-23T16:16:12.1108270Z [ 24%] Building CXX object CMakeFiles/researchify.dir/src/main.cpp.o
+2026-10-23T16:16:12.2110920Z [ 27%] Building CXX object CMakeFiles/cs_disk_tests.dir/tests/disk_tests.cpp.o
+2026-10-23T16:16:12.2117860Z [ 30%] Building CXX object CMakeFiles/cs_json_tests.dir/tests/json_tests.cpp.o
+2026-10-23T16:16:15.0584380Z [ 33%] Linking CXX executable rs
+2026-10-23T16:16:15.1586730Z [ 33%] Built target researchify
+2026-10-23T16:16:15.2589220Z [ 36%] Building CXX object CMakeFiles/cs_v2_tests.dir/tests/v2_tests.cpp.o
+2026-10-23T16:16:17.8287690Z [ 39%] Linking CXX executable cs_json_tests
+2026-10-23T16:16:17.9365820Z [ 39%] Built target cs_json_tests
+2026-10-23T16:16:17.9569810Z [ 42%] Building CXX object CMakeFiles/cs_process_tests.dir/tests/process_tests.cpp.o
+2026-10-23T16:16:22.7062250Z [ 45%] Linking CXX executable cs_disk_tests
+2026-10-23T16:16:22.8346540Z [ 45%] Built target cs_disk_tests
+2026-10-23T16:16:22.9029620Z [ 48%] Building CXX object CMakeFiles/cs_content_io_tests.dir/tests/content_io_tests.cpp.o
+2026-10-23T16:16:23.8235970Z [ 51%] Linking CXX executable cs_process_tests
+2026-10-23T16:16:24.0288930Z [ 51%] Built target cs_process_tests
+2026-10-23T16:16:24.0545850Z [ 54%] Building CXX object CMakeFiles/cs_indexing_perf_tests.dir/tests/indexing_perf_tests.cpp.o
+2026-10-23T16:16:30.1558670Z [ 57%] Linking CXX executable cs_v2_tests
+2026-10-23T16:16:30.2565080Z [ 60%] Linking CXX executable cs_content_io_tests
+2026-10-23T16:16:30.3062530Z [ 60%] Built target cs_v2_tests
+2026-10-23T16:16:30.3202730Z [ 60%] Built target cs_content_io_tests
+2026-10-23T16:16:30.4372010Z [ 63%] Building CXX object CMakeFiles/cs_search_perf_tests.dir/tests/search_perf_tests.cpp.o
+2026-10-23T16:16:30.5374010Z [ 66%] Building CXX object CMakeFiles/cs_literal_filter_tests.dir/tests/literal_filter_tests.cpp.o
+2026-10-23T16:16:32.8431440Z [ 69%] Linking CXX executable cs_literal_filter_tests
+2026-10-23T16:16:32.9629470Z [ 69%] Built target cs_literal_filter_tests
+2026-10-23T16:16:32.9826660Z [ 72%] Building CXX object CMakeFiles/cs_tests.dir/tests/engine_tests.cpp.o
+2026-10-23T16:16:33.2188540Z [ 75%] Linking CXX executable cs_indexing_perf_tests
+2026-10-23T16:16:33.3192090Z [ 75%] Built target cs_indexing_perf_tests
+2026-10-23T16:16:33.4196280Z [ 78%] Building CXX object CMakeFiles/cs_query_tests.dir/tests/query_tests.cpp.o
+2026-10-23T16:16:41.6269600Z [ 81%] Linking CXX executable cs_tests
+2026-10-23T16:16:41.7570220Z [ 81%] Built target cs_tests
+2026-10-23T16:16:41.8396590Z [ 84%] Building CXX object CMakeFiles/cs_storage_tests.dir/tests/storage_tests.cpp.o
+2026-10-23T16:16:42.4199790Z [ 87%] Linking CXX executable cs_search_perf_tests
+2026-10-23T16:16:42.5424300Z [ 87%] Built target cs_search_perf_tests
+2026-10-23T16:16:42.6020190Z [ 90%] Building CXX object CMakeFiles/cs_bench.dir/bench/benchmark.cpp.o
+2026-10-23T16:16:47.0234640Z [ 93%] Linking CXX executable cs_bench
+2026-10-23T16:16:47.2467220Z [ 93%] Built target cs_bench
+2026-10-23T16:16:47.6651650Z [ 96%] Linking CXX executable cs_query_tests
+2026-10-23T16:16:47.7817830Z [ 96%] Built target cs_query_tests
+2026-10-23T16:16:50.6828020Z [100%] Linking CXX executable cs_storage_tests
+2026-10-23T16:16:50.8204860Z [100%] Built target cs_storage_tests
+2026-10-23T16:16:50.8540030Z ##[group]Run ctest --test-dir build --output-on-failure
+2026-10-23T16:16:50.8541340Z [36;1mctest --test-dir build --output-on-failure[0m
+2026-10-23T16:16:50.8629220Z shell: /bin/bash -e {0}
+2026-10-23T16:16:50.8629880Z env:
+2026-10-23T16:16:50.8630520Z   pythonLocation: /Users/runner/hostedtoolcache/Python/3.12.10/x64
+2026-10-23T16:16:50.8631760Z   PKG_CONFIG_PATH: /Users/runner/hostedtoolcache/Python/3.12.10/x64/lib/pkgconfig
+2026-10-23T16:16:50.8633130Z   Python_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/x64
+2026-10-23T16:16:50.8634480Z   Python2_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/x64
+2026-10-23T16:16:50.8635700Z   Python3_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/x64
+2026-10-23T16:16:50.8636510Z ##[endgroup]
+2026-10-23T16:16:50.9600470Z Test project /Users/runner/work/ReSearchify/ReSearchify/build
+2026-10-23T16:16:50.9666860Z       Start  1: json
+2026-10-23T16:16:51.0318470Z  1/13 Test  #1: json .............................   Passed    0.06 sec
+2026-10-23T16:16:51.1321760Z       Start  2: disk
+2026-10-23T16:16:51.7733720Z  2/13 Test  #2: disk .............................   Passed    0.75 sec
+2026-10-23T16:16:51.7735430Z       Start  3: v2
+2026-10-23T16:16:55.8940900Z  3/13 Test  #3: v2 ...............................   Passed    4.10 sec
+2026-10-23T16:16:55.9155720Z       Start  4: process
+2026-10-23T16:16:55.9406230Z  4/13 Test  #4: process ..........................   Passed    0.06 sec
+2026-10-23T16:16:55.9523810Z       Start  5: content_io
+2026-10-23T16:16:56.3368050Z  5/13 Test  #5: content_io .......................   Passed    0.39 sec
+2026-10-23T16:16:56.3398460Z       Start  6: indexing_perf
+2026-10-23T16:16:59.0487720Z  6/13 Test  #6: indexing_perf ....................   Passed    2.67 sec
+2026-10-23T16:16:59.0491040Z       Start  7: literal_filter
+2026-10-23T16:16:59.0726880Z  7/13 Test  #7: literal_filter ...................   Passed    0.06 sec
+2026-10-23T16:16:59.0819530Z       Start  8: search_perf
+2026-10-23T16:17:12.0877030Z  8/13 Test  #8: search_perf ......................   Passed   13.01 sec
+2026-10-23T16:17:12.0881750Z       Start  9: engine
+2026-10-23T16:17:12.8541170Z  9/13 Test  #9: engine ...........................   Passed    0.77 sec
+2026-10-23T16:17:12.8542940Z       Start 10: query
+2026-10-23T16:17:13.0186990Z 10/13 Test #10: query ............................   Passed    0.16 sec
+2026-10-23T16:17:13.0189160Z       Start 11: storage
+2026-10-23T16:17:14.7475640Z 11/13 Test #11: storage ..........................   Passed    1.73 sec
+2026-10-23T16:17:14.7477170Z       Start 12: cli
+2026-10-23T16:17:14.8972800Z 12/13 Test #12: cli ..............................   Passed    0.15 sec
+2026-10-23T16:17:14.8974490Z       Start 13: api_cli
+2026-10-23T16:17:15.2478610Z 13/13 Test #13: api_cli ..........................   Passed    0.35 sec
+2026-10-23T16:17:15.2487380Z 
+2026-10-23T16:17:15.2488460Z 100% tests passed out of 13
+2026-10-23T16:17:15.2488820Z 
+2026-10-23T16:17:15.2489050Z Total Test time (real) =  24.28 sec
+2026-10-23T16:17:15.2575700Z ##[group]Run python -m unittest discover -s scripts -p "test_*.py"
+2026-10-23T16:17:15.2576640Z [36;1mpython -m unittest discover -s scripts -p "test_*.py"[0m
+2026-10-23T16:17:15.2654700Z shell: /bin/bash -e {0}
+2026-10-23T16:17:15.2655350Z env:
+2026-10-23T16:17:15.2656140Z   pythonLocation: /Users/runner/hostedtoolcache/Python/3.12.10/x64
+2026-10-23T16:17:15.2657560Z   PKG_CONFIG_PATH: /Users/runner/hostedtoolcache/Python/3.12.10/x64/lib/pkgconfig
+2026-10-23T16:17:15.2658950Z   Python_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/x64
+2026-10-23T16:17:15.2660230Z   Python2_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/x64
+2026-10-23T16:17:15.2661520Z   Python3_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/x64
+2026-10-23T16:17:15.2663050Z ##[endgroup]
+2026-10-23T16:17:16.8534420Z sssssssss................................FFFF
+2026-10-23T16:17:16.8535500Z ======================================================================
+2026-10-23T16:17:16.8537950Z FAIL: test_full_corpus_check_rejects_unexpected_file_despite_child_claim (test_tiny_update_comparison.UpdateOnlyJobTests.test_full_corpus_check_rejects_unexpected_file_despite_child_claim)
+2026-10-23T16:17:16.8539820Z ----------------------------------------------------------------------
+2026-10-23T16:17:16.8540610Z Traceback (most recent call last):
+2026-10-23T16:17:16.8551120Z   File "/Users/runner/work/ReSearchify/ReSearchify/scripts/test_tiny_update_comparison.py", line 100, in test_full_corpus_check_rejects_unexpected_file_despite_child_claim
+2026-10-23T16:17:16.8552790Z     self.execute(extra)
+2026-10-23T16:17:16.8553840Z   File "/Users/runner/work/ReSearchify/ReSearchify/scripts/test_tiny_update_comparison.py", line 66, in execute
+2026-10-23T16:17:16.8555040Z     return updates.run(self.args)
+2026-10-23T16:17:16.8555550Z            ^^^^^^^^^^^^^^^^^^^^^^
+2026-10-23T16:17:16.8556540Z   File "/Users/runner/work/ReSearchify/ReSearchify/scripts/tiny_update_comparison.py", line 143, in run
+2026-10-23T16:17:16.8557590Z     raise failure
+2026-10-23T16:17:16.8558530Z   File "/Users/runner/work/ReSearchify/ReSearchify/scripts/tiny_update_comparison.py", line 100, in run
+2026-10-23T16:17:16.8559700Z     record["sample"] = bench.command(command, args.timeout)
+2026-10-23T16:17:16.8560380Z                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-23T16:17:16.8561560Z   File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/unittest/mock.py", line 1139, in __call__
+2026-10-23T16:17:16.8563190Z     return self._mock_call(*args, **kwargs)
+2026-10-23T16:17:16.8563980Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-23T16:17:16.8565590Z   File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/unittest/mock.py", line 1143, in _mock_call
+2026-10-23T16:17:16.8567150Z     return self._execute_mock_call(*args, **kwargs)
+2026-10-23T16:17:16.8567940Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-23T16:17:16.8569250Z   File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/unittest/mock.py", line 1204, in _execute_mock_call
+2026-10-23T16:17:16.8570510Z     result = effect(*args, **kwargs)
+2026-10-23T16:17:16.8571030Z              ^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-23T16:17:16.8572140Z   File "/Users/runner/work/ReSearchify/ReSearchify/scripts/test_tiny_update_comparison.py", line 45, in command
+2026-10-23T16:17:16.8573350Z     self.assertEqual(argv[0], str(self.after))
+2026-10-23T16:17:16.8575080Z AssertionError: '/private/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/tmp7xfkrrrk/after' != '/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/tmp7xfkrrrk/after'
+2026-10-23T16:17:16.8576800Z - /private/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/tmp7xfkrrrk/after
+2026-10-23T16:17:16.8577640Z ? --------
+2026-10-23T16:17:16.8579050Z + /var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/tmp7xfkrrrk/after
+2026-10-23T16:17:16.8579630Z 
+2026-10-23T16:17:16.8579640Z 
+2026-10-23T16:17:16.8579850Z ======================================================================
+2026-10-23T16:17:16.8582330Z FAIL: test_incomplete_build_preserves_sample_and_stops_before_updates (test_tiny_update_comparison.UpdateOnlyJobTests.test_incomplete_build_preserves_sample_and_stops_before_updates)
+2026-10-23T16:17:16.8584170Z ----------------------------------------------------------------------
+2026-10-23T16:17:16.8584880Z Traceback (most recent call last):
+2026-10-23T16:17:16.8586580Z   File "/Users/runner/work/ReSearchify/ReSearchify/scripts/test_tiny_update_comparison.py", line 110, in test_incomplete_build_preserves_sample_and_stops_before_updates
+2026-10-23T16:17:16.8588130Z     self.execute(forbidden)
+2026-10-23T16:17:16.8589200Z   File "/Users/runner/work/ReSearchify/ReSearchify/scripts/test_tiny_update_comparison.py", line 66, in execute
+2026-10-23T16:17:16.8590360Z     return updates.run(self.args)
+2026-10-23T16:17:16.8590870Z            ^^^^^^^^^^^^^^^^^^^^^^
+2026-10-23T16:17:16.8591870Z   File "/Users/runner/work/ReSearchify/ReSearchify/scripts/tiny_update_comparison.py", line 143, in run
+2026-10-23T16:17:16.8592930Z     raise failure
+2026-10-23T16:17:16.8593840Z   File "/Users/runner/work/ReSearchify/ReSearchify/scripts/tiny_update_comparison.py", line 100, in run
+2026-10-23T16:17:16.8594990Z     record["sample"] = bench.command(command, args.timeout)
+2026-10-23T16:17:16.8595710Z                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-23T16:17:16.8596880Z   File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/unittest/mock.py", line 1139, in __call__
+2026-10-23T16:17:16.8598040Z     return self._mock_call(*args, **kwargs)
+2026-10-23T16:17:16.8598600Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-23T16:17:16.8599910Z   File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/unittest/mock.py", line 1143, in _mock_call
+2026-10-23T16:17:16.8601180Z     return self._execute_mock_call(*args, **kwargs)
+2026-10-23T16:17:16.8601810Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-23T16:17:16.8603070Z   File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/unittest/mock.py", line 1204, in _execute_mock_call
+2026-10-23T16:17:16.8604260Z     result = effect(*args, **kwargs)
+2026-10-23T16:17:16.8604790Z              ^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-23T16:17:16.8605900Z   File "/Users/runner/work/ReSearchify/ReSearchify/scripts/test_tiny_update_comparison.py", line 45, in command
+2026-10-23T16:17:16.8607070Z     self.assertEqual(argv[0], str(self.after))
+2026-10-23T16:17:16.8608580Z AssertionError: '/private/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/tmpth2y2rl5/after' != '/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/tmpth2y2rl5/after'
+2026-10-23T16:17:16.8610500Z - /private/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/tmpth2y2rl5/after
+2026-10-23T16:17:16.8611410Z ? --------
+2026-10-23T16:17:16.8612310Z + /var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/tmpth2y2rl5/after
+2026-10-23T16:17:16.8613090Z 
+2026-10-23T16:17:16.8613140Z 
+2026-10-23T16:17:16.8613460Z ======================================================================
+2026-10-23T16:17:16.8615690Z FAIL: test_interrupted_update_keeps_error_partial_artifact_and_restore_result (test_tiny_update_comparison.UpdateOnlyJobTests.test_interrupted_update_keeps_error_partial_artifact_and_restore_result)
+2026-10-23T16:17:16.8617790Z ----------------------------------------------------------------------
+2026-10-23T16:17:16.8618520Z Traceback (most recent call last):
+2026-10-23T16:17:16.8620310Z   File "/Users/runner/work/ReSearchify/ReSearchify/scripts/test_tiny_update_comparison.py", line 88, in test_interrupted_update_keeps_error_partial_artifact_and_restore_result
+2026-10-23T16:17:16.8621930Z     self.execute(interrupted)
+2026-10-23T16:17:16.8623090Z   File "/Users/runner/work/ReSearchify/ReSearchify/scripts/test_tiny_update_comparison.py", line 66, in execute
+2026-10-23T16:17:16.8625520Z     return updates.run(self.args)
+2026-10-23T16:17:16.8626060Z            ^^^^^^^^^^^^^^^^^^^^^^
+2026-10-23T16:17:16.8627540Z   File "/Users/runner/work/ReSearchify/ReSearchify/scripts/tiny_update_comparison.py", line 143, in run
+2026-10-23T16:17:16.8628610Z     raise failure
+2026-10-23T16:17:16.8629520Z   File "/Users/runner/work/ReSearchify/ReSearchify/scripts/tiny_update_comparison.py", line 100, in run
+2026-10-23T16:17:16.8630680Z     record["sample"] = bench.command(command, args.timeout)
+2026-10-23T16:17:16.8631380Z                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-23T16:17:16.8632670Z   File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/unittest/mock.py", line 1139, in __call__
+2026-10-23T16:17:16.8633830Z     return self._mock_call(*args, **kwargs)
+2026-10-23T16:17:16.8634380Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-23T16:17:16.8635520Z   File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/unittest/mock.py", line 1143, in _mock_call
+2026-10-23T16:17:16.8636730Z     return self._execute_mock_call(*args, **kwargs)
+2026-10-23T16:17:16.8637350Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-23T16:17:16.8638620Z   File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/unittest/mock.py", line 1204, in _execute_mock_call
+2026-10-23T16:17:16.8639860Z     result = effect(*args, **kwargs)
+2026-10-23T16:17:16.8640430Z              ^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-23T16:17:16.8641510Z   File "/Users/runner/work/ReSearchify/ReSearchify/scripts/test_tiny_update_comparison.py", line 45, in command
+2026-10-23T16:17:16.8642780Z     self.assertEqual(argv[0], str(self.after))
+2026-10-23T16:17:16.8644290Z AssertionError: '/private/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/tmpg883f7cv/after' != '/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/tmpg883f7cv/after'
+2026-10-23T16:17:16.8646340Z - /private/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/tmpg883f7cv/after
+2026-10-23T16:17:16.8647550Z ? --------
+2026-10-23T16:17:16.8648200Z + /var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/tmpg883f7cv/after
+2026-10-23T16:17:16.8648740Z 
+2026-10-23T16:17:16.8648750Z 
+2026-10-23T16:17:16.8649000Z ======================================================================
+2026-10-23T16:17:16.8650870Z FAIL: test_update_only_scope_builds_current_profiles_and_preserves_seven_pairs (test_tiny_update_comparison.UpdateOnlyJobTests.test_update_only_scope_builds_current_profiles_and_preserves_seven_pairs)
+2026-10-23T16:17:16.8652810Z ----------------------------------------------------------------------
+2026-10-23T16:17:16.8653520Z Traceback (most recent call last):
+2026-10-23T16:17:16.8655280Z   File "/Users/runner/work/ReSearchify/ReSearchify/scripts/test_tiny_update_comparison.py", line 72, in test_update_only_scope_builds_current_profiles_and_preserves_seven_pairs
+2026-10-23T16:17:16.8657020Z     result = self.execute(self.complete_updates)
+2026-10-23T16:17:16.8657640Z              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-23T16:17:16.8658770Z   File "/Users/runner/work/ReSearchify/ReSearchify/scripts/test_tiny_update_comparison.py", line 66, in execute
+2026-10-23T16:17:16.8659940Z     return updates.run(self.args)
+2026-10-23T16:17:16.8660450Z            ^^^^^^^^^^^^^^^^^^^^^^
+2026-10-23T16:17:16.8661610Z   File "/Users/runner/work/ReSearchify/ReSearchify/scripts/tiny_update_comparison.py", line 143, in run
+2026-10-23T16:17:16.8662670Z     raise failure
+2026-10-23T16:17:16.8663670Z   File "/Users/runner/work/ReSearchify/ReSearchify/scripts/tiny_update_comparison.py", line 100, in run
+2026-10-23T16:17:16.8664840Z     record["sample"] = bench.command(command, args.timeout)
+2026-10-23T16:17:16.8665590Z                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-23T16:17:16.8666850Z   File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/unittest/mock.py", line 1139, in __call__
+2026-10-23T16:17:16.8667990Z     return self._mock_call(*args, **kwargs)
+2026-10-23T16:17:16.8669400Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-23T16:17:16.8670530Z   File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/unittest/mock.py", line 1143, in _mock_call
+2026-10-23T16:17:16.8672060Z     return self._execute_mock_call(*args, **kwargs)
+2026-10-23T16:17:16.8673020Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-23T16:17:16.8674430Z   File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/unittest/mock.py", line 1204, in _execute_mock_call
+2026-10-23T16:17:16.8675650Z     result = effect(*args, **kwargs)
+2026-10-23T16:17:16.8676160Z              ^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-23T16:17:16.8677220Z   File "/Users/runner/work/ReSearchify/ReSearchify/scripts/test_tiny_update_comparison.py", line 45, in command
+2026-10-23T16:17:16.8678380Z     self.assertEqual(argv[0], str(self.after))
+2026-10-23T16:17:16.8679870Z AssertionError: '/private/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/tmp47snqoyi/after' != '/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/tmp47snqoyi/after'
+2026-10-23T16:17:16.8681650Z - /private/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/tmp47snqoyi/after
+2026-10-23T16:17:16.8682430Z ? --------
+2026-10-23T16:17:16.8682990Z + /var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/tmp47snqoyi/after
+2026-10-23T16:17:16.8683530Z 
+2026-10-23T16:17:16.8683540Z 
+2026-10-23T16:17:16.8683850Z ----------------------------------------------------------------------
+2026-10-23T16:17:16.8684520Z Ran 45 tests in 0.896s
+2026-10-23T16:17:16.8684800Z 
+2026-10-23T16:17:16.8684980Z FAILED (failures=4, skipped=9)
+2026-10-23T16:17:16.8814370Z ##[error]Process completed with exit code 1.
+2026-10-23T16:17:16.9153380Z Post job cleanup.
+2026-10-23T16:17:17.0535100Z [command]/usr/local/bin/git version
+2026-10-23T16:17:17.0632720Z git version 2.55.0
+2026-10-23T16:17:17.0668940Z Copying '/Users/runner/.gitconfig' to '/Users/runner/work/_temp/c6fd530b-63fd-4ee8-bb15-f8dd6307b7ac/.gitconfig'
+2026-10-23T16:17:17.0685080Z Temporarily overriding HOME='/Users/runner/work/_temp/c6fd530b-63fd-4ee8-bb15-f8dd6307b7ac' before making global git config changes
+2026-10-23T16:17:17.0686820Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-23T16:17:17.0692600Z [command]/usr/local/bin/git config --global --add safe.directory /Users/runner/work/ReSearchify/ReSearchify
+2026-10-23T16:17:17.0795370Z [command]/usr/local/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-23T16:17:17.0915080Z [command]/usr/local/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-23T16:17:17.2081970Z [command]/usr/local/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-23T16:17:17.2162020Z http.https://github.com/.extraheader
+2026-10-23T16:17:17.2176230Z [command]/usr/local/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-10-23T16:17:17.2277330Z [command]/usr/local/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-23T16:17:17.3559170Z [command]/usr/local/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-23T16:17:17.3653990Z [command]/usr/local/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-23T16:17:17.5042640Z Cleaning up orphan processes
+2026-10-23T16:17:17.8372850Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-python@v5. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
