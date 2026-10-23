@@ -119,6 +119,51 @@ class CaptureTests(unittest.TestCase):
 
 
 class OracleTests(unittest.TestCase):
+    def check_count_pages(self, responses, expected):
+        pages = iter(responses)
+        class FakeService:
+            def __init__(self, argv, timeout):
+                pass
+            def request(self, request):
+                return {"response": next(pages)}
+            def close(self, validate=True):
+                pass
+        with patch.object(driver, "Service", FakeService):
+            return driver.all_counts("rs", Path("index"), {"name": "term", "query": "return"}, expected, 10)
+
+    @staticmethod
+    def count_page(paths, total, cursor=None):
+        return {"snapshot": {"generation": "1"}, "total": total,
+                "results": [{"path": path, "matches": 1} for path in paths],
+                "has_more": cursor is not None, "output_truncated": False, "next_cursor": cursor}
+
+    def test_full_counts_require_strict_path_order_within_and_between_pages(self):
+        expected = {"a.c": 1, "b.c": 1}
+        for pages in ([self.count_page(["b.c", "a.c"], 2)],
+                      [self.count_page(["b.c"], 2, "next"), self.count_page(["a.c"], 2)]):
+            with self.subTest(pages=pages), self.assertRaisesRegex(RuntimeError, "Out-of-order path"):
+                self.check_count_pages(pages, expected)
+
+    def test_full_counts_accept_utf8_path_order(self):
+        paths = ["a.c", "z.c", "é.c", "終.c"]
+        self.assertEqual(paths, sorted(paths, key=lambda path: path.encode("utf-8")))
+        result = self.check_count_pages([self.count_page(paths[:2], 4, "next"),
+                                         self.count_page(paths[2:], 4)], {path: 1 for path in paths})
+        self.assertEqual(result["pages"], 2)
+        self.assertEqual(result["matching_files"], 4)
+
+    def test_full_counts_reject_duplicates_and_nonprogressing_cursor(self):
+        duplicate = [self.count_page(["a.c"], 2, "next"), self.count_page(["a.c"], 2)]
+        with self.assertRaisesRegex(RuntimeError, "Duplicate path"):
+            self.check_count_pages(duplicate, {"a.c": 1, "b.c": 1})
+        repeated_cursor = [self.count_page(["a.c"], 3, "same"), self.count_page(["b.c"], 3, "same")]
+        with self.assertRaisesRegex(RuntimeError, "Non-progressing correctness pagination"):
+            self.check_count_pages(repeated_cursor, {"a.c": 1, "b.c": 1, "c.c": 1})
+        missing_cursor = self.count_page(["a.c"], 2)
+        missing_cursor["has_more"] = True
+        with self.assertRaisesRegex(RuntimeError, "Non-progressing correctness pagination"):
+            self.check_count_pages([missing_cursor], {"a.c": 1, "b.c": 1})
+
     def test_exact_ascii_term_treats_all_non_ascii_bytes_as_word(self):
         case = {"kind": "term", "pattern": "return"}
         data = "\ufeffreturn; return\r\néreturn return© return_ _return\nreturn".encode()

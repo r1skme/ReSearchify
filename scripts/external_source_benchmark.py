@@ -89,6 +89,7 @@ def all_counts(executable: str, index: Path, case: dict, expected: dict[str, int
                "regex_steps": MAX_REGEX_STEPS, "max_output_bytes": MAX_OUTPUT_BYTES}
     found, cursors, pages = {}, set(), 0
     snapshot = None
+    previous_path = None
     service = Service(command, timeout)
     finished = False
     try:
@@ -102,7 +103,13 @@ def all_counts(executable: str, index: Path, case: dict, expected: dict[str, int
             for hit in response["results"]:
                 if hit["path"] in found:
                     raise RuntimeError("Duplicate path during correctness pagination")
+                # Valid UTF-8 has the same lexical order as Unicode scalar
+                # order. Keep this boundary across pages, not just within one
+                # envelope: dict equality alone would accept reordered hits.
+                if previous_path is not None and hit["path"] <= previous_path:
+                    raise RuntimeError("Out-of-order path during correctness pagination")
                 found[hit["path"]] = hit["matches"]
+                previous_path = hit["path"]
             if not response["has_more"]:
                 if response.get("output_truncated") or len(found) != response["total"] or found != expected:
                     missing = list(sorted(set(expected) - set(found)))[:5]
