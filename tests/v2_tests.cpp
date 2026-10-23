@@ -72,23 +72,34 @@ J initialize(const std::string& version = "2025-11-25") {
 J initialized() { return O{{"jsonrpc", "2.0"}, {"method", "notifications/initialized"}};
 }
 #ifdef _WIN32
-// A normal RemoveDirectoryW is delete-on-close while this handle remains open.
+// Explicit legacy disposition keeps the directory delete-pending until close.
+// RemoveDirectoryW can use POSIX deletion and unlink its name immediately.
 // Keep this platform fixture in the tests; the runtime uses std::filesystem.
 class DeletePendingDirectory {
     HANDLE handle_ = INVALID_HANDLE_VALUE;
 public:
     explicit DeletePendingDirectory(const fs::path& path) {
         REQUIRE(fs::create_directory(path));
-        handle_ = CreateFileW(path.c_str(), FILE_READ_ATTRIBUTES,
+        handle_ = CreateFileW(path.c_str(), GENERIC_READ | DELETE,
             FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, nullptr,
             OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, nullptr);
         if (handle_ == INVALID_HANDLE_VALUE)
             throw std::system_error(static_cast<int>(GetLastError()), std::system_category(), "CreateFileW lock directory");
-        if (!RemoveDirectoryW(path.c_str())) {
+        FILE_DISPOSITION_INFO disposition{TRUE};
+        if (!SetFileInformationByHandle(handle_, FileDispositionInfo, &disposition,
+                static_cast<DWORD>(sizeof(disposition)))) {
             const auto code = GetLastError();
             release();
-            throw std::system_error(static_cast<int>(code), std::system_category(), "RemoveDirectoryW lock directory");
+            throw std::system_error(static_cast<int>(code), std::system_category(), "SetFileInformationByHandle legacy disposition");
         }
+    }
+    void require_pending() const {
+        FILE_STANDARD_INFO information{};
+        if (!GetFileInformationByHandleEx(handle_, FileStandardInfo, &information,
+                static_cast<DWORD>(sizeof(information))))
+            throw std::system_error(static_cast<int>(GetLastError()), std::system_category(), "GetFileInformationByHandleEx lock directory");
+        REQUIRE(information.Directory);
+        REQUIRE(information.DeletePending);
     }
     DWORD release() noexcept {
         if (handle_ == INVALID_HANDLE_VALUE) return ERROR_SUCCESS;
@@ -100,7 +111,8 @@ public:
     DeletePendingDirectory(const DeletePendingDirectory&) = delete;
     DeletePendingDirectory& operator=(const DeletePendingDirectory&) = delete;
 };
-void require_delete_pending(const fs::path& path) {
+void require_delete_pending(const fs::path& path, const DeletePendingDirectory& pending) {
+    pending.require_pending();
     std::error_code code;
     const auto created = fs::create_directory(path, code);
     // This is also a negative control for the previous DirectoryLock predicate:
@@ -306,7 +318,7 @@ int main() {
             write(w.root / "a", "common\n");
             create_index(w.root, w.index, options());
             DeletePendingDirectory pending(w.index / "access.lock");
-            require_delete_pending(w.index / "access.lock");
+            require_delete_pending(w.index / "access.lock", pending);
             std::promise<void> started;
             auto ready = started.get_future();
             auto reader = std::async(std::launch::async, [&] {
@@ -338,7 +350,7 @@ int main() {
             const auto generation = Index(w.index).generation();
             write(w.root / "a", "newterm\n");
             DeletePendingDirectory pending(w.index / "writer.lock");
-            require_delete_pending(w.index / "writer.lock");
+            require_delete_pending(w.index / "writer.lock", pending);
             rejects([&] { update_index(w.index, options()); }, "E_LOCKED");
             REQUIRE(Index(w.index).generation() == generation);
             REQUIRE(Index(w.index).search("oldterm").total_matches == 1);
