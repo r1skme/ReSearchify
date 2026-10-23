@@ -355,6 +355,39 @@ The assertion occurred at 16:17:27 UTC; CTest finished at 16:17:59 UTC after 42.
 
 Head `108ff41d2016abcc931bc8bd9418e288fd9d2677`, actual PR merge `d5ecb3abc6d63241c78870ee8263750dda73cb84`, and local `ef76aa8838e3107113800580d97cedd93487fc76` all have tree `edfbd3562bf68e11e03fb2ae622b9466750ccc02`. The C++ core is unchanged relative to the earlier performance windows. [Failure excerpts](../bench/results/native-tiny-39985259365-windows-x64-validation.json) and [source/job provenance](../bench/results/native-tiny-39985259365-provenance.json) preserve this failing checkpoint. A repair and new native validation are required; the older complete run 18 is not substituted for this failed gate.
 
+
+## Independent Windows updates: completed run 21 window
+
+The dedicated update job passed on a separate Windows Server 2022 x64 runner, with 4 logical CPUs and MSVC 19.44.35229.0. Its step ran from 16:17:06 to 16:26:48 UTC (9 minutes 42 seconds). It builds both native binaries but does not run CTest; the concurrent GC/open failure in the separate Windows search job remains unresolved in this checkpoint.
+
+The source is the run 21 merge checkout recorded above. Current binary SHA256: `9be260d4e67bee4fc58af7fcdd3b12c0ec405edffb7f2a3757f28c19450af75c`; baseline SHA256: `e33166d8d2bac497a6a2c0ca6a2b8dfbe5664597609368accbee80e1059bdcf2`. PE x86-64 architecture checks passed. Its generated fixture has the same 100,000 files / 800,000 lines / 19,034,450 bytes and path/content digest as the tiny surrogate, freshly created on this independent runner.
+
+Each profile completed 70 timed update operations and 46 correctness checks: **140 operations and 92 checks total**. The parent driver independently rehashed the complete restored corpus and verified the original edit timestamp. Both tools use separate copies of the same current-writer base index; strict global scans and known-path updates are different scopes. Four threads and a 256 MiB configured budget are used. Setup, copying, assertions and restoration are outside timed CLI lifetimes. OS caches are uncontrolled; seven-sample p95 equals the maximum.
+
+### Compact
+
+| Stage | Original median ms | Current median ms | Current p95 ms | Original CPU ms | Current CPU ms | Current max RSS MiB |
+| --- | --- | --- | --- | --- | --- | --- |
+| strict_noop | 8090.118 | 7822.922 | 7893.334 | 27828.125 | 26734.375 | 52.129 |
+| global_one_edit | 8111.153 | 7857.686 | 8644.878 | 27781.250 | 26921.875 | 51.523 |
+| targeted_one_edit | 12.582 | 11.942 | 14.098 | 15.625 | 15.625 | 4.125 |
+| targeted_one_add | 12.242 | 11.769 | 13.867 | 0.000 | 15.625 | 4.117 |
+| targeted_one_delete | 11.324 | 10.884 | 11.052 | 15.625 | 0.000 | 4.039 |
+
+### Fast
+
+| Stage | Original median ms | Current median ms | Current p95 ms | Original CPU ms | Current CPU ms | Current max RSS MiB |
+| --- | --- | --- | --- | --- | --- | --- |
+| strict_noop | 8110.883 | 7817.425 | 7881.323 | 27875.000 | 26765.625 | 51.785 |
+| global_one_edit | 8082.558 | 7829.439 | 7944.943 | 27890.625 | 26906.250 | 53.812 |
+| targeted_one_edit | 13.562 | 12.713 | 12.827 | 15.625 | 15.625 | 6.203 |
+| targeted_one_add | 13.128 | 12.275 | 12.537 | 15.625 | 15.625 | 6.086 |
+| targeted_one_delete | 11.964 | 10.834 | 12.693 | 15.625 | 15.625 | 4.023 |
+
+The independent arithmetic pass reproduced all 70 unique profile distributions, compared all 84 paired marker result records exactly (including scores, content identities and snippets), checked the eight rename/verify responses, and checked all operation status/completeness/return codes. The raw archive also contains byte-identical copies of both child reports; duplicate copies are not additional observations.
+
+[Exact unchanged ZIP](../bench/results/native-tiny-39985259365-windows-updates-x64.zip), SHA256 `af5b12fec0ef5801495943d43f5911fc6eb9e59151d0f7acb6a00862667e0d59`; [unchanged summary](../bench/results/native-tiny-39985259365-windows-updates-x64-summary.json); [native build and independent validation](../bench/results/native-tiny-39985259365-windows-updates-x64-validation.json); [run/source provenance](../bench/results/native-tiny-39985259365-provenance.json). These values are a separate runner window and are not merged into run 18 or run 19 measurements.
+
 ---
 
 

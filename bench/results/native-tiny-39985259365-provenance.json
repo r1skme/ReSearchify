@@ -14,7 +14,7 @@
   "local_core_commit": "ef76aa8838e3107113800580d97cedd93487fc76",
   "local_core_tree": "edfbd3562bf68e11e03fb2ae622b9466750ccc02",
   "source_trees_equal": true,
-  "snapshot_at": "2026-10-23T16:23:05Z",
+  "snapshot_at": "2026-10-23T16:33:58Z",
   "jobs": [
     {
       "id": 120522639719,
@@ -879,10 +879,10 @@
     {
       "id": 120522640551,
       "name": "Windows x64 update comparison (independent runner)",
-      "status": "in_progress",
-      "conclusion": null,
+      "status": "completed",
+      "conclusion": "success",
       "started_at": "2026-10-23T16:15:28Z",
-      "completed_at": null,
+      "completed_at": "2026-10-23T16:26:55Z",
       "steps": [
         {
           "name": "Set up job",
@@ -934,43 +934,51 @@
         },
         {
           "name": "Native 100k tiny-file updates only (correctness gate only)",
-          "status": "in_progress",
-          "conclusion": null,
+          "status": "completed",
+          "conclusion": "success",
           "number": 7,
           "started_at": "2026-10-23T16:17:06Z",
-          "completed_at": null
+          "completed_at": "2026-10-23T16:26:48Z"
         },
         {
           "name": "Preserve update evidence, including interrupted child reports",
-          "status": "pending",
-          "conclusion": null,
+          "status": "completed",
+          "conclusion": "success",
           "number": 8,
-          "started_at": null,
-          "completed_at": null
+          "started_at": "2026-10-23T16:26:48Z",
+          "completed_at": "2026-10-23T16:26:49Z"
         },
         {
           "name": "Post Check out original Windows update baseline",
-          "status": "pending",
-          "conclusion": null,
+          "status": "completed",
+          "conclusion": "success",
           "number": 14,
-          "started_at": null,
-          "completed_at": null
+          "started_at": "2026-10-23T16:26:49Z",
+          "completed_at": "2026-10-23T16:26:51Z"
         },
         {
           "name": "Post Run actions/setup-python@v5",
-          "status": "pending",
-          "conclusion": null,
+          "status": "completed",
+          "conclusion": "success",
           "number": 15,
-          "started_at": null,
-          "completed_at": null
+          "started_at": "2026-10-23T16:26:51Z",
+          "completed_at": "2026-10-23T16:26:51Z"
         },
         {
           "name": "Post Run actions/checkout@v4",
-          "status": "pending",
-          "conclusion": null,
+          "status": "completed",
+          "conclusion": "success",
           "number": 16,
-          "started_at": null,
-          "completed_at": null
+          "started_at": "2026-10-23T16:26:51Z",
+          "completed_at": "2026-10-23T16:26:53Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 17,
+          "started_at": "2026-10-23T16:26:53Z",
+          "completed_at": "2026-10-23T16:26:53Z"
         }
       ]
     },
@@ -1039,8 +1047,88 @@
           "completed_at": "2026-10-23T16:17:48Z"
         }
       ]
+    },
+    {
+      "id": 120528131099,
+      "name": "Publish tested multi-platform preview",
+      "status": "completed",
+      "conclusion": "skipped",
+      "started_at": "2026-10-23T16:26:56Z",
+      "completed_at": "2026-10-23T16:26:55Z",
+      "steps": []
     }
   ],
-  "artifacts": [],
-  "note": "Windows update performance runs in a separate job/window. Search performance was skipped in failed Windows CTest job. Later pass/fix must be recorded separately."
+  "artifacts": [
+    {
+      "id": 12515757564,
+      "name": "native-performance-windows-updates-x64",
+      "size_in_bytes": 54334,
+      "url": "https://api.github.com/repos/r1skme/ReSearchify/actions/artifacts/12515757564",
+      "archive_download_url": "https://api.github.com/repos/r1skme/ReSearchify/actions/artifacts/12515757564/zip",
+      "expired": false,
+      "created_at": "2026-10-23T16:26:49Z",
+      "expires_at": "2027-01-21T16:15:25Z",
+      "updated_at": "2026-10-23T16:26:49Z",
+      "digest": "sha256:af5b12fec0ef5801495943d43f5911fc6eb9e59151d0f7acb6a00862667e0d59",
+      "workflow_run": {
+        "id": 39985259365,
+        "repository_id": 1427610584,
+        "head_repository_id": 1427610584,
+        "head_branch": "perf/cross-platform-optimization",
+        "head_sha": "108ff41d2016abcc931bc8bd9418e288fd9d2677"
+      },
+      "local_file": "bench/results/native-tiny-39985259365-windows-updates-x64.zip",
+      "local_sha256": "af5b12fec0ef5801495943d43f5911fc6eb9e59151d0f7acb6a00862667e0d59",
+      "digest_verified": true,
+      "members": [
+        {
+          "name": "results/compact-updates.json",
+          "size_bytes": 218046,
+          "sha256": "e9d2344871a1a71e2994402b098a9425fa17bd2e20ff0253b7a9cff169678490"
+        },
+        {
+          "name": "results/fast-updates.json",
+          "size_bytes": 217999,
+          "sha256": "97a24ba6507f36772fde3349b239b0e9db9ce19928ae0105b578bb6269fa3577"
+        },
+        {
+          "name": "results/compact-updates.log",
+          "size_bytes": 193,
+          "sha256": "1f68bd62bb9fdf5d88d373332d5572fbb5fb22b84523db693e8d3172c917e117"
+        },
+        {
+          "name": "results/fast-updates.log",
+          "size_bytes": 190,
+          "sha256": "aeec8f4faf82556c3709b129a4b66b2a84fe1eb5bd3686d74d99202532516a15"
+        },
+        {
+          "name": "results/fixture.json",
+          "size_bytes": 287,
+          "sha256": "a3999c0b3720ed3e22bbf410872a5090ded71a83802f85ed6beee6fef9b9aee0"
+        },
+        {
+          "name": "results/summary.json",
+          "size_bytes": 10927,
+          "sha256": "87b79f8ac77ae579ad2fa29a9f284543a093150030a7e170afbda45c154dec36"
+        },
+        {
+          "name": "results/update-fixture.json",
+          "size_bytes": 701,
+          "sha256": "f591fc80b05251d0973e5d657a113248c2f116ec5d055caee586066aa34992e0"
+        },
+        {
+          "name": "updates-compact/results.json",
+          "size_bytes": 218046,
+          "sha256": "e9d2344871a1a71e2994402b098a9425fa17bd2e20ff0253b7a9cff169678490"
+        },
+        {
+          "name": "updates-fast/results.json",
+          "size_bytes": 217999,
+          "sha256": "97a24ba6507f36772fde3349b239b0e9db9ce19928ae0105b578bb6269fa3577"
+        }
+      ]
+    }
+  ],
+  "note": "Windows update performance runs in a separate job/window. Search performance was skipped in failed Windows CTest job. Later pass/fix must be recorded separately.",
+  "update_window_note": "Independent update-only job completed 70 operations / 46 checks per profile; original bytes, timestamp and complete corpus path/content digest were restored. This job cannot supersede failed CTest in the separate Windows search job."
 }
