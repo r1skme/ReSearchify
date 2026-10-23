@@ -386,20 +386,45 @@ std::uint64_t avalanche(std::uint64_t value) {
 }
 
 std::uint32_t crc32(std::string_view data, std::uint32_t previous) {
-    static const auto table = [] {
-        std::array<std::uint32_t, 256> values{};
+    // IEEE CRC-32, with the same finalized incremental seed as the original
+    // byte-at-a-time implementation. Slicing-by-8 breaks the dependency chain
+    // between bytes without requiring ISA extensions, aligned loads or native
+    // byte order. In particular, x86 SSE4.2 CRC32 computes a different polynomial
+    // (CRC-32C) and is not a compatible replacement for these on-disk checksums.
+    static constexpr auto table = [] {
+        std::array<std::array<std::uint32_t, 256>, 8> values{};
         for (std::uint32_t i = 0; i < 256; ++i) {
             auto value = i;
             for (unsigned bit = 0; bit < 8; ++bit)
                 value = (value & 1U) != 0 ? (value >> 1) ^ 0xedb88320U : value >> 1;
-            values[i] = value;
+            values[0][i] = value;
+        }
+        for (std::size_t slice = 1; slice < values.size(); ++slice) {
+            for (std::size_t i = 0; i < 256; ++i) {
+                const auto value = values[slice - 1][i];
+                values[slice][i] = values[0][value & 255U] ^ (value >> 8);
+            }
         }
         return values;
     }();
     auto value = previous ^ 0xffffffffU;
-    for (const char raw : data) {
-        const auto byte = static_cast<unsigned char>(raw);
-        value = table[(value ^ byte) & 255U] ^ (value >> 8);
+    std::size_t offset = 0;
+    while (data.size() - offset >= 8) {
+        const auto* bytes = data.data() + offset;
+        value ^= decode32(bytes);
+        value = table[7][value & 255U]
+              ^ table[6][(value >> 8) & 255U]
+              ^ table[5][(value >> 16) & 255U]
+              ^ table[4][value >> 24]
+              ^ table[3][static_cast<unsigned char>(bytes[4])]
+              ^ table[2][static_cast<unsigned char>(bytes[5])]
+              ^ table[1][static_cast<unsigned char>(bytes[6])]
+              ^ table[0][static_cast<unsigned char>(bytes[7])];
+        offset += 8;
+    }
+    for (; offset < data.size(); ++offset) {
+        const auto byte = static_cast<unsigned char>(data[offset]);
+        value = table[0][(value ^ byte) & 255U] ^ (value >> 8);
     }
     return value ^ 0xffffffffU;
 }

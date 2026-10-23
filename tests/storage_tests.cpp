@@ -95,6 +95,17 @@ void same_posting(const Posting& a, const Posting& b) {
     require(a.hash == b.hash && a.document == b.document && a.frequency == b.frequency &&
             a.line == b.line && a.column == b.column, "Posting mismatch");
 }
+
+// Independent bitwise oracle: no lookup tables and no calls to storage::crc32.
+std::uint32_t reference_crc32(std::string_view bytes, std::uint32_t previous = 0) {
+    auto value = previous ^ 0xffffffffU;
+    for (const char raw : bytes) {
+        value ^= static_cast<unsigned char>(raw);
+        for (unsigned bit = 0; bit < 8; ++bit)
+            value = (value >> 1) ^ ((value & 1U) ? 0xedb88320U : 0U);
+    }
+    return value ^ 0xffffffffU;
+}
 }
 
 int main() {
@@ -107,6 +118,60 @@ int main() {
             for (const auto byte : std::string("123456789")) value = crc32(std::string_view(&byte, 1), value);
             require(value == 0xcbf43926U, "Incremental CRC");
             require(crc32("", value) == value, "Empty incremental CRC");
+        }},
+        {"crc32_all_tails_alignments_and_chunk_splits", [] {
+            std::string data(528, '\0');
+            for (std::size_t i = 0; i < data.size(); ++i)
+                data[i] = static_cast<char>((i * 71 + i / 7) & 255U);
+            for (std::size_t alignment = 0; alignment < 16; ++alignment) {
+                for (std::size_t length = 0; length <= 512; ++length) {
+                    const std::string_view bytes(data.data() + alignment, length);
+                    require(crc32(bytes) == reference_crc32(bytes), "CRC alignment/tail mismatch");
+                    require(crc32(bytes, 0x12345678U) == reference_crc32(bytes, 0x12345678U),
+                            "CRC seeded alignment/tail mismatch");
+                }
+            }
+            for (std::size_t length = 0; length <= 256; ++length) {
+                const std::string_view bytes(data.data() + 3, length);
+                for (const auto seed : {0U, 0xffffffffU, 0x87654321U}) {
+                    const auto expected = reference_crc32(bytes, seed);
+                    for (std::size_t split = 0; split <= length; ++split) {
+                        const auto prefix = crc32(bytes.substr(0, split), seed);
+                        require(crc32(bytes.substr(split), prefix) == expected, "CRC chunk split mismatch");
+                    }
+                }
+            }
+        }},
+        {"crc32_random_buffers_and_streaming_boundaries", [] {
+            std::uint64_t random = 0x4d595df4d0f33173ULL;
+            const auto next = [&] {
+                random = random * 6364136223846793005ULL + 1442695040888963407ULL;
+                return random;
+            };
+            std::string data(131089, '\0');
+            for (auto& byte : data) byte = static_cast<char>(next() >> 56);
+            for (std::size_t trial = 0; trial < 80; ++trial) {
+                const auto alignment = static_cast<std::size_t>(next() % 16);
+                const auto length = static_cast<std::size_t>(next() % (data.size() - alignment + 1));
+                const auto seed = static_cast<std::uint32_t>(next() >> 32);
+                const std::string_view bytes(data.data() + alignment, length);
+                const auto expected = reference_crc32(bytes, seed);
+                require(crc32(bytes, seed) == expected, "Random CRC mismatch");
+                auto chunked = seed;
+                for (std::size_t position = 0; position < bytes.size();) {
+                    const auto chunk = (std::min)(bytes.size() - position,
+                                                  static_cast<std::size_t>(1 + next() % 4096));
+                    chunked = crc32(bytes.substr(position, chunk), chunked);
+                    position += chunk;
+                }
+                require(chunked == expected, "Random streaming CRC mismatch");
+            }
+            for (const std::size_t length : {65535U, 65536U, 65537U, 131071U, 131072U}) {
+                const auto bytes = std::string_view(data).substr(1, length);
+                const auto first = (std::min)(length, std::size_t{65536});
+                require(crc32(bytes.substr(first), crc32(bytes.substr(0, first))) == reference_crc32(bytes),
+                        "CRC 64 KiB streaming boundary mismatch");
+            }
         }},
         {"fingerprint_chunk_independence_and_stability", [] {
             Hasher full, chunked;
