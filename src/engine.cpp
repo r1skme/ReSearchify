@@ -2,6 +2,7 @@
 #include "researchify/disk.hpp"
 #include "researchify/query.hpp"
 #include "researchify/storage.hpp"
+#include "researchify/literal_filter.hpp"
 #include <algorithm>
 #include <array>
 #include <atomic>
@@ -421,49 +422,74 @@ struct ReadInfo {
     std::uint64_t lines = 0, bytes = 0;
 };
 ReadInfo stream_text(std::istream& in, std::uint64_t size, std::size_t maximum,
-                     const std::function<void(std::string_view, std::uint64_t)>& callback, std::ostream* copy = nullptr) {
-    std::array<char, IoBytes> buffer{};
+                     const std::function<void(std::string_view, std::uint64_t)>& callback,
+                     std::ostream* copy = nullptr, SearchProfile* profile = nullptr) {
+    // Only lines crossing an I/O boundary need an owning buffer. Most source
+    // lines can be validated and consumed directly from the read buffer.
+    std::array<char, IoBytes> buffer;
     std::string line;
-    line.reserve((std::min)(maximum, IoBytes));
     storage::Hasher hash;
     ReadInfo info;
-    auto emit = [&] {
+    if (profile && !profile->enabled) profile = nullptr;
+    auto duration = [](Clock::time_point begin) { return std::chrono::duration<double>(Clock::now() - begin).count(); };
+    double callbacks = 0;
+    auto emit = [&](std::string_view text) {
         ++info.lines;
-        info.max_line = (std::max)(info.max_line, static_cast<std::uint32_t>(line.size()));
-        std::string_view text(line);
+        info.max_line = (std::max)(info.max_line, static_cast<std::uint32_t>(text.size()));
         if (!text.empty() && text.back() == '\r') text.remove_suffix(1);
         if (info.lines == 1 && text.starts_with("\xef\xbb\xbf")) text.remove_prefix(3);
         if (text.find('\0') != std::string_view::npos) throw SkipFile{"binary NUL byte"};
         if (!valid_utf8(text)) throw SkipFile{"invalid UTF-8"};
-        callback(text, info.lines);
-        line.clear();
+        if (profile) {
+            auto begin = Clock::now();
+            callback(text, info.lines);
+            callbacks += duration(begin);
+        } else callback(text, info.lines);
     };
     auto left = size;
     while (left) {
         auto take = static_cast<std::size_t>((std::min)(left, std::uint64_t(buffer.size())));
+        const auto read_begin = profile ? Clock::now() : Clock::time_point{};
         in.read(buffer.data(), static_cast<std::streamsize>(take));
         if (!in) throw Error("E_IO", "File truncated or unreadable during scan");
+        if (profile) {
+            profile->content_read_seconds += duration(read_begin);
+            ++profile->content_reads;
+            profile->content_bytes += take;
+        }
         std::string_view data(buffer.data(), take);
+        const auto verify_begin = profile ? Clock::now() : Clock::time_point{};
         hash.add(data);
         info.crc = storage::crc32(data, info.crc);
+        if (profile) profile->verification_seconds += duration(verify_begin);
         if (copy) { copy->write(data.data(), static_cast<std::streamsize>(data.size()));
         if (!*copy) throw Error("E_IO", "Cannot write snapshot content");
         }
+        const auto text_begin = profile ? Clock::now() : Clock::time_point{};
+        const auto callbacks_before = callbacks;
         std::size_t at = 0;
         while (at < data.size()) {
             auto end = data.find('\n', at);
             auto part = data.substr(at, end == data.npos ? data.size() - at : end - at);
             if (part.size() > maximum - line.size()) throw SkipFile{"line exceeds max-line limit"};
-            line.append(part);
+            if (line.empty() && (end != data.npos || left == take)) {
+                emit(part);
+            } else {
+                line.append(part);
+                if (end != data.npos || left == take) {
+                    emit(line);
+                    line.clear();
+                }
+            }
             if (end == data.npos) break;
-            emit();
             at = end + 1;
         }
+        if (profile) profile->line_processing_seconds += (std::max)(0.0, duration(text_begin) - (callbacks - callbacks_before));
         left -= take;
     }
-    if (!line.empty()) emit();
     info.fingerprint = hash.finish();
     info.bytes = size;
+    if (profile) profile->matching_seconds += callbacks;
     return info;
 }
 struct Job { std::string path;
@@ -485,53 +511,140 @@ ReadInfo read_source(const fs::path& root, const Job& job, std::size_t max_line,
         throw Error("E_SOURCE_CHANGED", "Source changed while reading: " + job.path, true);
     return info;
 }
+// Query/worker-local: neither the seekable streams nor their positions are
+// shared. The caller's immutable Snapshot keeps every cached segment pinned.
+// LRU eviction bounds open handles even after many incremental generations.
+class ContentReader {
+    struct Entry {
+        std::uint64_t segment = 0, size = 0, next = EndDoc;
+        std::ifstream input;
+    };
+    const Snapshot& snapshot_;
+    std::size_t maximum_;
+    SearchProfile* profile_;
+    std::list<Entry> files_;
+public:
+    explicit ContentReader(const Snapshot& snapshot, std::size_t max_open = 16, SearchProfile* profile = nullptr)
+        : snapshot_(snapshot), maximum_((std::max)(std::size_t(1), (std::min)(max_open, std::size_t(32)))),
+          profile_(profile && profile->enabled ? profile : nullptr) {}
+    ContentReader(const ContentReader&) = delete;
+    ContentReader& operator=(const ContentReader&) = delete;
+    ReadInfo read(const Record& r, const std::function<void(std::string_view, std::uint64_t)>& callback,
+                  std::ostream* copy = nullptr) {
+        const auto opened = profile_ ? Clock::now() : Clock::time_point{};
+        auto found = std::find_if(files_.begin(), files_.end(), [&](const Entry& item) { return item.segment == r.segment; });
+        if (found == files_.end()) {
+            if (files_.size() == maximum_) files_.pop_back();
+            const auto path = segment_path(snapshot_.directory, r.segment) / "content.bin";
+            Entry entry;
+            entry.segment = r.segment;
+            entry.size = storage::checked_file_size(path);
+            entry.input.open(path, std::ios::binary);
+            if (!entry.input) throw Error("E_IO", "Cannot read snapshot content");
+            entry.next = 0;
+            files_.push_front(std::move(entry));
+            found = files_.begin();
+            if (profile_) ++profile_->content_opens;
+        } else files_.splice(files_.begin(), files_, found);
+        auto& entry = files_.front();
+        if (r.offset > entry.size || r.size > entry.size - r.offset ||
+            r.offset > static_cast<std::uint64_t>((std::numeric_limits<std::streamoff>::max)()))
+            throw Error("E_INDEX_CORRUPT", "Snapshot content out of bounds");
+        if (entry.next != r.offset || !entry.input) {
+            entry.input.clear();
+            entry.input.seekg(static_cast<std::streamoff>(r.offset));
+            if (!entry.input) throw Error("E_IO", "Cannot seek snapshot content");
+        }
+        // A callback may throw after the stream has read ahead. Only publish
+        // the new position when both consumption and integrity checks succeed.
+        entry.next = EndDoc;
+        if (profile_) profile_->content_open_seconds += std::chrono::duration<double>(Clock::now() - opened).count();
+        ReadInfo info;
+        try { info = stream_text(entry.input, r.size, (std::max)(std::size_t(1), std::size_t(r.max_line)), callback, copy, profile_);
+        }
+        catch (const SkipFile& e) { throw Error("E_INDEX_CORRUPT", "Corrupt snapshot content: " + e.reason);
+        }
+        if (info.fingerprint != r.fingerprint || info.crc != r.crc || info.lines != r.lines || info.max_line != r.max_line)
+            throw Error("E_INDEX_CORRUPT", "Snapshot content identity mismatch: " + r.path);
+        entry.next = r.offset + r.size;
+        return info;
+    }
+};
 ReadInfo read_content(const Snapshot& s, const Record& r,
                       const std::function<void(std::string_view, std::uint64_t)>& callback, std::ostream* copy = nullptr) {
-    auto p = segment_path(s.directory, r.segment) / "content.bin";
-    auto size = storage::checked_file_size(p);
-    if (r.offset > size || r.size > size - r.offset || r.offset > static_cast<std::uint64_t>((std::numeric_limits<std::streamoff>::max)()))
-        throw Error("E_INDEX_CORRUPT", "Snapshot content out of bounds");
-    std::ifstream in(p, std::ios::binary);
-    if (!in) throw Error("E_IO", "Cannot read snapshot content");
-    in.seekg(static_cast<std::streamoff>(r.offset));
-    ReadInfo info;
-    try { info = stream_text(in, r.size, (std::max)(std::size_t(1), std::size_t(r.max_line)), callback, copy);
-    }
-    catch (const SkipFile& e) { throw Error("E_INDEX_CORRUPT", "Corrupt snapshot content: " + e.reason);
-    }
-    if (info.fingerprint != r.fingerprint || info.crc != r.crc || info.lines != r.lines || info.max_line != r.max_line)
-        throw Error("E_INDEX_CORRUPT", "Snapshot content identity mismatch: " + r.path);
-    return info;
+    return ContentReader(s, 1).read(r, callback, copy);
 }
+// Optional, additive accelerator. Old segments (or tiny/saturated documents)
+// have no signature and always fall back to exact content verification. The
+// table uses the existing checked B+tree format and binds each versioned value
+// to its document identity; it is never an authority for positive matches.
+class LiteralLookup {
+    const Snapshot& snapshot_;
+    std::map<std::uint64_t, std::shared_ptr<disk::Table>> tables_;
+public:
+    explicit LiteralLookup(const Snapshot& snapshot) : snapshot_(snapshot) {}
+    std::optional<LiteralFilter> get(const Record& record) {
+        auto found = tables_.find(record.segment);
+        if (found == tables_.end()) {
+            if (tables_.size() >= 32) tables_.erase(tables_.begin());
+            const auto path = segment_path(snapshot_.directory, record.segment) / "literal.tbl";
+            std::shared_ptr<disk::Table> table;
+            if (fs::exists(path)) table = std::make_shared<disk::Table>(path, snapshot_.cache);
+            found = tables_.emplace(record.segment, std::move(table)).first;
+        }
+        if (!found->second) return {};
+        auto value = found->second->get(disk::ordered(record.id));
+        if (!value) return {};
+        if (value->size() != 157 || !value->starts_with("RSLF1")) throw Error("E_INDEX_CORRUPT", "Invalid literal-filter version or size");
+        std::size_t at = 5;
+        const auto a = disk::get_u64(*value, at), b = disk::get_u64(*value, at), crc = disk::get_u64(*value, at);
+        if (a != record.fingerprint.a || b != record.fingerprint.b || crc != record.crc)
+            throw Error("E_INDEX_CORRUPT", "Literal-filter document identity mismatch");
+        const auto filter = LiteralFilter::decode(std::string_view(*value).substr(at));
+        if (!filter) throw Error("E_INDEX_CORRUPT", "Invalid literal-filter payload");
+        return filter;
+    }
+};
 struct JobQueue {
     std::mutex mutex;
-    std::condition_variable changed;
+    std::condition_variable available, space;
     std::deque<Job> jobs;
     std::size_t bytes = 0, maximum = MiB;
     bool done = false, cancelled = false;
+    bool profile = false;
+    double producer_wait_seconds = 0;
     void push(Job job) {
+        const auto started = profile ? Clock::now() : Clock::time_point{};
         std::unique_lock lock(mutex);
         auto cost = job.path.size() + 256;
-        changed.wait(lock, [&] { return cancelled || bytes + cost <= maximum || jobs.empty(); });
+        space.wait(lock, [&] { return cancelled || bytes + cost <= maximum || jobs.empty(); });
+        if (profile) producer_wait_seconds += std::chrono::duration<double>(Clock::now() - started).count();
         if (cancelled) throw Error("E_CANCELLED", "Build worker failed");
         bytes += cost;
         jobs.push_back(std::move(job));
-        changed.notify_all();
+        lock.unlock();
+        available.notify_one();
     }
-    bool pop(Job& job) {
+    bool pop(Job& job, double* wait_seconds = nullptr) {
+        const auto started = wait_seconds ? Clock::now() : Clock::time_point{};
         std::unique_lock lock(mutex);
-        changed.wait(lock, [&] { return cancelled || done || !jobs.empty(); });
+        available.wait(lock, [&] { return cancelled || done || !jobs.empty(); });
+        if (wait_seconds) *wait_seconds += std::chrono::duration<double>(Clock::now() - started).count();
         if (cancelled || jobs.empty()) return false;
         job = std::move(jobs.front());
         jobs.pop_front();
         bytes -= job.path.size() + 256;
-        changed.notify_all();
+        lock.unlock();
+        space.notify_one();
         return true;
     }
-    void close(bool cancel = false) { std::lock_guard lock(mutex);
-    done = true;
-    cancelled = cancel;
-    changed.notify_all();
+    void close(bool cancel = false) {
+        { std::lock_guard lock(mutex);
+        done = true;
+        cancelled = cancelled || cancel;
+        }
+        available.notify_all();
+        space.notify_all();
     }
 };
 bool excluded(const std::string& path, const BuildOptions& o) {
@@ -546,9 +659,47 @@ bool excluded(const std::string& path, const BuildOptions& o) {
 }
 struct WorkerReport { std::uint64_t added = 0, changed = 0, unchanged = 0, skipped = 0, hashed = 0, tokenized = 0;
 std::vector<std::string> warnings;
+BuildProfile profile;
+};
+class BuildStageTimer {
+    double* destination_;
+    Clock::time_point started_;
+public:
+    explicit BuildStageTimer(double* destination) : destination_(destination),
+        started_(destination ? Clock::now() : Clock::time_point{}) {}
+    ~BuildStageTimer() {
+        if (destination_) *destination_ += std::chrono::duration<double>(Clock::now() - started_).count();
+    }
+};
+// Query keys carry a namespace byte. Lookup can hash the existing token view
+// without constructing the owning, prefixed string for every occurrence.
+struct PostingKeyView {
+    char kind;
+    std::string_view text;
+};
+struct PostingKeyHash {
+    using is_transparent = void;
+    std::size_t operator()(PostingKeyView value) const noexcept {
+        return std::hash<std::string_view>{}(value.text) ^ static_cast<unsigned char>(value.kind);
+    }
+    std::size_t operator()(const std::string& value) const noexcept {
+        return (*this)(PostingKeyView{value.front(), std::string_view(value).substr(1)});
+    }
+};
+struct PostingKeyEqual {
+    using is_transparent = void;
+    bool operator()(const std::string& a, const std::string& b) const noexcept { return a == b; }
+    bool operator()(const std::string& a, PostingKeyView b) const noexcept {
+        return a.front() == b.kind && std::string_view(a).substr(1) == b.text;
+    }
+    bool operator()(PostingKeyView a, const std::string& b) const noexcept { return (*this)(b, a); }
 };
 BuildReport build(const fs::path& source, const fs::path& requested, const BuildOptions& options, bool creating, bool compacting = false) {
     const auto started = Clock::now();
+    const auto stage_start = [&] { return options.profile_stages ? Clock::now() : Clock::time_point{}; };
+    const auto stage_elapsed = [&](Clock::time_point begin) {
+        return options.profile_stages ? std::chrono::duration<double>(Clock::now() - begin).count() : 0.0;
+    };
     validate_options(options);
     auto budget = budget_bytes(options.memory_mb);
     fs::create_directories(requested);
@@ -572,6 +723,7 @@ BuildReport build(const fs::path& source, const fs::path& requested, const Build
     next.policy.checkpoint = {};
     next.policy.changed_only = false;
     next.policy.changed_files.clear();
+    next.policy.profile_stages = false;
     next.generation = new_generation(directory);
     next.freshness = options.changed_only ? "known-paths-only" : options.trust_mtime ? "metadata-scan" : "strict-scan";
     auto transaction = directory / ("transaction-" + std::to_string(next.generation));
@@ -585,11 +737,12 @@ BuildReport build(const fs::path& source, const fs::path& requested, const Build
     const std::size_t fixed = (old && !compacting && !options.changed_only ? 12 : 8) * MemoryMiB + words * 8
         + (old ? (std::min)(budget / 4, std::size_t(64 * MiB)) : 0);
     const std::size_t gram_memory = options.profile == "fast" ? 3 * MemoryMiB : 0;
-    const std::size_t per_worker = 2 * options.max_line_bytes + 3 * MemoryMiB + gram_memory;
+    const std::size_t literal_memory = options.profile == "compact" ? MemoryMiB / 4 : 0;
+    const std::size_t per_worker = 2 * options.max_line_bytes + 3 * MemoryMiB + gram_memory + literal_memory;
     std::size_t workers = (std::min)(options.threads, (std::max)(std::size_t(1), budget > fixed ? (budget - fixed) / per_worker : 0));
     if (fixed + per_worker > budget) throw Error("E_BUDGET", "Memory budget too small for line buffers and metadata");
     auto sorter_budget = (std::min)(std::size_t(4 * MemoryMiB),
-        (budget - fixed) / workers - 2 * options.max_line_bytes - 2 * MemoryMiB - gram_memory);
+        (budget - fixed) / workers - 2 * options.max_line_bytes - 2 * MemoryMiB - gram_memory - literal_memory);
     sorter_budget = (std::max)(std::size_t(MemoryMiB / 4), sorter_budget);
     disk::Sorter deltas(transaction / "changes", 2 * MiB, [](std::string&, const std::string&) { throw Error("E_ARGUMENT", "Duplicate changed document"); });
     std::mutex deltas_mutex, failure_mutex, segments_mutex;
@@ -602,6 +755,7 @@ BuildReport build(const fs::path& source, const fs::path& requested, const Build
     std::vector<std::uint64_t> new_segments;
     std::vector<WorkerReport> reports(workers);
     JobQueue queue;
+    queue.profile = options.profile_stages;
     // Apple libc++ does not expose std::jthread on all supported macOS SDKs.
     // Keep the same explicit join below, and close the queue before joining
     // during stack unwinding (including a failed thread creation).
@@ -624,18 +778,29 @@ BuildReport build(const fs::path& source, const fs::path& requested, const Build
         pool.emplace_back([&, worker] {
             try {
                 auto& report = reports[worker];
+                report.profile.enabled = options.profile_stages;
                 std::unique_ptr<disk::Sorter> postings;
+                std::unique_ptr<disk::Sorter> literals;
                 std::ofstream blob;
                 fs::path part;
                 std::uint64_t segment = 0, documents = 0, blob_bytes = 0;
                 auto finish_segment = [&] {
                     if (!postings) return;
+                    const auto finish_started = stage_start();
                     disk::finish(blob, part / "content.bin");
                     disk::PostingWriter output(part);
                     postings->finish([&](auto k, auto v) { output.add(k, v); });
                     output.finish();
                     postings.reset();
                     fs::remove_all(part / "sort");
+                    if (literals) {
+                        disk::TableWriter literal_table(part / "literal.tbl");
+                        literals->finish([&](auto key, auto value) { literal_table.add(key, value); });
+                        literal_table.finish();
+                        literals.reset();
+                        fs::remove_all(part / "literal-sort");
+                    }
+                    report.profile.posting_write_seconds += stage_elapsed(finish_started);
                     std::lock_guard lock(segments_mutex);
                     new_segments.push_back(segment);
                 };
@@ -656,8 +821,15 @@ BuildReport build(const fs::path& source, const fs::path& requested, const Build
                 std::vector<std::uint64_t> gram_bits;
                 std::vector<std::uint32_t> gram_words;
                 if (options.profile == "fast") gram_bits.resize(1U << 18);
+                // Preserve the bounded bucket allocation across small documents.
+                // Entries still leave the aggregate at every spill/document.
+                std::unordered_map<std::string, disk::Posting, PostingKeyHash, PostingKeyEqual> aggregate;
+                aggregate.reserve(512);
+                std::unique_ptr<ContentReader> saved_content;
+                if (compacting) saved_content = std::make_unique<ContentReader>(*old,
+                    (std::max)(std::size_t(1), (std::min)(std::size_t(16), std::size_t(128) / workers)));
                 Job job;
-                while (queue.pop(job)) {
+                while (queue.pop(job, options.profile_stages ? &report.profile.queue_wait_seconds : nullptr)) {
                     auto prior = job.saved ? job.saved : old ? old->by_path(job.path) : std::optional<Record>();
                     if (prior && !seen.empty()) {
                         auto id = prior->id & SerialMask;
@@ -674,7 +846,10 @@ BuildReport build(const fs::path& source, const fs::path& requested, const Build
                         if (!compacting) {
                             ++report.hashed;
                             checkpoint(options, "before_source_read");
-                            first = read_source(next.root, job, options.max_line_bytes, [](auto, auto) {});
+                            {
+                                BuildStageTimer timer(options.profile_stages ? &report.profile.validation_seconds : nullptr);
+                                first = read_source(next.root, job, options.max_line_bytes, [](auto, auto) {});
+                            }
                             if (prior && prior->size == job.size && prior->fingerprint == first.fingerprint && prior->crc == first.crc) {
                                 if (prior->mtime != job.mtime) { prior->mtime = job.mtime;
                                 delta(prior->id, prior);
@@ -696,17 +871,21 @@ BuildReport build(const fs::path& source, const fs::path& requested, const Build
                         file.offset = blob_bytes;
                         file.size = job.size;
                         file.mtime = job.mtime;
-                        std::unordered_map<std::string, disk::Posting> aggregate;
-                        aggregate.reserve(512);
+                        aggregate.clear();
                         std::size_t aggregate_bytes = 0;
+                        const auto document_suffix = std::string(1, '\0') + disk::ordered(file.id);
                         auto spill = [&] {
-                            for (const auto& [key, value] : aggregate) postings->add(key + std::string(1, '\0') + disk::ordered(file.id), disk::posting_value(value));
+                            for (const auto& [key, value] : aggregate) postings->add(key + document_suffix, disk::posting_value(value));
                             aggregate.clear();
                             aggregate_bytes = 0;
                         };
-                        auto add = [&](std::string key, std::uint64_t line, std::uint64_t column) {
-                            auto found = aggregate.find(key);
+                        auto add = [&](char kind, std::string_view token, std::uint64_t line, std::uint64_t column) {
+                            auto found = aggregate.find(PostingKeyView{kind, token});
                             if (found == aggregate.end()) {
+                                std::string key;
+                                key.reserve(token.size() + 1);
+                                key.push_back(kind);
+                                key.append(token);
                                 aggregate_bytes += key.size() + 144;
                                 aggregate.emplace(std::move(key), disk::Posting{0, 1, line, column});
                             } else found->second.frequency = checked_add(found->second.frequency, 1);
@@ -714,11 +893,17 @@ BuildReport build(const fs::path& source, const fs::path& requested, const Build
                         };
                         for (auto word : gram_words) gram_bits[word] = 0;
                         gram_words.clear();
+                        // Small documents are cheaper to verify directly. This
+                        // optional sidecar adds no entries for them or for fast
+                        // indexes, which already have byte-trigram postings.
+                        const bool filter_content = options.profile == "compact" && file.size >= 512;
+                        LiteralFilter literal_filter;
                         auto tokenize = [&](std::string_view text, std::uint64_t line) {
+                            if (filter_content) literal_filter.add_line(text);
                             for_each_token(text, [&](Token token) {
                                 ++file.tokens;
                                 // The query grammar permits at most 8192 bytes per whole expression.
-                                if (token.text.size() <= 8192) add(std::string(1, '\2') + std::string(token.text), line, token.column + 1);
+                                if (token.text.size() <= 8192) add('\2', token.text, line, token.column + 1);
                             });
                             if (options.profile == "fast" && text.size() >= 3) {
                                 for (std::size_t i = 0; i + 3 <= text.size(); ++i) {
@@ -730,13 +915,14 @@ BuildReport build(const fs::path& source, const fs::path& requested, const Build
                                     if (gram_bits[word] & mask) continue;
                                     if (!gram_bits[word]) gram_words.push_back(word);
                                     gram_bits[word] |= mask;
-                                    add(std::string(1, '\1') + std::string(text.substr(i, 3)), line, i + 1);
+                                    add('\1', text.substr(i, 3), line, i + 1);
                                 }
                             }
                         };
                         ReadInfo info;
                         try {
-                            info = compacting ? read_content(*old, *prior, tokenize, &blob) : read_source(next.root, job, options.max_line_bytes, tokenize, &blob);
+                            BuildStageTimer timer(options.profile_stages ? &report.profile.capture_seconds : nullptr);
+                            info = compacting ? saved_content->read(*prior, tokenize, &blob) : read_source(next.root, job, options.max_line_bytes, tokenize, &blob);
                         } catch (const SkipFile& e) { throw Error("E_SOURCE_CHANGED", "Source changed after validation: " + job.path + ": " + e.reason, true);
                         }
                         if (!compacting && (info.fingerprint != first.fingerprint || info.crc != first.crc))
@@ -746,6 +932,21 @@ BuildReport build(const fs::path& source, const fs::path& requested, const Build
                         file.crc = info.crc;
                         file.lines = info.lines;
                         file.max_line = info.max_line;
+                        if (filter_content) {
+                            auto mask = literal_filter.encode();
+                            // Saturated signatures are not selective. Missing
+                            // entries deliberately mean 'verify this document'.
+                            if (!std::all_of(mask.begin(), mask.end(), [](char c) { return static_cast<unsigned char>(c) == 255U; })) {
+                                if (!literals) literals = std::make_unique<disk::Sorter>(part / "literal-sort", literal_memory,
+                                    [](std::string&, const std::string&) { throw Error("E_INDEX_CORRUPT", "Duplicate literal signature"); });
+                                std::string value = "RSLF1";
+                                disk::u64(value, file.fingerprint.a);
+                                disk::u64(value, file.fingerprint.b);
+                                disk::u64(value, file.crc);
+                                value += mask;
+                                literals->add(disk::ordered(file.id), std::move(value));
+                            }
+                        }
                         blob_bytes = checked_add(blob_bytes, file.size);
                         ++documents;
                         ++report.tokenized;
@@ -782,6 +983,7 @@ BuildReport build(const fs::path& source, const fs::path& requested, const Build
         pending_jobs.push_back(std::move(job));
         if (pending_bytes >= 2 * MiB || pending_jobs.size() >= 8192) flush_jobs();
     };
+    const auto enumeration_started = stage_start();
     try {
         if (compacting) old->each([&](const Record& r) { queue.push({r.path, r.size, r.mtime, r}); });
         else if (options.changed_only) {
@@ -819,6 +1021,7 @@ BuildReport build(const fs::path& source, const fs::path& requested, const Build
         queue.close();
     } catch (...) { fail();
     }
+    const auto enumeration_seconds = stage_elapsed(enumeration_started);
     for (auto& thread : pool) thread.join();
     if (failure) std::rethrow_exception(failure);
     if (old && !compacting && !options.changed_only) {
@@ -828,6 +1031,9 @@ BuildReport build(const fs::path& source, const fs::path& requested, const Build
         });
     }
     BuildReport report;
+    report.profile.enabled = options.profile_stages;
+    report.profile.enumeration_seconds = enumeration_seconds;
+    report.profile.queue_wait_seconds = queue.producer_wait_seconds;
     report.generation = next.generation;
     report.workers = workers;
     report.memory_budget_bytes = budget;
@@ -835,6 +1041,10 @@ BuildReport build(const fs::path& source, const fs::path& requested, const Build
     if (old) report.warnings = old->warnings;
     if (options.changed_only) report.warnings.push_back("Only supplied paths were checked; other workspace changes may be absent");
     for (const auto& r : reports) {
+        report.profile.queue_wait_seconds += r.profile.queue_wait_seconds;
+        report.profile.validation_seconds += r.profile.validation_seconds;
+        report.profile.capture_seconds += r.profile.capture_seconds;
+        report.profile.posting_write_seconds += r.profile.posting_write_seconds;
         report.added += r.added;
         report.changed += r.changed;
         report.unchanged += r.unchanged;
@@ -845,6 +1055,7 @@ BuildReport build(const fs::path& source, const fs::path& requested, const Build
     }
     for (auto id : new_segments) fs::rename(segment_path(transaction, id), segment_path(directory, id));
     checkpoint(options, "after_segments");
+    const auto catalog_started = stage_start();
     std::size_t active_bucket = Buckets;
     std::map<std::uint64_t, Record> records;
     std::size_t record_memory = 0;
@@ -914,6 +1125,7 @@ BuildReport build(const fs::path& source, const fs::path& requested, const Build
         } else ++report.removed;
     });
     save_bucket();
+    report.profile.catalog_seconds = stage_elapsed(catalog_started);
     next.next_id = serial.load();
     report.files = next.files;
     report.lines = next.lines;
@@ -925,13 +1137,16 @@ BuildReport build(const fs::path& source, const fs::path& requested, const Build
         same.generation = old->manifest.generation;
         same.freshness = old->manifest.freshness;
         if (encode_manifest(same) == encode_manifest(old->manifest)) {
+            const auto commit_started = stage_start();
             fs::remove_all(transaction);
+            report.profile.commit_seconds = stage_elapsed(commit_started);
             report.generation = old->manifest.generation;
             report.seconds = std::chrono::duration<double>(Clock::now() - started).count();
             return report;
         }
     }
     checkpoint(options, "after_catalog");
+    const auto commit_started = stage_start();
     auto temporary = commit_path(directory, next.generation);
     temporary += ".tmp";
     disk::write_file(temporary, encode_manifest(next));
@@ -939,6 +1154,7 @@ BuildReport build(const fs::path& source, const fs::path& requested, const Build
     fs::rename(temporary, commit_path(directory, next.generation));
     checkpoint(options, "after_commit");
     fs::remove_all(transaction);
+    report.profile.commit_seconds = stage_elapsed(commit_started);
     report.seconds = std::chrono::duration<double>(Clock::now() - started).count();
     return report;
 }
@@ -1067,18 +1283,116 @@ public:
 struct Anchor {
     bool universe = true;
     std::uint64_t cost = EndDoc;
-    std::vector<std::string> terms;
+    enum class Kind { Term, And, Or } kind = Kind::Term;
+    std::string term;
+    std::shared_ptr<const Anchor> left, right;
+    std::size_t streams = 0;
 };
-Anchor and_anchor(Anchor a, Anchor b) { return a.cost <= b.cost ? a : b;
+Anchor and_anchor(Anchor a, Anchor b) {
+    if (a.universe) return b;
+    if (b.universe) return a;
+    if (a.cost > b.cost) std::swap(a, b);
+    if (!a.cost || (a.kind == Anchor::Kind::Term && b.kind == Anchor::Kind::Term && a.term == b.term)) return a;
+    // A tiny anchor is already cheap to verify. Bound cursor state and avoid
+    // intersecting a rare list with a vastly more expensive common list.
+    if (a.cost <= 32 || a.streams + b.streams > 4 || b.cost / a.cost > 16) return a;
+    Anchor out;
+    out.universe = false;
+    out.cost = a.cost;
+    out.kind = Anchor::Kind::And;
+    out.streams = a.streams + b.streams;
+    out.left = std::make_shared<Anchor>(std::move(a));
+    out.right = std::make_shared<Anchor>(std::move(b));
+    return out;
 }
 Anchor or_anchor(Anchor a, Anchor b) {
     if (a.universe || b.universe) return {};
-    a.cost = b.cost > EndDoc - a.cost ? EndDoc - 1 : a.cost + b.cost;
-    a.terms.insert(a.terms.end(), b.terms.begin(), b.terms.end());
-    std::sort(a.terms.begin(), a.terms.end());
-    a.terms.erase(std::unique(a.terms.begin(), a.terms.end()), a.terms.end());
-    return a;
+    if (a.kind == Anchor::Kind::Term && b.kind == Anchor::Kind::Term && a.term == b.term) return a;
+    Anchor out;
+    out.universe = false;
+    out.cost = b.cost > EndDoc - a.cost ? EndDoc - 1 : a.cost + b.cost;
+    out.kind = Anchor::Kind::Or;
+    out.streams = a.streams + b.streams;
+    out.left = std::make_shared<Anchor>(std::move(a));
+    out.right = std::make_shared<Anchor>(std::move(b));
+    return out;
 }
+// Composable monotone cursors: AND leapfrogs sorted lists, OR merges them.
+// No posting list or candidate set is materialized.
+class AnchorStream {
+    Anchor::Kind kind_;
+    std::unique_ptr<LiveStream> term_;
+    std::unique_ptr<AnchorStream> left_, right_;
+public:
+    AnchorStream(const Snapshot& snapshot, DocumentLookup& documents, const Anchor& anchor,
+                 const std::map<std::string, std::shared_ptr<TermSource>>& sources) : kind_(anchor.kind) {
+        if (kind_ == Anchor::Kind::Term) term_ = std::make_unique<LiveStream>(snapshot, documents, *sources.at(anchor.term));
+        else {
+            left_ = std::make_unique<AnchorStream>(snapshot, documents, *anchor.left, sources);
+            right_ = std::make_unique<AnchorStream>(snapshot, documents, *anchor.right, sources);
+        }
+    }
+    std::uint64_t seek(std::uint64_t target) {
+        if (term_) return term_->seek(target);
+        auto a = left_->seek(target), b = right_->seek(target);
+        if (kind_ == Anchor::Kind::Or) return (std::min)(a, b);
+        while (a != b && a != EndDoc && b != EndDoc) {
+            if (a < b) a = left_->seek(b);
+            else b = right_->seek(a);
+        }
+        return a == b ? a : EndDoc;
+    }
+};
+// A query-local bounded pool. The caller participates as worker 0. Batches
+// retain document order, while content streams/workspaces are worker-local.
+class SearchWorkers {
+    std::mutex mutex_;
+    std::condition_variable changed_, finished_;
+    std::vector<std::thread> threads_;
+    std::function<void(std::size_t)> job_;
+    std::size_t generation_ = 0, pending_ = 0;
+    bool stopping_ = false;
+    void stop() noexcept {
+        { std::lock_guard lock(mutex_); stopping_ = true; }
+        changed_.notify_all();
+        for (auto& thread : threads_) if (thread.joinable()) thread.join();
+    }
+public:
+    explicit SearchWorkers(std::size_t count) {
+        try {
+            for (std::size_t id = 1; id < count; ++id) threads_.emplace_back([&, id] {
+                std::unique_lock lock(mutex_);
+                std::size_t seen = 0;
+                for (;;) {
+                    changed_.wait(lock, [&] { return stopping_ || seen != generation_; });
+                    if (stopping_) return;
+                    seen = generation_;
+                    lock.unlock();
+                    // The supplied job catches all document exceptions and
+                    // publishes them for propagation after joining the batch.
+                    job_(id);
+                    lock.lock();
+                    if (--pending_ == 0) finished_.notify_one();
+                }
+            });
+        } catch (...) { stop(); throw; }
+    }
+    ~SearchWorkers() { stop(); }
+    SearchWorkers(const SearchWorkers&) = delete;
+    SearchWorkers& operator=(const SearchWorkers&) = delete;
+    void run(const std::function<void(std::size_t)>& job) {
+        { std::lock_guard lock(mutex_);
+        job_ = job;
+        pending_ = threads_.size();
+        ++generation_;
+        }
+        changed_.notify_all();
+        job_(0);
+        std::unique_lock lock(mutex_);
+        finished_.wait(lock, [&] { return pending_ == 0; });
+        job_ = {};
+    }
+};
 void positive_leaves(const std::shared_ptr<const QueryNode>& node, bool negative, std::vector<bool>& flags) {
     if (node->kind == NodeKind::Leaf) { if (!negative) flags[node->leaf] = true;
     return;
@@ -1124,15 +1438,19 @@ SearchReport do_search(const Snapshot& snapshot, const Query& query, const Searc
     validate_query(query);
     const auto budget = budget_bytes(options.memory_mb);
     if (options.limit > 10000 || options.offset > 10000 || options.offset + options.limit > 10000 || options.snippets_per_file > 32 ||
-        options.snippet_bytes < 16 || options.snippet_bytes > 65536 || !options.max_regex_steps || options.paths.size() > 128)
+        options.snippet_bytes < 16 || options.snippet_bytes > 65536 || !options.max_regex_steps || options.paths.size() > 128 || options.threads > 256)
         throw Error("E_ARGUMENT", "Invalid search limits");
     if (options.after && (options.after_path.empty() || options.after_path.size() > MaxPath || !valid_utf8(options.after_path) || !std::isfinite(options.after_score)))
         throw Error("E_CURSOR", "Invalid continuation key");
     auto result_memory = (options.offset + options.limit) * (512ULL + MaxPath + options.snippets_per_file * (options.snippet_bytes + 128ULL));
-    if (result_memory + 2 * snapshot.manifest.policy.max_line_bytes + 4 * MiB > budget / 2)
+    // Non-overlapping upper allocations: shared page/record caches 5/16,
+    // results + main line buffers <=1/3, decoded documents/sources/cursors
+    // each <=1/16, workers <=1/8, pending batch <=1/64. OS thread stacks and
+    // allocator overhead are not controllable through standard C++.
+    if (result_memory + 2 * snapshot.manifest.policy.max_line_bytes + MiB > budget / 3)
         throw Error("E_BUDGET", "Result buffers exceed memory budget; reduce limit/snippet size");
     for (const auto& p : options.paths) if (p.size() > 8192 || !valid_utf8(p)) throw Error("E_ARGUMENT", "Invalid path filter");
-    DocumentLookup documents(snapshot, budget / 8);
+    DocumentLookup documents(snapshot, budget / 16);
     std::map<std::string, std::shared_ptr<TermSource>> sources;
     std::size_t source_memory = 0;
     auto source = [&](const std::string& term) -> std::shared_ptr<TermSource> {
@@ -1151,24 +1469,34 @@ SearchReport do_search(const Snapshot& snapshot, const Query& query, const Searc
             }
         }
         source_memory += term.size() * 2 + 256;
-        if (source_memory > budget / 8) throw Error("E_BUDGET", "Query dictionary state exceeds budget");
+        if (source_memory > budget / 16) throw Error("E_BUDGET", "Query dictionary state exceeds budget");
         sources.emplace(term, s);
         return s;
     };
     auto term_anchor = [&](const std::string& term) { auto s = source(term);
-    return Anchor{false, s->df, {term}};
+    return Anchor{false, s->df, Anchor::Kind::Term, term, {}, {}, 1};
     };
     auto literal_anchor = [&](const std::string& text) {
         Anchor best;
+        // Only fully enclosed tokens are necessary exact terms. A token at a
+        // literal edge can match inside a larger identifier and is NOT safe.
+        for_each_token(text, [&](Token token) {
+            if (token.column && token.column + token.text.size() < text.size())
+                best = and_anchor(std::move(best), term_anchor(std::string(1, '\2') + std::string(token.text)));
+        });
         if (snapshot.manifest.policy.profile != "fast" || text.size() < 3) return best;
         // Sampling only weakens the necessary condition; it cannot lose a match.
         const auto n = text.size() - 2, count = (std::min)(std::size_t(16), n);
+        std::vector<Anchor> choices;
         for (std::size_t i = 0; i < count; ++i) {
             auto at = count == 1 ? 0 : i * (n - 1) / (count - 1);
-            auto candidate = term_anchor(std::string(1, '\1') + text.substr(at, 3));
-            best = and_anchor(best, std::move(candidate));
-            if (!best.cost) break;
+            choices.push_back(term_anchor(std::string(1, '\1') + text.substr(at, 3)));
+            if (!choices.back().cost) return choices.back();
         }
+        std::sort(choices.begin(), choices.end(), [](const Anchor& a, const Anchor& b) {
+            return a.cost < b.cost || (a.cost == b.cost && a.term < b.term);
+        });
+        for (auto& candidate : choices) best = and_anchor(std::move(best), std::move(candidate));
         return best;
     };
     std::function<Anchor(const std::shared_ptr<const RegexFilter>&)> regex_anchor;
@@ -1183,7 +1511,7 @@ SearchReport do_search(const Snapshot& snapshot, const Query& query, const Searc
     for (std::size_t i = 0; i < query.leaves.size(); ++i) {
         const auto& l = query.leaves[i];
         if (l.kind == LeafKind::Term) { exact[i] = source(std::string(1, '\2') + l.text);
-        leaves.push_back({false, exact[i]->df, {exact[i]->term}});
+        leaves.push_back({false, exact[i]->df, Anchor::Kind::Term, exact[i]->term, {}, {}, 1});
         }
         else if (l.kind == LeafKind::Phrase) leaves.push_back(literal_anchor(l.text));
         else leaves.push_back(regex_anchor(l.regex->prefilter()));
@@ -1198,20 +1526,51 @@ SearchReport do_search(const Snapshot& snapshot, const Query& query, const Searc
     documents.set_sparse(!anchor.universe && anchor.cost < snapshot.manifest.files / 16);
     std::size_t stream_parts = 0;
     for (const auto& s : exact) if (s) stream_parts += s->lists.size();
-    for (const auto& key : anchor.terms) stream_parts += source(key)->lists.size();
-    if (stream_parts > budget / (8 * 8192)) throw Error("E_BUDGET", "Too many query/segment cursors; compact index or simplify query");
-    std::vector<std::unique_ptr<LiveStream>> anchors;
+    std::function<void(const Anchor&)> count_parts = [&](const Anchor& a) {
+        if (a.universe) return;
+        if (a.kind == Anchor::Kind::Term) stream_parts += source(a.term)->lists.size();
+        else { count_parts(*a.left); count_parts(*a.right); }
+    };
+    count_parts(anchor);
+    if (stream_parts > budget / (16 * 8192)) throw Error("E_BUDGET", "Too many query/segment cursors; compact index or simplify query");
+    std::unique_ptr<AnchorStream> anchors;
     std::vector<std::unique_ptr<ExactStream>> values(query.leaves.size());
     for (std::size_t i = 0; i < exact.size(); ++i) if (exact[i]) values[i] = std::make_unique<ExactStream>(snapshot, *exact[i]);
-    for (const auto& key : anchor.terms) anchors.push_back(std::make_unique<LiveStream>(snapshot, documents, *source(key)));
+    if (!anchor.universe) anchors = std::make_unique<AnchorStream>(snapshot, documents, anchor, sources);
     std::vector<bool> positive(query.leaves.size(), false), present(query.leaves.size());
     positive_leaves(query.root, false, positive);
-    std::vector<std::uint64_t> counts(query.leaves.size()), first_line(query.leaves.size());
+    std::vector<std::uint64_t> scratch_counts(query.leaves.size()), scratch_lines(query.leaves.size());
     std::vector<std::uint8_t> possible(query.leaves.size());
     std::vector<RegexWorkspace> regex_work(query.leaves.size());
     std::uint64_t steps = options.max_regex_steps;
     SearchReport report;
     report.generation = snapshot.manifest.generation;
+    report.profile.enabled = options.profile;
+    ContentReader content_reader(snapshot, 16, options.profile ? &report.profile : nullptr);
+    LiteralLookup literal_filters(snapshot);
+    std::vector<LiteralFilter> literal_masks(query.leaves.size());
+    std::map<const RegexFilter*, LiteralFilter> regex_masks;
+    std::function<void(const std::shared_ptr<const RegexFilter>&)> prepare_filter = [&](const auto& filter) {
+        if (!filter) return;
+        if (filter->kind == RegexFilter::Kind::Literal) regex_masks.emplace(filter.get(), LiteralFilter::required(filter->literal));
+        else { prepare_filter(filter->left); prepare_filter(filter->right); }
+    };
+    bool filter_useful = false;
+    for (std::size_t i = 0; i < query.leaves.size(); ++i) {
+        const auto& leaf = query.leaves[i];
+        if (leaf.kind == LeafKind::Phrase && leaf.text.size() >= LiteralFilter::GramBytes) {
+            literal_masks[i] = LiteralFilter::required(leaf.text);
+            filter_useful = true;
+        } else if (leaf.kind == LeafKind::Regex) prepare_filter(leaf.regex->prefilter());
+    }
+    filter_useful = filter_useful || !regex_masks.empty();
+    std::function<bool(const std::shared_ptr<const RegexFilter>&, const LiteralFilter&)> regex_possible;
+    regex_possible = [&](const auto& filter, const LiteralFilter& document) -> bool {
+        if (!filter || filter->kind == RegexFilter::Kind::Always) return true;
+        if (filter->kind == RegexFilter::Kind::Literal) return document.maybe(regex_masks.at(filter.get()));
+        if (filter->kind == RegexFilter::Kind::And) return regex_possible(filter->left, document) && regex_possible(filter->right, document);
+        return regex_possible(filter->left, document) || regex_possible(filter->right, document);
+    };
     auto charge_read = [&](const Record& r) {
         report.scanned_bytes = checked_add(report.scanned_bytes, r.size);
         if (options.max_scan_bytes && report.scanned_bytes > options.max_scan_bytes) throw Error("E_BUDGET", "Search scan-byte budget exhausted");
@@ -1221,53 +1580,20 @@ SearchReport do_search(const Snapshot& snapshot, const Query& query, const Searc
     };
     auto better = [&](const Scored& a, const Scored& b) {
         if (!options.sort_path && a.hit.score != b.hit.score) return a.hit.score > b.hit.score;
-        return a.hit.path < b.hit.path;
+        return a.record.path < b.record.path;
     };
     std::priority_queue<Scored, std::vector<Scored>, decltype(better)> best(better);
     auto wanted = options.limit == 0 ? std::size_t(0) : options.offset + options.limit;
     const auto average = (std::max)(1.0, static_cast<double>(snapshot.manifest.tokens) / (std::max)(1.0, static_cast<double>(snapshot.manifest.files)));
-    auto evaluate = [&](const Record& file) {
-        ++report.candidates;
-        if (options.max_candidates && report.candidates > options.max_candidates) throw Error("E_BUDGET", "Candidate budget exhausted");
-        if (!options.paths.empty() && std::none_of(options.paths.begin(), options.paths.end(), [&](const auto& p) { return match_path(p, file.path); })) return;
-        std::fill(counts.begin(), counts.end(), 0);
-        std::fill(first_line.begin(), first_line.end(), 0);
-        bool scans = false;
-        for (std::size_t i = 0; i < values.size(); ++i) {
-            if (values[i]) {
-                if (auto value = values[i]->match(file)) {
-                    counts[i] = value->frequency;
-                    first_line[i] = value->line;
-                }
-                possible[i] = counts[i] ? 1 : 0;
-            } else { possible[i] = 2;
-            scans = true;
-            }
-        }
-        if (query.possible(possible) == 0) return;
-        if (scans) {
-            charge_read(file);
-            read_content(snapshot, file, [&](std::string_view text, std::uint64_t line) {
-                for (std::size_t i = 0; i < query.leaves.size(); ++i) {
-                    const auto& l = query.leaves[i];
-                    if (l.kind == LeafKind::Phrase) {
-                        std::size_t start = 0;
-                        while (true) {
-                            auto at = text.find(l.text, start);
-                            if (at == text.npos) break;
-                            ++counts[i];
-                            if (!first_line[i]) first_line[i] = line;
-                            start = at + l.text.size();
-                        }
-                    } else if (l.kind == LeafKind::Regex) {
-                        RegexMatch match;
-                        if (l.regex->find(text, match, steps, regex_work[i])) { ++counts[i];
-                        if (!first_line[i]) first_line[i] = line;
-                        }
-                    }
-                }
-            });
-        }
+    std::vector<double> idfs(query.leaves.size(), 1.0);
+    for (std::size_t i = 0; i < exact.size(); ++i) if (exact[i]) {
+        const auto df = static_cast<double>((std::min)(snapshot.manifest.files, exact[i]->df));
+        idfs[i] = std::log1p((static_cast<double>(snapshot.manifest.files) - df + 0.5) / (df + 0.5));
+    }
+    const auto candidate_started = options.profile ? Clock::now() : Clock::time_point{};
+    if (options.profile) report.profile.planning_seconds = std::chrono::duration<double>(candidate_started - started).count();
+    auto score_document = [&](const Record& file, const std::vector<std::uint64_t>& counts,
+                              const std::vector<std::uint64_t>& first_line) {
         for (std::size_t i = 0; i < counts.size(); ++i) present[i] = counts[i] != 0;
         if (!query.evaluate(present)) return;
         ++report.total_matches;
@@ -1275,36 +1601,173 @@ SearchReport do_search(const Snapshot& snapshot, const Query& query, const Searc
         return;
         }
         Scored hit;
-        hit.record = file;
-        hit.hit.path = file.path;
-        hit.hit.content_id = content_id(file);
         std::uint64_t minimum = EndDoc, maximum = 0;
         std::size_t contributing = 0;
+        const auto norm = 1.2 * (0.25 + 0.75 * static_cast<double>(file.tokens) / average);
         for (std::size_t i = 0; i < counts.size(); ++i) if (positive[i] && counts[i]) {
             ++contributing;
             hit.hit.matches = checked_add(hit.hit.matches, counts[i]);
             minimum = (std::min)(minimum, first_line[i]);
             maximum = (std::max)(maximum, first_line[i]);
             // Segment df is an upper estimate until compaction removes obsolete versions.
-            auto df = static_cast<double>(exact[i] ? (std::min)(snapshot.manifest.files, exact[i]->df) : 0);
-            auto idf = exact[i] ? std::log1p((static_cast<double>(snapshot.manifest.files) - df + 0.5) / (df + 0.5)) : 1.0;
             auto tf = static_cast<double>(counts[i]);
-            auto norm = 1.2 * (0.25 + 0.75 * static_cast<double>(file.tokens) / average);
             auto weight = query.leaves[i].kind == LeafKind::Phrase ? 1.6 : 1.0;
-            hit.hit.score += weight * idf * (tf * 2.2 / (tf + norm)) * (1.0 + 0.4 / (1.0 + static_cast<double>(first_line[i]) / 30.0));
+            hit.hit.score += weight * idfs[i] * (tf * 2.2 / (tf + norm)) * (1.0 + 0.4 / (1.0 + static_cast<double>(first_line[i]) / 30.0));
             if (file.path.find(query.leaves[i].text) != std::string::npos) hit.hit.score += 0.5;
         }
         if (contributing > 1) hit.hit.score += 0.2 / (1.0 + static_cast<double>(maximum - minimum));
         if (options.after) {
-            if (options.sort_path) { if (hit.hit.path <= options.after_path) return;
+            if (options.sort_path) { if (file.path <= options.after_path) return;
             }
-            else if (hit.hit.score > options.after_score || (hit.hit.score == options.after_score && hit.hit.path <= options.after_path)) return;
+            else if (hit.hit.score > options.after_score || (hit.hit.score == options.after_score && file.path <= options.after_path)) return;
         }
         ++report.remaining_matches;
-        if (best.size() < wanted) best.push(std::move(hit));
-        else if (better(hit, best.top())) { best.pop();
-        best.push(std::move(hit));
+        const bool retain = best.size() < wanted ||
+            (!options.sort_path && hit.hit.score != best.top().hit.score ? hit.hit.score > best.top().hit.score : file.path < best.top().record.path);
+        if (retain) {
+            // Most matching documents never enter top-k. Do not allocate their
+            // paths or format content IDs, and keep only one owning path copy.
+            hit.record = file;
+            if (best.size() == wanted) best.pop();
+            best.push(std::move(hit));
         }
+    };
+    const bool has_regex = std::any_of(query.leaves.begin(), query.leaves.end(), [](const QueryLeaf& leaf) { return leaf.kind == LeafKind::Regex; });
+    const bool has_content = std::any_of(query.leaves.begin(), query.leaves.end(), [](const QueryLeaf& leaf) { return leaf.kind != LeafKind::Term; });
+    const auto estimated = (std::min)(anchor.cost, snapshot.manifest.files);
+    // Finite query-wide NFA work is charged in document order. Keep regex
+    // queries serial rather than changing their budget contract with races or
+    // speculative per-worker limits. Term-only queries already use postings.
+    const auto desired = options.threads ? options.threads : (std::min)(std::size_t(8), std::size_t((std::max)(1U, std::thread::hardware_concurrency())));
+    const auto per_worker = 2 * snapshot.manifest.policy.max_line_bytes + IoBytes + 256 * 1024;
+    const auto workers = has_content && !has_regex && estimated >= 512 && snapshot.manifest.bytes >= MiB
+        ? (std::max)(std::size_t(1), (std::min)({desired, std::size_t(16), (budget / 8) / per_worker})) : std::size_t(1);
+    struct Pending {
+        Record file;
+        std::vector<std::uint64_t> counts, lines;
+    };
+    std::vector<Pending> pending;
+    std::size_t pending_memory = 0;
+    const auto batch_limit = (std::max)(std::size_t(16), workers * 16);
+    std::vector<SearchProfile> worker_profiles(workers);
+    std::vector<std::unique_ptr<ContentReader>> readers;
+    std::unique_ptr<SearchWorkers> pool;
+    auto check_cancelled = [&] {
+        if (options.cancelled && options.cancelled()) throw Error("E_CANCELLED", "Search cancelled", true);
+    };
+    auto scan_document = [&](ContentReader& reader, const Record& file, std::vector<std::uint64_t>& counts,
+                             std::vector<std::uint64_t>& first_line, const std::atomic<bool>* stopped = nullptr) {
+        reader.read(file, [&](std::string_view text, std::uint64_t line) {
+            if (stopped && stopped->load(std::memory_order_relaxed)) throw Error("E_CANCELLED", "Search worker stopped");
+            check_cancelled();
+            for (std::size_t i = 0; i < query.leaves.size(); ++i) {
+                const auto& leaf = query.leaves[i];
+                if (leaf.kind == LeafKind::Phrase) {
+                    std::size_t start = 0;
+                    while (true) {
+                        const auto at = text.find(leaf.text, start);
+                        if (at == text.npos) break;
+                        ++counts[i];
+                        if (!first_line[i]) first_line[i] = line;
+                        start = at + leaf.text.size();
+                    }
+                } else if (leaf.kind == LeafKind::Regex) {
+                    RegexMatch match;
+                    if (leaf.regex->find(text, match, steps, regex_work[i])) {
+                        ++counts[i];
+                        if (!first_line[i]) first_line[i] = line;
+                    }
+                }
+            }
+        });
+    };
+    auto flush = [&] {
+        if (pending.empty()) return;
+        // Do not create threads for a selective prefilter's tiny remainder.
+        if (!pool && pending.size() >= (std::max)(std::size_t(32), workers * 4)) {
+            for (std::size_t i = 0; i < workers; ++i) {
+                worker_profiles[i].enabled = options.profile;
+                readers.push_back(std::make_unique<ContentReader>(snapshot, (std::max)(std::size_t(1), std::size_t(64) / workers),
+                    options.profile ? &worker_profiles[i] : nullptr));
+            }
+            pool = std::make_unique<SearchWorkers>(workers);
+            report.profile.workers = workers;
+        }
+        if (pool) {
+            std::atomic<bool> stopped{false};
+            std::exception_ptr failure;
+            std::mutex failure_mutex;
+            pool->run([&](std::size_t worker) {
+                for (std::size_t i = worker; i < pending.size(); i += workers) {
+                    if (stopped.load(std::memory_order_relaxed)) return;
+                    auto& item = pending[i];
+                    try { scan_document(*readers[worker], item.file, item.counts, item.lines, &stopped); }
+                    catch (...) {
+                        // Preserve the original failure, not a secondary
+                        // cancellation raised by another worker unwinding.
+                        std::lock_guard lock(failure_mutex);
+                        if (!failure) failure = std::current_exception();
+                        stopped.store(true, std::memory_order_relaxed);
+                        return;
+                    }
+                }
+            });
+            if (failure) std::rethrow_exception(failure);
+        } else {
+            for (auto& item : pending) scan_document(content_reader, item.file, item.counts, item.lines);
+        }
+        // One deterministic ordered reduction retains exact scores/ties,
+        // totals, top-k and continuation semantics, without per-thread heaps.
+        for (const auto& item : pending) score_document(item.file, item.counts, item.lines);
+        pending.clear();
+        pending_memory = 0;
+    };
+    auto evaluate = [&](const Record& file) {
+        check_cancelled();
+        ++report.candidates;
+        if (options.max_candidates && report.candidates > options.max_candidates) throw Error("E_BUDGET", "Candidate budget exhausted");
+        if (!options.paths.empty() && std::none_of(options.paths.begin(), options.paths.end(), [&](const auto& p) { return match_path(p, file.path); })) return;
+        std::fill(scratch_counts.begin(), scratch_counts.end(), 0);
+        std::fill(scratch_lines.begin(), scratch_lines.end(), 0);
+        bool scans = false;
+        for (std::size_t i = 0; i < values.size(); ++i) {
+            if (values[i]) {
+                if (auto value = values[i]->match(file)) {
+                    scratch_counts[i] = value->frequency;
+                    scratch_lines[i] = value->line;
+                }
+                possible[i] = scratch_counts[i] ? 1 : 0;
+            } else { possible[i] = 2; scans = true; }
+        }
+        if (query.possible(possible) == 0) return;
+        if (scans) {
+            if (filter_useful && snapshot.manifest.policy.profile == "compact") {
+                if (const auto filter = literal_filters.get(file)) {
+                    for (std::size_t i = 0; i < query.leaves.size(); ++i) {
+                        const auto& leaf = query.leaves[i];
+                        if ((leaf.kind == LeafKind::Phrase && !filter->maybe(literal_masks[i])) ||
+                            (leaf.kind == LeafKind::Regex && !regex_possible(leaf.regex->prefilter(), *filter))) possible[i] = 0;
+                    }
+                    if (query.possible(possible) == 0) {
+                        if (options.profile) ++report.profile.filtered_documents;
+                        return;
+                    }
+                }
+            }
+            // Reserve global work in candidate order before dispatch; workers
+            // cannot multiply max_scan_bytes/max_candidates by their count.
+            charge_read(file);
+            if (workers > 1) {
+                const auto cost = sizeof(Pending) + file.path.size() + 128 + query.leaves.size() * 16;
+                if (pending_memory + cost > budget / 64) flush();
+                pending.push_back({file, scratch_counts, scratch_lines});
+                pending_memory += cost;
+                if (pending.size() >= batch_limit) flush();
+                return;
+            }
+            scan_document(content_reader, file, scratch_counts, scratch_lines);
+        }
+        score_document(file, scratch_counts, scratch_lines);
     };
     if (anchor.universe) {
         // Records are copied before advancing any other cursor, which can evict a shard.
@@ -1322,8 +1785,7 @@ SearchReport do_search(const Snapshot& snapshot, const Query& query, const Searc
     } else {
         std::uint64_t from = 0;
         for (;;) {
-            auto doc = EndDoc;
-            for (auto& stream : anchors) doc = (std::min)(doc, stream->seek(from));
+            auto doc = anchors->seek(from);
             if (doc == EndDoc) break;
             auto found = documents.get(doc);
             if (!found) throw Error("E_INDEX_CORRUPT", "Live posting has no document");
@@ -1332,6 +1794,19 @@ SearchReport do_search(const Snapshot& snapshot, const Query& query, const Searc
             from = doc + 1;
         }
     }
+    flush();
+    if (options.profile) for (const auto& p : worker_profiles) {
+        report.profile.content_open_seconds += p.content_open_seconds;
+        report.profile.content_read_seconds += p.content_read_seconds;
+        report.profile.verification_seconds += p.verification_seconds;
+        report.profile.line_processing_seconds += p.line_processing_seconds;
+        report.profile.matching_seconds += p.matching_seconds;
+        report.profile.content_opens += p.content_opens;
+        report.profile.content_reads += p.content_reads;
+        report.profile.content_bytes += p.content_bytes;
+    }
+    const auto snippets_started = options.profile ? Clock::now() : Clock::time_point{};
+    if (options.profile) report.profile.candidate_seconds = std::chrono::duration<double>(snippets_started - candidate_started).count();
     std::vector<Scored> ordered;
     ordered.reserve(best.size());
     while (!best.empty()) { ordered.push_back(best.top());
@@ -1343,7 +1818,8 @@ SearchReport do_search(const Snapshot& snapshot, const Query& query, const Searc
         auto& snippets = result.hit.snippets;
         if (options.snippets_per_file && std::any_of(positive.begin(), positive.end(), [](bool b) { return b; })) {
             charge_read(result.record);
-            read_content(snapshot, result.record, [&](std::string_view text, std::uint64_t line) {
+            content_reader.read(result.record, [&](std::string_view text, std::uint64_t line) {
+                check_cancelled();
                 if (snippets.size() >= options.snippets_per_file) return;
                 std::size_t column = (std::numeric_limits<std::size_t>::max)();
                 for_each_token(text, [&](Token t) {
@@ -1362,9 +1838,15 @@ SearchReport do_search(const Snapshot& snapshot, const Query& query, const Searc
                 if (column != (std::numeric_limits<std::size_t>::max)()) snippets.push_back({line, column + 1, snippet_text(text, column, options.snippet_bytes)});
             });
         }
+        result.hit.content_id = content_id(result.record);
+        result.hit.path = std::move(result.record.path);
         report.hits.push_back(std::move(result.hit));
     }
     report.seconds = std::chrono::duration<double>(Clock::now() - started).count();
+    if (options.profile) {
+        report.profile.snippet_seconds = std::chrono::duration<double>(Clock::now() - snippets_started).count();
+        report.profile.regex_steps = options.max_regex_steps - steps;
+    }
     return report;
 }
 std::uint64_t object_bytes(const fs::path& p) {
@@ -1465,6 +1947,8 @@ VerifyReport Index::verify() const {
     std::uint64_t lines = 0, bytes = 0, tokens = 0;
     std::map<std::uint64_t, std::uint64_t> segments;
     std::uint64_t catalog_entries = 0;
+    ContentReader content_reader(*s);
+    LiteralLookup literal_filters(*s);
     for (std::size_t b = 0; b < Buckets; ++b) if (auto table = s->table(b)) {
         out.bytes_checked = checked_add(out.bytes_checked, table->verify());
         catalog_entries = checked_add(catalog_entries, table->count());
@@ -1472,7 +1956,11 @@ VerifyReport Index::verify() const {
     s->each([&](const Record& r) {
         auto linked = s->by_path(r.path);
         if (!linked || linked->id != r.id) throw Error("E_INDEX_CORRUPT", "Broken path link");
-        read_content(*s, r, [](auto, auto) {});
+        const auto saved_filter = literal_filters.get(r);
+        LiteralFilter actual_filter;
+        content_reader.read(r, [&](std::string_view text, auto) { if (saved_filter) actual_filter.add_line(text); });
+        if (saved_filter && actual_filter.encode() != saved_filter->encode())
+            throw Error("E_INDEX_CORRUPT", "Literal filter differs from verified snapshot content");
         ++out.files;
         out.bytes_checked = checked_add(out.bytes_checked, r.size);
         lines = checked_add(lines, r.lines);
@@ -1485,6 +1973,15 @@ VerifyReport Index::verify() const {
         throw Error("E_INDEX_CORRUPT", "Manifest/catalog accounting mismatch");
     for (const auto& [id, count] : m.segments) { (void)count;
     out.bytes_checked = checked_add(out.bytes_checked, disk::verify_postings(segment_path(s->directory, id), s->cache));
+    const auto filter_path = segment_path(s->directory, id) / "literal.tbl";
+    if (fs::exists(filter_path)) {
+        disk::Table filters(filter_path, s->cache);
+        out.bytes_checked = checked_add(out.bytes_checked, filters.verify());
+        filters.each([&](auto key, auto value) {
+            if (key.size() != 8 || value.size() != 157 || !value.starts_with("RSLF1"))
+                throw Error("E_INDEX_CORRUPT", "Invalid literal-filter entry");
+        });
+    }
     ++out.segments;
     }
     return out;

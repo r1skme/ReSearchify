@@ -46,7 +46,7 @@ researchify_warnings(researchify)
 
 include(CTest)
 if(BUILD_TESTING)
-    foreach(suite IN ITEMS json disk v2 process)
+    foreach(suite IN ITEMS json disk v2 process content_io indexing_perf literal_filter search_perf)
         add_executable(cs_${suite}_tests tests/${suite}_tests.cpp)
         target_link_libraries(cs_${suite}_tests PRIVATE researchify_core)
         researchify_warnings(cs_${suite}_tests)
