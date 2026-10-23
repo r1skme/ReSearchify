@@ -2,7 +2,14 @@
 
 ## Current optimization implementation
 
-See [PERFORMANCE_OPTIMIZATION.md](PERFORMANCE_OPTIMIZATION.md) for the current implementation, repeated old/new/rg measurements, platform checks, index-size tradeoffs and remaining limitations. The v1/v2 results later on this page are historical and must not be relabeled as the current branch's results.
+Start with the [implementation and evidence map](PERFORMANCE_IMPLEMENTATION.md).
+The [initial integrated report](PERFORMANCE_OPTIMIZATION.md) records its own
+frozen checkpoint; the later [tiny-file planner](PERFORMANCE_TINY_PLANNER.md),
+[known-path updates](PERFORMANCE_UPDATE_FOLLOWUP.md) and
+[NFA execution](PERFORMANCE_NFA_FOLLOWUP.md) reports identify their separate
+before/after binaries. Do not multiply gains from separate windows or relabel
+an earlier checkpoint as the final executable. The v1/v2 results later on this
+page are historical.
 
 The development-only Python tools require Python 3.11+; the C++ engine and downloaded CLI do not require Python. `scripts/test_perf_benchmark.py` tests the measurement harness itself.
 
@@ -54,6 +61,53 @@ python3 scripts/scale_smoke.py run --bench build/cs_bench --rs build/rs --work b
 
 The million-file smoke uses five lines per file. Generation is deliberately separate from measured build/search/verify, and the report lives outside the source/index. It validates one scale point and measured memory use, not a repeated before/after speed claim. Do not run corpus generation, builds or another benchmark concurrently with a timed comparison.
 
+For pinned external projects, `prepare_external_source.py` captures original
+regular UTF-8 C/H files from an explicitly identified source archive and records
+every exclusion plus per-file SHA-256. `external_source_benchmark.py` separates
+build, full-result validation and measurement phases; its `--resume` contract
+checks source, binary and snapshot identities. It freezes per-query sample
+counts before timing, including an explicit `--wide-regex-iterations` override
+for expensive broad queries. At most two independent readers may overlap during
+full correctness validation; both finish before any timed target or warmup.
+All measured baseline/current/rg target processes run sequentially.
+
+### Reproduce the tiny-file comparison
+
+The reported Windows source fixture was not attached. The generator below is
+an explicit eight-line surrogate: 100,000 files, 800,000 lines and 19,034,450
+source bytes. Its identity is recorded in every result; it is not the reported
+800,101-line source tree.
+
+```sh
+python3 scripts/tiny_comparison.py \
+  --baseline ../researchify-baseline/build/rs --current build/rs \
+  --baseline-revision eb858348169157686e70104af6b64f9539a39fe8 \
+  --current-revision CURRENT_FULL_COMMIT_SHA \
+  --work NEW_DISPOSABLE_WORK_DIRECTORY --files 100000 --iterations 21 \
+  --session-iterations 1000 --fresh-processes 1000 \
+  --update-iterations 7 --index-threads 4 --rg rg
+```
+
+Use the actual full current commit SHA. Windows uses `python` and the native
+`build/Release/rs.exe` paths for both versions. The output directory must be new.
+The driver checks full path/count maps and real rg JSON snippets before timing,
+records 1,000 fresh process searches separately from 1,000 resident JSONL
+requests, then measures strict and known-path updates on its owned fixture.
+Update mutations are restored and independently checked; failure evidence is
+retained. Index creation is a separate single observation for each writer and
+profile, not a stable build-latency distribution.
+
+### File-data cache experiments
+
+The ordinary comparison scripts retain uncontrolled/warmed OS-cache labels.
+The separate [scoped cache driver](CACHE_BENCHMARK.md) can observe residency of
+explicitly owned disposable source/index files on 64-bit Linux. Successful
+`DONTNEED` advice alone is not a cold-cache result: the driver requires a
+complete zero-residency observation immediately before a target to use the
+`verified-cold-file-data-pages` label. Otherwise it reports the failed or
+unverified observation. It never claims a cold executable, metadata cache,
+device cache or entire machine, and does not reset global OS caches.
+
 ### Incremental maintenance and exact-planner regression checks
 
 ```sh
@@ -67,7 +121,7 @@ For the anchor regression script, `CONTROL_RS` is a compatible generic-planner c
 
 ### Measurement rules
 
-- Fresh executable startup is **not cold filesystem cache**. These tools do not flush OS caches or claim a cold-cache result. They record uncontrolled/warmed OS cache conditions explicitly.
+- Fresh executable startup is **not cold filesystem cache**. Ordinary search/session comparisons record uncontrolled/warmed OS cache conditions. The separate scoped cache driver has the narrower file-data residency contract described above; it does not reset global OS caches.
 - Paired comparisons shuffle baseline/current/rg order with a recorded seed and preserve raw samples, binary hashes, exact commands, CPU/wall distributions, candidates and scanned bytes. A final identity check rejects changed binaries or index generations.
 - Median, nearest-rank p95, minimum and maximum are reported. Seven samples yield p95 equal to the maximum; that is not enough to characterize a real production tail.
 - RS count-only and `rg --count-matches` both complete occurrence scans, but the output projections differ: aggregate JSON versus per-file counts. Do not describe these as a ranked/snippet workload or compare them with `rg -l` early exits.
