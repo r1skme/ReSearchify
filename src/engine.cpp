@@ -1734,7 +1734,7 @@ SearchReport do_search(const Snapshot& snapshot, const Query& query, const Searc
     std::size_t pending_memory = 0;
     constexpr std::uint64_t ParallelContentThreshold = 2 * MiB;
     std::uint64_t admitted_content_bytes = 0;
-    const auto batch_limit = (std::max)(std::size_t(16), workers * 16);
+    const auto batch_limit = (std::max)(std::size_t(16), workers * 128);
     std::vector<SearchProfile> worker_profiles(workers);
     std::vector<std::unique_ptr<ContentReader>> readers;
     std::unique_ptr<SearchWorkers> pool;
@@ -1743,6 +1743,9 @@ SearchReport do_search(const Snapshot& snapshot, const Query& query, const Searc
     };
     auto scan_document = [&](ContentReader& reader, const Record& file, std::vector<std::uint64_t>& counts,
                              std::vector<std::uint64_t>& first_line, const std::atomic<bool>* stopped = nullptr) {
+        // Empty documents have no line callback, but queued work must still
+        // observe cancellation in both serial and worker-driven flushes.
+        check_cancelled();
         reader.read(file, [&](std::string_view text, std::uint64_t line) {
             if (stopped && stopped->load(std::memory_order_relaxed)) throw Error("E_CANCELLED", "Search worker stopped");
             check_cancelled();
@@ -1781,12 +1784,57 @@ SearchReport do_search(const Snapshot& snapshot, const Query& query, const Searc
             report.profile.workers = workers;
         }
         if (pool) {
+            // Reorder only dispatch indices for locality, never the charged
+            // candidate stream or the deterministic ordered result reduction.
+            std::uint64_t total_bytes = 0, smallest = EndDoc, largest = 0;
+            for (const auto& item : pending) {
+                total_bytes += item.file.size; // Already bounded by charge_read().
+                smallest = (std::min)(smallest, item.file.size);
+                largest = (std::max)(largest, item.file.size);
+            }
+            // Preserve the striped schedule for empty/extremely mixed batches,
+            // where byte-only partitions can hide per-file overhead.
+            const bool grouped = smallest && largest / smallest <= 16 &&
+                largest <= (total_bytes / workers) * 2;
+            std::vector<std::size_t> order;
+            std::array<std::size_t, 17> boundaries{};
+            if (grouped) {
+                order.resize(pending.size());
+                std::iota(order.begin(), order.end(), std::size_t(0));
+                std::sort(order.begin(), order.end(), [&](auto a, auto b) {
+                    const auto& x = pending[a].file;
+                    const auto& y = pending[b].file;
+                    return x.segment != y.segment ? x.segment < y.segment : x.offset < y.offset;
+                });
+                std::uint64_t consumed = 0;
+                std::size_t next = 0;
+                for (std::size_t worker = 1; worker < workers; ++worker) {
+                    const auto target = (total_bytes / workers) * worker +
+                        ((total_bytes % workers) * worker) / workers;
+                    while (next < order.size() && consumed <= target &&
+                           pending[order[next]].file.size <= target - consumed) {
+                        consumed += pending[order[next++]].file.size;
+                    }
+                    if (next < order.size() && consumed <= target) {
+                        const auto remaining = target - consumed;
+                        const auto bytes = pending[order[next]].file.size;
+                        if (remaining > bytes - remaining)
+                            consumed += pending[order[next++]].file.size;
+                    }
+                    boundaries[worker] = next;
+                }
+                boundaries[workers] = order.size();
+            }
             std::atomic<bool> stopped{false};
             std::exception_ptr failure;
             std::mutex failure_mutex;
             pool->run([&](std::size_t worker) {
-                for (std::size_t i = worker; i < pending.size(); i += workers) {
+                const auto begin = grouped ? boundaries[worker] : worker;
+                const auto end = grouped ? boundaries[worker + 1] : pending.size();
+                const auto stride = grouped ? std::size_t(1) : workers;
+                for (std::size_t position = begin; position < end; position += stride) {
                     if (stopped.load(std::memory_order_relaxed)) return;
+                    const auto i = grouped ? order[position] : position;
                     auto& item = pending[i];
                     try { scan_document(*readers[worker], item.file, item.counts, item.lines, &stopped); }
                     catch (...) {
@@ -1845,7 +1893,7 @@ SearchReport do_search(const Snapshot& snapshot, const Query& query, const Searc
             // cannot multiply max_scan_bytes/max_candidates by their count.
             charge_read(file);
             if (workers > 1) {
-                const auto cost = sizeof(Pending) + file.path.size() + 128 + query.leaves.size() * 16;
+                const auto cost = sizeof(Pending) + sizeof(std::size_t) + file.path.size() + 128 + query.leaves.size() * 16;
                 if (pending_memory + cost > budget / 64) flush();
                 pending.push_back({file, scratch_counts, scratch_lines});
                 // Count admitted work only after an owning queue item exists:

@@ -7,6 +7,7 @@
 #include <map>
 #include <set>
 #include <sstream>
+#include <thread>
 
 using namespace test;
 
@@ -339,6 +340,103 @@ int main() {
                 limited.cancelled = {};
                 REQUIRE(index.search("\"MARK!\"", limited).total_matches == 768);
             }
+        }},
+        {"queued_empty_documents_observe_cancellation_without_line_callbacks", [] {
+            Workspace w;
+            constexpr std::size_t group_size = 512;
+            const std::string content = std::string(4096, '.') + "\n";
+            std::string first_empty;
+            const auto populate = [&](const std::string& prefix, bool nonempty) {
+                std::size_t added = 0;
+                for (unsigned n = 0; added < group_size; ++n) {
+                    const auto path = prefix + "/" + std::to_string(n) + ".txt";
+                    // Catalog IDs visit the nonempty prefix before the empty
+                    // suffix, independently of filesystem enumeration order.
+                    const bool lower_half = (storage::term_hash(path) & 1023U) < 512;
+                    if (lower_half != nonempty) continue;
+                    write(w.root / path, nonempty ? content : std::string{});
+                    if (!nonempty && first_empty.empty()) first_empty = path;
+                    ++added;
+                }
+            };
+            populate("warm", true);
+            populate("empty", false);
+            auto bo = options();
+            bo.threads = 1;
+            bo.max_line_bytes = 8192;
+            bo.segment_documents = 64;
+            create_index(w.root, w.index, bo);
+            Index index(w.index, 128);
+            REQUIRE(index.stats(false).files == 2 * group_size);
+            REQUIRE(index.stats(false).lines == group_size);
+            const auto empties = index.files("empty/*", group_size);
+            REQUIRE(empties.total == group_size);
+            for (const auto& file : empties.files) {
+                REQUIRE(file.bytes == 0);
+                REQUIRE(file.lines == 0);
+            }
+
+            auto so = search_options();
+            so.threads = 2;
+            so.limit = 0;
+            so.snippets_per_file = 0;
+            so.profile = true;
+            // A one-byte literal has no content prefilter. Measure ordinary
+            // search/admission polls without reading any selected document.
+            std::atomic<std::size_t> polls{0};
+            so.paths = {"absent/*"};
+            so.cancelled = [&] { polls.fetch_add(1, std::memory_order_relaxed); return false; };
+            const auto no_reads = index.search("\"!\"", so);
+            REQUIRE(no_reads.candidates == 2 * group_size);
+            REQUIRE(no_reads.profile.content_opens == 0);
+            const auto admission_polls = polls.load(std::memory_order_relaxed);
+            REQUIRE(admission_polls > 0);
+            // Only one zero-byte item is enqueued, so its final pending flush
+            // remains serial even though this corpus permits worker execution.
+            so.paths = {first_empty};
+            polls.store(0, std::memory_order_relaxed);
+            so.cancelled = [&] { return polls.fetch_add(1, std::memory_order_relaxed) >= admission_polls; };
+            rejects([&] { index.search("\"!\"", so); }, "E_CANCELLED");
+            REQUIRE(polls.load(std::memory_order_relaxed) > admission_polls);
+            so.cancelled = {};
+            const auto serial_empty = index.search("\"!\"", so);
+            REQUIRE(serial_empty.total_matches == 0);
+            REQUIRE(serial_empty.scanned_bytes == 0);
+            REQUIRE(serial_empty.profile.workers == 1);
+            REQUIRE(serial_empty.profile.content_opens > 0);
+
+            // The equal-size prefix crosses the pool's admitted-work threshold.
+            // Calibrate its helper-thread polls rather than depending on an
+            // exact number of implementation checkpoints or thread timing.
+            const auto caller = std::this_thread::get_id();
+            std::atomic<std::size_t> worker_polls{0};
+            so.paths = {"warm/*"};
+            so.cancelled = [&] {
+                if (std::this_thread::get_id() != caller)
+                    worker_polls.fetch_add(1, std::memory_order_relaxed);
+                return false;
+            };
+            const auto warm = index.search("\"!\"", so);
+            REQUIRE(warm.profile.workers == 2);
+            REQUIRE(warm.scanned_bytes == group_size * content.size());
+            const auto warm_worker_polls = worker_polls.load(std::memory_order_relaxed);
+            REQUIRE(warm_worker_polls > 0);
+            // Prefix batches are unchanged when the empty suffix is admitted.
+            // Cancel only from a helper after its measured nonempty work; an
+            // implementation polling only per line would never see this stop.
+            so.paths = {"warm/*", "empty/*"};
+            worker_polls.store(0, std::memory_order_relaxed);
+            so.cancelled = [&] {
+                if (std::this_thread::get_id() == caller) return false;
+                return worker_polls.fetch_add(1, std::memory_order_relaxed) >= warm_worker_polls;
+            };
+            rejects([&] { index.search("\"!\"", so); }, "E_CANCELLED");
+            REQUIRE(worker_polls.load(std::memory_order_relaxed) > warm_worker_polls);
+            so.cancelled = {};
+            const auto recovered = index.search("\"!\"", so);
+            REQUIRE(recovered.profile.workers == 2);
+            REQUIRE(recovered.scanned_bytes == warm.scanned_bytes);
+            REQUIRE(recovered.total_matches == 0);
         }},
         {"and_range_skips_and_no_match_cancellation", [] {
             Workspace w;
