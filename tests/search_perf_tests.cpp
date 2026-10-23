@@ -143,6 +143,112 @@ void matches_oracle(const SearchReport& actual, const std::map<std::string, std:
 
 int main() {
     return run({
+        {"single_common_content_anchor_preserves_snapshots_and_work_budgets", [] {
+            Workspace w;
+            Corpus corpus;
+            constexpr unsigned count = 96;
+            const std::string literal = "\"needle_42 = 0;\"";
+            const std::string regex = "/needle_42 = 0;/";
+            const std::string legacy_plan = " AND NOT definitely_missing_token";
+            for (unsigned n = 0; n < count; ++n) {
+                auto text = n % 3 == 0 ? "xneedle_42 = 0;\nneedle_42 = 0;\n" :
+                    "other_" + std::to_string(n) + " = 0;\n";
+                text += " all_marker;\n";
+                const auto path = n == 3 ? "\xc3\xa9.cpp" : std::to_string(n) + ".cpp";
+                corpus.emplace(path, text);
+                write(w.root / path_from_utf8(path), text);
+            }
+            auto bo = options();
+            bo.threads = 1;
+            bo.segment_documents = 32;
+            create_index(w.root, w.index, bo);
+            Index pinned(w.index, 128);
+            const auto original = corpus;
+            auto so = search_options();
+            so.max_regex_steps = 1000000000;
+            so.max_candidates = count;
+            const auto initial = pinned.search(literal, so);
+            REQUIRE(initial.candidates == count);
+            matches_oracle(initial, oracle(corpus, literal));
+            // Both content matchers retain frequency, first position, scoring,
+            // snippets and ordering compared with the equivalent Boolean query
+            // that deliberately retains the ordinary posting-driven plan.
+            const auto ordinary = pinned.search(literal + legacy_plan, so);
+            same_result(initial, ordinary);
+            REQUIRE(initial.scanned_bytes == ordinary.scanned_bytes);
+            const auto regex_initial = pinned.search(regex, so);
+            matches_oracle(regex_initial, oracle(corpus, literal));
+            same_result(regex_initial, pinned.search(regex + legacy_plan, so));
+            for (const bool sort_path : {false, true}) {
+                auto page = so;
+                page.sort_path = sort_path;
+                page.limit = 7;
+                page.offset = 3;
+                same_result(pinned.search(literal, page), pinned.search(literal + legacy_plan, page));
+                page.offset = 0;
+                const auto first_page = pinned.search(literal, page);
+                REQUIRE(first_page.hits.size() == page.limit);
+                page.after = true;
+                page.after_path = first_page.hits.back().path;
+                page.after_score = first_page.hits.back().score;
+                same_result(pinned.search(literal, page), pinned.search(literal + legacy_plan, page));
+            }
+            auto limited = so;
+            limited.max_candidates = count - 1;
+            rejects([&] { pinned.search(literal, limited); }, "E_BUDGET");
+            limited.max_candidates = count;
+            limited.max_scan_bytes = 1;
+            rejects([&] { pinned.search(literal, limited); }, "E_BUDGET");
+            limited.max_scan_bytes = 0;
+            limited.cancelled = [] { return true; };
+            rejects([&] { pinned.search(literal, limited); }, "E_CANCELLED");
+            bool checked_content = false;
+            for (const auto& item : fs::recursive_directory_iterator(w.index)) {
+                if (item.path().filename() != "content.bin" || item.file_size() == 0) continue;
+                const auto saved = read(item.path());
+                flip(item.path(), 0);
+                rejects([&] { pinned.search(literal, so); }, "E_INDEX_CORRUPT");
+                write(item.path(), saved);
+                checked_content = true;
+                break;
+            }
+            REQUIRE(checked_content);
+
+            // Keep old segments partially live while replacing most records.
+            // Their raw df still covers the old corpus, but only eight of the
+            // current files contain token 0. It must remain a selective
+            // posting plan, rather than treating stale df as a live count.
+            unsigned at = 0;
+            std::uint64_t retained = 0;
+            for (auto& [path, text] : corpus) {
+                if (at++ % 12 == 0) { ++retained; continue; }
+                text = "replacement without the necessary token\n all_marker;\n";
+                write(w.root / path_from_utf8(path), text);
+            }
+            REQUIRE(retained == 8);
+            REQUIRE(update_index(w.index, bo).changed == count - retained);
+            Index fresh(w.index, 128);
+            so.max_candidates = retained;
+            const auto updated = fresh.search(literal, so);
+            REQUIRE(updated.candidates == retained);
+            matches_oracle(updated, oracle(corpus, literal));
+            same_result(updated, fresh.search(literal + legacy_plan, so));
+            const auto regex_updated = fresh.search(regex, so);
+            matches_oracle(regex_updated, oracle(corpus, literal));
+            same_result(regex_updated, fresh.search(regex + legacy_plan, so));
+            matches_oracle(pinned.search(literal, search_options()), oracle(original, literal));
+            REQUIRE(fresh.verify().files == count);
+
+            // A full compaction can safely use current-generation knowledge
+            // again; it must keep the new results and the pinned old snapshot.
+            compact_index(w.index, 1, 128);
+            Index compacted(w.index, 128);
+            matches_oracle(compacted.search(literal, search_options()), oracle(corpus, literal));
+            const auto common = compacted.search("\" all_marker;\"", search_options());
+            REQUIRE(common.candidates == count);
+            matches_oracle(common, oracle(corpus, "\" all_marker;\""));
+            matches_oracle(pinned.search(literal, search_options()), oracle(original, literal));
+        }},
         {"compact_fast_literal_boolean_oracle_and_parallel_equivalence", [] {
             Workspace w;
             const auto corpus = make_corpus(w.root);

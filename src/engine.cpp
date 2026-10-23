@@ -32,6 +32,7 @@ namespace researchify {
 namespace {
 using Clock = std::chrono::steady_clock;
 constexpr std::uint64_t MiB = 1024 * 1024, SerialMask = (1ULL << 54) - 1;
+constexpr std::uint64_t SegmentGenerationStride = 1000000;
 constexpr std::size_t Buckets = 1024, IoBytes = 65536, MaxPath = 32768;
 constexpr std::uint64_t EndDoc = (std::numeric_limits<std::uint64_t>::max)();
 std::uint64_t checked_add(std::uint64_t a, std::uint64_t b) {
@@ -82,14 +83,14 @@ std::uint64_t new_generation(const fs::path& dir) {
         auto name = path_to_utf8(item.path().filename());
         std::uint64_t g = 0;
         if (numbered(name, "commit-", ".bin", g) || numbered(name, "transaction-", "", g) || numbered(name, "commit-", ".bin.tmp", g)) maximum = (std::max)(maximum, g);
-        if (numbered(name, "segment-", "", g)) maximum = (std::max)(maximum, g / 1000000);
+        if (numbered(name, "segment-", "", g)) maximum = (std::max)(maximum, g / SegmentGenerationStride);
         if (name.starts_with("catalog-")) {
             auto end = name.find('-', 8);
             if (end != std::string::npos) { try { maximum = (std::max)(maximum, unsigned_number(std::string_view(name).substr(8, end - 8)));
             } catch (const Error&) {} }
         }
     }
-    if (maximum >= (std::numeric_limits<std::uint64_t>::max)() / 1000000 - 1) throw Error("E_BUDGET", "Generation space exhausted");
+    if (maximum >= (std::numeric_limits<std::uint64_t>::max)() / SegmentGenerationStride - 1) throw Error("E_BUDGET", "Generation space exhausted");
     return maximum + 1;
 }
 class DirectoryLock {
@@ -254,7 +255,7 @@ Manifest read_manifest(const fs::path& dir, std::uint64_t generation) {
     std::uint64_t total = 0, previous = 0;
     for (std::uint64_t i = 0; i < count; ++i) {
         auto id = disk::get_varint(data, at), live = disk::get_varint(data, at);
-        if (!live || id <= previous || id / 1000000 > generation) throw Error("E_INDEX_CORRUPT", "Invalid segment descriptor");
+        if (!live || id <= previous || id / SegmentGenerationStride > generation) throw Error("E_INDEX_CORRUPT", "Invalid segment descriptor");
         total = checked_add(total, live);
         m.segments.emplace(id, live);
         previous = id;
@@ -852,8 +853,8 @@ BuildReport build(const fs::path& source, const fs::path& requested, const Build
                     if (postings && documents < options.segment_documents && blob_bytes < 256 * MiB) return;
                     finish_segment();
                     auto n = ++segment_serial;
-                    if (n >= 1000000) throw Error("E_BUDGET", "Too many segments in one generation");
-                    segment = next.generation * 1000000 + n;
+                    if (n >= SegmentGenerationStride) throw Error("E_BUDGET", "Too many segments in one generation");
+                    segment = next.generation * SegmentGenerationStride + n;
                     part = segment_path(transaction, segment);
                     fs::create_directory(part);
                     blob.open(part / "content.bin", std::ios::binary | std::ios::trunc);
@@ -1666,6 +1667,20 @@ SearchReport do_search(const Snapshot& snapshot, const Query& query, const Searc
         return n->kind == NodeKind::And ? and_anchor(std::move(a), std::move(b)) : or_anchor(std::move(a), std::move(b));
     };
     auto anchor = plan(query.root);
+    // A single content predicate whose one posting driver covers every live
+    // document gains nothing from merging that posting list and looking up the
+    // same catalog rows again. The ordered catalog scan visits the identical
+    // candidates directly. Only freshly written segments make df exact: after
+    // an incremental update, obsolete postings can inflate it arbitrarily.
+    // Keep Boolean/intersection plans intact even when their component lists
+    // are common; their joint membership can still be highly selective.
+    if (query.root->kind == NodeKind::Leaf &&
+        query.leaves[query.root->leaf].kind != LeafKind::Term &&
+        !anchor.universe && anchor.kind == Anchor::Kind::Term &&
+        snapshot.manifest.files && anchor.cost == snapshot.manifest.files &&
+        std::all_of(snapshot.manifest.segments.begin(), snapshot.manifest.segments.end(),
+            [&](const auto& item) { return item.first / SegmentGenerationStride == snapshot.manifest.generation; }))
+        anchor = {};
     documents.set_sparse(!anchor.universe && anchor.cost < snapshot.manifest.files / 16);
     std::size_t stream_parts = 0;
     for (const auto& s : exact) if (s) stream_parts += s->lists.size();
