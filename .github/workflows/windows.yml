@@ -86,6 +86,17 @@ jobs:
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
           cmake --build native-baselines/original/build --target researchify --config Release --parallel 4
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
+      - name: Prove Windows lock regression fails on original and passes on fixed core
+        if: steps.tiny_perf.outputs.run == 'true'
+        timeout-minutes: 15
+        run: python scripts/windows_lock_regression.py --baseline-source native-baselines/original --current-build build --work native-lock-regression
+      - name: Preserve native Windows lock control evidence
+        if: always() && steps.tiny_perf.outputs.run == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-windows-lock-regression-x64
+          path: native-lock-regression/
+          if-no-files-found: warn
       - name: Native 100k tiny-file comparison (correctness gate only)
         if: steps.tiny_perf.outputs.run == 'true'
         timeout-minutes: 70
