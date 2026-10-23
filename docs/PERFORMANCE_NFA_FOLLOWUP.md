@@ -46,7 +46,8 @@ verified internal entry point introduced earlier retains its contract.
 
 The fixture contains the original bytes of 1005 regular UTF-8 `.c`/`.h` files,
 27,501,615 bytes and 834,893 lines, captured from CPython v3.13.0 commit
-`60403a5409ff2c3f3b07dd2ca91a7a3e096839c7`. Its full manifest hash is
+`60403a5409ff2c3f3b07dd2ca91a7a3e096839c7`. Its canonical manifest identity
+(sorted compact JSON, excluding the manifest's own checksum field) is
 `5539e8d9a04e1d3f1fe9b70a8ba927b6a54541e09eea8f032d0c0b2a0fda43ef`.
 
 Both readers used the same immutable 456a5cf-built index in each profile.
