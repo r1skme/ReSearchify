@@ -194,19 +194,41 @@ jobs:
         with:
           name: perf-macos-${{ matrix.arch }}
           path: perf-smoke/measurements.json
+      - name: Check whether native timing inputs changed
+        id: native_perf
+        shell: bash
+        env:
+          PREVIOUS_HEAD: ${{ github.event.before }}
+        run: |
+          set -euo pipefail
+          rerun=true
+          # Documentation/raw-evidence updates still build and test every target,
+          # but do not repeat a measured performance experiment on identical code.
+          # Missing history or non-synchronize events conservatively run it.
+          if [[ "$PREVIOUS_HEAD" =~ ^[0-9a-f]{40}$ ]]; then
+            if git fetch --no-tags --depth=1 origin "$PREVIOUS_HEAD"; then
+              if git diff --quiet "$PREVIOUS_HEAD" HEAD -- src include tests CMakeLists.txt cmake scripts .github/workflows bench ':(exclude)bench/results/**'; then
+                rerun=false
+              fi
+            fi
+          fi
+          echo "run=$rerun" >> "$GITHUB_OUTPUT"
       - name: Check out original performance baseline
+        if: steps.native_perf.outputs.run == 'true'
         uses: actions/checkout@v4
         with:
           ref: eb858348169157686e70104af6b64f9539a39fe8
           path: native-baselines/original
           persist-credentials: false
       - name: Check out previous optimized checkpoint
+        if: steps.native_perf.outputs.run == 'true'
         uses: actions/checkout@v4
         with:
           ref: dbcddf76708b614c26e212fa27b48efa33ddfd58
           path: native-baselines/previous
           persist-credentials: false
       - name: Build native comparison binaries
+        if: steps.native_perf.outputs.run == 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -219,6 +241,7 @@ jobs:
           done
           test "$(lipo -archs build/rs)" = "${{ matrix.machine }}"
       - name: Paired native performance comparisons (correctness gate only)
+        if: steps.native_perf.outputs.run == 'true'
         timeout-minutes: 25
         shell: bash
         run: |
@@ -230,7 +253,7 @@ jobs:
             --machine "${{ matrix.machine }}" --files 20000 --iterations 21 --term-iterations 201 \
             --rg rg --output-dir native-perf
       - name: Preserve native comparison evidence, including failed/incomplete runs
-        if: always()
+        if: always() && steps.native_perf.outputs.run == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: native-performance-macos-${{ matrix.arch }}
