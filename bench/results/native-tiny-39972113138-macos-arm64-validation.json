@@ -1,0 +1,13 @@
+{
+  "job_id": 120477210171,
+  "logs_api": "https://api.github.com/repos/r1skme/ReSearchify/actions/jobs/120477210171/logs",
+  "log_sha256_method": "Hash omitted; only relevant tool-returned decoded log excerpts retained",
+  "excerpts": [
+    "2026-10-23T14:46:31.1902530Z Version: 20260828.587",
+    "2026-10-23T14:46:31.1908620Z Image: macos-15-arm64",
+    "2026-10-23T14:46:31.1909000Z Version: 20260907.0337.1",
+    "2026-10-23T14:47:30.1386700Z 100% tests passed out of 13",
+    "2026-10-23T14:47:30.1473750Z Total Test time (real) =  19.49 sec",
+    "2026-10-23T14:47:31.6341230Z Ran 28 tests in 0.442s"
+  ]
+}

@@ -1,0 +1,563 @@
+{
+  "format": "researchify-native-tiny-checkpoint-v1",
+  "workflow_run_id": 39972113138,
+  "workflow_run_url": "https://github.com/r1skme/ReSearchify/actions/runs/39972113138",
+  "run_head_commit": "d71cbea1e6c71a9e3f07a4fed0f4d19fedd8f3b5",
+  "run_head_tree": "a017f6c242fb0d71c13a4efc422c9de09d68b28f",
+  "checkout_commit": "0babf2521230df09791fd2e61ab04dc90af53854",
+  "checkout_tree": "a017f6c242fb0d71c13a4efc422c9de09d68b28f",
+  "checkout_parents": [
+    "f06dfbcca862407167a672cb42a6df8653c86791",
+    "d71cbea1e6c71a9e3f07a4fed0f4d19fedd8f3b5"
+  ],
+  "local_core_commit": "456a5cf88c15330eaf8ae8c752e351e09e0f5ceb",
+  "expected_local_tree": "a017f6c242fb0d71c13a4efc422c9de09d68b28f",
+  "scope": "Intermediate native checkpoint before the later NFA initial-set experiment. Windows tiny and macOS 20k larger-file corpora are separate.",
+  "jobs": [
+    {
+      "id": 120477209945,
+      "name": "Linux arm64 (GCC)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 120477209955,
+      "name": "Linux x64 (Clang)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 120477209994,
+      "name": "macOS x64 (Clang)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 120477210016,
+      "name": "Windows x64 (MSVC)",
+      "status": "completed",
+      "conclusion": "failure"
+    },
+    {
+      "id": 120477210084,
+      "name": "Address/UB sanitizer",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 120477210116,
+      "name": "Linux x64 (GCC)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 120477210171,
+      "name": "macOS arm64 (Clang)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 120513812929,
+      "name": "Publish tested multi-platform preview",
+      "status": "completed",
+      "conclusion": "skipped"
+    }
+  ],
+  "artifacts": [
+    {
+      "id": 12509863656,
+      "name": "native-performance-macos-arm64",
+      "size_in_bytes": 218182,
+      "digest": "sha256:da2c915db14c8c00ae1a74763df4102e958db40f17716ad1e0615b5d79ab8ea0",
+      "created_at": "2026-10-23T14:54:58Z",
+      "workflow_run": {
+        "id": 39972113138,
+        "repository_id": 1427610584,
+        "head_repository_id": 1427610584,
+        "head_branch": "perf/cross-platform-optimization",
+        "head_sha": "d71cbea1e6c71a9e3f07a4fed0f4d19fedd8f3b5"
+      },
+      "url": "https://api.github.com/repos/r1skme/ReSearchify/actions/artifacts/12509863656",
+      "local_zip": "native-tiny-39972113138-macos-arm64.zip",
+      "local_sha256": "da2c915db14c8c00ae1a74763df4102e958db40f17716ad1e0615b5d79ab8ea0",
+      "digest_verified": true,
+      "zip_members": [
+        {
+          "name": "correctness.json",
+          "uncompressed_bytes": 6066,
+          "sha256": "9abc58e61eda8f81d6c028096d6042c7e43a66b0bdd07aa1d956f3b7db0720bb"
+        },
+        {
+          "name": "current-compact-create.json",
+          "uncompressed_bytes": 1068,
+          "sha256": "af3f5d73fb9d804120ea3fbb5cb28c9a79ac1b5b8cc76285dbdd8c32f0f900df"
+        },
+        {
+          "name": "current-fast-create.json",
+          "uncompressed_bytes": 1063,
+          "sha256": "bf822d10acda3bc983c6546b14ce26c9d1e36767831934b5cc8569b7702bfc4d"
+        },
+        {
+          "name": "expected-broad_literal.json",
+          "uncompressed_bytes": 678893,
+          "sha256": "bb7c71f30b65bb8f6dc4bc1f9d8a3c459590e708c176352ddbee996460246056"
+        },
+        {
+          "name": "expected-broad_regex.json",
+          "uncompressed_bytes": 658893,
+          "sha256": "990b7f9cb80f186c184599eb699323da93f0c03927c7de3c8d7d904b88031b7a"
+        },
+        {
+          "name": "expected-literal.json",
+          "uncompressed_bytes": 33,
+          "sha256": "4de2e38270f723e1b4f56c8bcdb7b986d9537602eedc3cf97f2c4187c2c3b00c"
+        },
+        {
+          "name": "expected-no_match.json",
+          "uncompressed_bytes": 3,
+          "sha256": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356"
+        },
+        {
+          "name": "expected-term.json",
+          "uncompressed_bytes": 33,
+          "sha256": "4de2e38270f723e1b4f56c8bcdb7b986d9537602eedc3cf97f2c4187c2c3b00c"
+        },
+        {
+          "name": "generation.json",
+          "uncompressed_bytes": 426,
+          "sha256": "b85ec1dadf4bb851d083526f14492e30bc3013f133e00c11df7fff4ff79f9201"
+        },
+        {
+          "name": "index-builds.json",
+          "uncompressed_bytes": 6329,
+          "sha256": "8e126a718c2b5bd4a30b1f0e78d1436c611dcd6699e5f2b6d728516fa81841af"
+        },
+        {
+          "name": "original-compact-create.json",
+          "uncompressed_bytes": 1096,
+          "sha256": "0937c8ea4c356805aa6001bc644e674622f9b8447a4f6b8715b991d3b9f61c08"
+        },
+        {
+          "name": "original-compact.json",
+          "uncompressed_bytes": 85425,
+          "sha256": "197122311a1f8cf69e10e9cb50f51f09e2ff3c423872d24ffddb52068a917005"
+        },
+        {
+          "name": "original-compact.stderr.log",
+          "uncompressed_bytes": 3588,
+          "sha256": "a89d218302882c8b6db15abbf31877b3b969817ae15c51dc839bb17441b3fbcd"
+        },
+        {
+          "name": "original-compact.stdout.log",
+          "uncompressed_bytes": 85425,
+          "sha256": "197122311a1f8cf69e10e9cb50f51f09e2ff3c423872d24ffddb52068a917005"
+        },
+        {
+          "name": "original-fast-create.json",
+          "uncompressed_bytes": 1089,
+          "sha256": "7376ad89acc5363fc8d444d81e7f53ccbb42b4991d5a8a48158dbaa3f68af5d0"
+        },
+        {
+          "name": "original-fast.json",
+          "uncompressed_bytes": 51287,
+          "sha256": "8ea155926e5b7f92da4eef74502089af5540631837dba3291bd8268dcb7f0405"
+        },
+        {
+          "name": "original-fast.stderr.log",
+          "uncompressed_bytes": 2010,
+          "sha256": "ee50c021d55ec6c31624a454f7022382ceb3befd233f2bb1254ec0f183901109"
+        },
+        {
+          "name": "original-fast.stdout.log",
+          "uncompressed_bytes": 51287,
+          "sha256": "8ea155926e5b7f92da4eef74502089af5540631837dba3291bd8268dcb7f0405"
+        },
+        {
+          "name": "previous-compact.json",
+          "uncompressed_bytes": 29106,
+          "sha256": "3d35522ed34aa122a2f9a0fcfc961676bcbdf52fb1796234967ca94c6db18f2c"
+        },
+        {
+          "name": "previous-compact.stderr.log",
+          "uncompressed_bytes": 1452,
+          "sha256": "248150c6deea3604997d07d3b59168f2a2c94ca1b0d01a38a6f90bd357330e4f"
+        },
+        {
+          "name": "previous-compact.stdout.log",
+          "uncompressed_bytes": 29106,
+          "sha256": "3d35522ed34aa122a2f9a0fcfc961676bcbdf52fb1796234967ca94c6db18f2c"
+        },
+        {
+          "name": "previous-jsonl-compact.json",
+          "uncompressed_bytes": 524512,
+          "sha256": "af1f4a2480e94f3613223b8bfce6a82db267089bd406c1e5ab616cddebb6a048"
+        },
+        {
+          "name": "previous-jsonl-compact.stderr.log",
+          "uncompressed_bytes": 100,
+          "sha256": "7e59ec455e2cbcc1f811a20a24993c8a8746ec758096272b60d4bdb54a1f9f71"
+        },
+        {
+          "name": "previous-jsonl-compact.stdout.log",
+          "uncompressed_bytes": 159,
+          "sha256": "ad218efac541f4fe64a6cde82d4abf210baef73116179dd85a01594a9f54c40c"
+        },
+        {
+          "name": "previous-jsonl-fast.json",
+          "uncompressed_bytes": 524369,
+          "sha256": "5030cc7912736f658b70a1983dc51e967278eb25480e0a9e3d627a06b433813b"
+        },
+        {
+          "name": "previous-jsonl-fast.stderr.log",
+          "uncompressed_bytes": 100,
+          "sha256": "7e59ec455e2cbcc1f811a20a24993c8a8746ec758096272b60d4bdb54a1f9f71"
+        },
+        {
+          "name": "previous-jsonl-fast.stdout.log",
+          "uncompressed_bytes": 153,
+          "sha256": "841735d8d69735e17582efac6376a8918fcf3c13d4acfd3e1767d6d506a73e95"
+        },
+        {
+          "name": "summary.json",
+          "uncompressed_bytes": 41700,
+          "sha256": "3a94f3fb9e4b02553a31fee05341e87b00301a8e73c0c06b58260dbf9abedc87"
+        }
+      ]
+    },
+    {
+      "id": 12511547195,
+      "name": "native-performance-macos-x64",
+      "size_in_bytes": 228040,
+      "digest": "sha256:a33a42e8468fc94475d2473962aa1313ff8ad4f86bf2dacc025f74e58e78b49a",
+      "created_at": "2026-10-23T15:12:47Z",
+      "workflow_run": {
+        "id": 39972113138,
+        "repository_id": 1427610584,
+        "head_repository_id": 1427610584,
+        "head_branch": "perf/cross-platform-optimization",
+        "head_sha": "d71cbea1e6c71a9e3f07a4fed0f4d19fedd8f3b5"
+      },
+      "url": "https://api.github.com/repos/r1skme/ReSearchify/actions/artifacts/12511547195",
+      "local_zip": "native-tiny-39972113138-macos-x64.zip",
+      "local_sha256": "a33a42e8468fc94475d2473962aa1313ff8ad4f86bf2dacc025f74e58e78b49a",
+      "digest_verified": true,
+      "zip_members": [
+        {
+          "name": "correctness.json",
+          "uncompressed_bytes": 6066,
+          "sha256": "9abc58e61eda8f81d6c028096d6042c7e43a66b0bdd07aa1d956f3b7db0720bb"
+        },
+        {
+          "name": "current-compact-create.json",
+          "uncompressed_bytes": 1062,
+          "sha256": "86f0423edc9f6a55862d7e53620e1371a59460d91e73f77570adbe788dc07049"
+        },
+        {
+          "name": "current-fast-create.json",
+          "uncompressed_bytes": 1062,
+          "sha256": "206406564922e89eb068eb6ffefa43193287cb4e22a8cdcdbe78ccb1024653a4"
+        },
+        {
+          "name": "expected-broad_literal.json",
+          "uncompressed_bytes": 678893,
+          "sha256": "32e3a02635cb56f6dcab5ace728a0293a1d9e61f88d49d30bcd0fe8a9cbb6a5f"
+        },
+        {
+          "name": "expected-broad_regex.json",
+          "uncompressed_bytes": 658893,
+          "sha256": "22a25d0f8477ce2876d33b9943a75d03b952311120fb8f9a5611ad4d1af80cdd"
+        },
+        {
+          "name": "expected-literal.json",
+          "uncompressed_bytes": 33,
+          "sha256": "4de2e38270f723e1b4f56c8bcdb7b986d9537602eedc3cf97f2c4187c2c3b00c"
+        },
+        {
+          "name": "expected-no_match.json",
+          "uncompressed_bytes": 3,
+          "sha256": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356"
+        },
+        {
+          "name": "expected-term.json",
+          "uncompressed_bytes": 33,
+          "sha256": "4de2e38270f723e1b4f56c8bcdb7b986d9537602eedc3cf97f2c4187c2c3b00c"
+        },
+        {
+          "name": "generation.json",
+          "uncompressed_bytes": 433,
+          "sha256": "01322fc00de41a53e3b51036075da2b61e813f2f53ce948006998829690b1b16"
+        },
+        {
+          "name": "index-builds.json",
+          "uncompressed_bytes": 6315,
+          "sha256": "dd2aa851dd05fe809e100f19c81cb28022711fff66149324b31a127949f98c74"
+        },
+        {
+          "name": "original-compact-create.json",
+          "uncompressed_bytes": 1095,
+          "sha256": "798972627295405fa217dc247ba09e85c057eb53c9bea57a80203959a6595e9f"
+        },
+        {
+          "name": "original-compact.json",
+          "uncompressed_bytes": 85779,
+          "sha256": "c8a2feae233ef78ca00b0c3e235d917de256bbd76d1607a4511e7ea15e5902e2"
+        },
+        {
+          "name": "original-compact.stderr.log",
+          "uncompressed_bytes": 3588,
+          "sha256": "a89d218302882c8b6db15abbf31877b3b969817ae15c51dc839bb17441b3fbcd"
+        },
+        {
+          "name": "original-compact.stdout.log",
+          "uncompressed_bytes": 85779,
+          "sha256": "c8a2feae233ef78ca00b0c3e235d917de256bbd76d1607a4511e7ea15e5902e2"
+        },
+        {
+          "name": "original-fast-create.json",
+          "uncompressed_bytes": 1083,
+          "sha256": "92f79e84a0443dbb2c51bc55a82596a1b346cca61e25a4cddc615002fa7cbc97"
+        },
+        {
+          "name": "original-fast.json",
+          "uncompressed_bytes": 51328,
+          "sha256": "11ad67b6395ac61571ab1f378008e5a568744129dc3328948707417d73fd6d38"
+        },
+        {
+          "name": "original-fast.stderr.log",
+          "uncompressed_bytes": 2010,
+          "sha256": "ee50c021d55ec6c31624a454f7022382ceb3befd233f2bb1254ec0f183901109"
+        },
+        {
+          "name": "original-fast.stdout.log",
+          "uncompressed_bytes": 51328,
+          "sha256": "11ad67b6395ac61571ab1f378008e5a568744129dc3328948707417d73fd6d38"
+        },
+        {
+          "name": "previous-compact.json",
+          "uncompressed_bytes": 29238,
+          "sha256": "3d2a7368cddf1f9a4b0d0c047be8f1a0381ac3b50efb4e7ffdbd2b62247fd702"
+        },
+        {
+          "name": "previous-compact.stderr.log",
+          "uncompressed_bytes": 1452,
+          "sha256": "248150c6deea3604997d07d3b59168f2a2c94ca1b0d01a38a6f90bd357330e4f"
+        },
+        {
+          "name": "previous-compact.stdout.log",
+          "uncompressed_bytes": 29238,
+          "sha256": "3d2a7368cddf1f9a4b0d0c047be8f1a0381ac3b50efb4e7ffdbd2b62247fd702"
+        },
+        {
+          "name": "previous-jsonl-compact.json",
+          "uncompressed_bytes": 524746,
+          "sha256": "d7776b33ca2c8b98453910164098d6012be8dd9026c82539fc06c8f617f39bca"
+        },
+        {
+          "name": "previous-jsonl-compact.stdout.log",
+          "uncompressed_bytes": 159,
+          "sha256": "ad218efac541f4fe64a6cde82d4abf210baef73116179dd85a01594a9f54c40c"
+        },
+        {
+          "name": "previous-jsonl-compact.stderr.log",
+          "uncompressed_bytes": 100,
+          "sha256": "7e59ec455e2cbcc1f811a20a24993c8a8746ec758096272b60d4bdb54a1f9f71"
+        },
+        {
+          "name": "previous-jsonl-fast.json",
+          "uncompressed_bytes": 524516,
+          "sha256": "d0932e06408a742802e30bc446f20d1bf6c37a1ec9ad1a1263e18a82dcb39c67"
+        },
+        {
+          "name": "previous-jsonl-fast.stderr.log",
+          "uncompressed_bytes": 100,
+          "sha256": "7e59ec455e2cbcc1f811a20a24993c8a8746ec758096272b60d4bdb54a1f9f71"
+        },
+        {
+          "name": "previous-jsonl-fast.stdout.log",
+          "uncompressed_bytes": 153,
+          "sha256": "841735d8d69735e17582efac6376a8918fcf3c13d4acfd3e1767d6d506a73e95"
+        },
+        {
+          "name": "summary.json",
+          "uncompressed_bytes": 41817,
+          "sha256": "3b6570fdfacf5363ec935c8333efd72b8d9311be804c54bd445ce0fa0def356f"
+        }
+      ]
+    },
+    {
+      "id": 12513817823,
+      "name": "native-performance-windows-tiny-x64",
+      "size_in_bytes": 247483,
+      "digest": "sha256:27d9ed2b48b3d6ecdde50af512630f05bd31bfe03142c19b9c3e072d954ff839",
+      "created_at": "2026-10-23T15:57:20Z",
+      "workflow_run": {
+        "id": 39972113138,
+        "repository_id": 1427610584,
+        "head_repository_id": 1427610584,
+        "head_branch": "perf/cross-platform-optimization",
+        "head_sha": "d71cbea1e6c71a9e3f07a4fed0f4d19fedd8f3b5"
+      },
+      "url": "https://api.github.com/repos/r1skme/ReSearchify/actions/artifacts/12513817823",
+      "local_zip": "native-tiny-39972113138-windows-x64.zip",
+      "local_sha256": "27d9ed2b48b3d6ecdde50af512630f05bd31bfe03142c19b9c3e072d954ff839",
+      "digest_verified": true,
+      "zip_members": [
+        {
+          "name": "compact-process.json",
+          "uncompressed_bytes": 102233,
+          "sha256": "cf06ab5026c75dc481328d67ac867797471f4da2f5896d7d62f1082b5161c724"
+        },
+        {
+          "name": "compact-process.log",
+          "uncompressed_bytes": 106799,
+          "sha256": "fa8ddfe6e883960b6d0524ce183e50bc505899381f380cf25825a55b2f40b7bb"
+        },
+        {
+          "name": "compact-sessions.json",
+          "uncompressed_bytes": 2401167,
+          "sha256": "ff3996497c552ca9aa8c0a54fbe2c7d7f2a2bb72e8b1f5210ddc08babf8ff9e7"
+        },
+        {
+          "name": "compact-sessions.log",
+          "uncompressed_bytes": 254,
+          "sha256": "ba95564d3e0bdc7c1dbd4d4fd7193e5e5a7cd6e79e32b8a67fc78faab3887602"
+        },
+        {
+          "name": "compact-updates.json",
+          "uncompressed_bytes": 217774,
+          "sha256": "3e7e3ddf0a3c65b8424a0e57bf8dc9934c9a88ebe4644231455407da609b2188"
+        },
+        {
+          "name": "compact-updates.log",
+          "uncompressed_bytes": 190,
+          "sha256": "15b09edcbc71195f042d6e0ea4283a66607f366af69263c1088c0f38117525c8"
+        },
+        {
+          "name": "fast-process.json",
+          "uncompressed_bytes": 101815,
+          "sha256": "1ea3b3ef83512a9618d10315ea085241d36bd76b24b241ee697c812d781a2fdf"
+        },
+        {
+          "name": "fast-process.log",
+          "uncompressed_bytes": 106381,
+          "sha256": "03769da32a76a17df992eaf62edc339465d949db203fab85601db85fe1eb9e34"
+        },
+        {
+          "name": "fast-sessions.json",
+          "uncompressed_bytes": 2401591,
+          "sha256": "ebe4f70bc67f5e338adf17bd24e86ae8d5868c1f85cf1d9eb1919d6c00fa3af9"
+        },
+        {
+          "name": "fast-sessions.log",
+          "uncompressed_bytes": 248,
+          "sha256": "fc70ef1267f8644a52866a570a0b5dbbe1bfc508c721237b0a30586f64401d71"
+        },
+        {
+          "name": "fast-updates.json",
+          "uncompressed_bytes": 28127,
+          "sha256": "a8f02fa8fe8e7d24a91c219403f2f1e13c38b1c8f317c8e07ff8c8c428633678"
+        },
+        {
+          "name": "fast-updates.log",
+          "uncompressed_bytes": 2030,
+          "sha256": "fa8d7bb3e9ba8f452670e2e4df0722b54cdc0ca3179b2b2e3e1ef0c64c85155b"
+        },
+        {
+          "name": "summary.json",
+          "uncompressed_bytes": 245845,
+          "sha256": "aabf41982a572cb72e622d315e7bb490decbdeb50e58457b886c3d31f3c9b392"
+        },
+        {
+          "name": "update-fixture.json",
+          "uncompressed_bytes": 698,
+          "sha256": "339893fb106db0c11976248442e14300796f1cac6a3d9a6f3352e401d0877225"
+        }
+      ]
+    }
+  ],
+  "source_tree_entries": [
+    {
+      "path": "CMakeLists.txt",
+      "sha": "ad9381d4e6b7a2f74a4464b5ed8b37528ee89f76"
+    },
+    {
+      "path": "include/researchify/api.hpp",
+      "sha": "fe31c34a6aee49d4cf333291b10922a44d5d5c96"
+    },
+    {
+      "path": "include/researchify/disk.hpp",
+      "sha": "a2f09ec2ad10e3d11fbb10eef13d2f493459b811"
+    },
+    {
+      "path": "include/researchify/engine.hpp",
+      "sha": "2e5591f865aef51fbd3d278e4f5b56bbd2c69a84"
+    },
+    {
+      "path": "include/researchify/json.hpp",
+      "sha": "bdb54ec6f9a688f36a3ff3347ad55bf221efd4e0"
+    },
+    {
+      "path": "include/researchify/literal_filter.hpp",
+      "sha": "d2662b8003bd875e58dc8ca345154fd12d187cd6"
+    },
+    {
+      "path": "include/researchify/query.hpp",
+      "sha": "336d7061739f7cb769bd2ba76b18cc38d1d61e2a"
+    },
+    {
+      "path": "include/researchify/storage.hpp",
+      "sha": "23b13d06218d11094a2ececf7941c5fffe7faea5"
+    },
+    {
+      "path": "src/api.cpp",
+      "sha": "0acf1424fbaa05193c411457c7c3edcc08401c8a"
+    },
+    {
+      "path": "src/disk.cpp",
+      "sha": "59d37dbc599991266e24b8e250d611366d51181c"
+    },
+    {
+      "path": "src/engine.cpp",
+      "sha": "af8b5f3a8aba959ae942759f3ea7f14c00c13774"
+    },
+    {
+      "path": "src/json.cpp",
+      "sha": "de303fd069a5225719ceb3b98b2b8dcccec334f8"
+    },
+    {
+      "path": "src/main.cpp",
+      "sha": "423aea0918e32f07b55831a4a21542fd930a05fa"
+    },
+    {
+      "path": "src/query.cpp",
+      "sha": "fc24d10f3948de7b8348d08a814725871b8899bf"
+    },
+    {
+      "path": "src/query_internal.hpp",
+      "sha": "1090ac4382f78024cdfa0ad849e489aaf15f9e55"
+    },
+    {
+      "path": "src/storage.cpp",
+      "sha": "6a42229958653cb2b92ba704a69eb3ef4a3eb24a"
+    }
+  ],
+  "notes": [
+    "GitHub artifact ZIP bytes preserved without repacking; hashes compared with GitHub artifact digest.",
+    "Download capability URLs are omitted because they are temporary credentials.",
+    "No local benchmark target or cache-eviction operation is part of this artifact analysis."
+  ],
+  "source_trees_equal": true,
+  "windows_tiny_completion": {
+    "complete": false,
+    "reason": "GitHub Actions 70-minute step timeout at 2026-10-23T15:57:19Z",
+    "interrupted_stage": "fast profile strict_noop update iteration 6, baseline operation after 13 completed no-op operations",
+    "search_correctness_checks": 24,
+    "search_reports_complete": 4,
+    "fresh_cli_batches_complete": 5,
+    "compact_update_operations": 70,
+    "compact_update_checks": 46,
+    "fast_update_operations_complete": 13,
+    "fast_update_checks": 0,
+    "source_restored_both_profiles": true
+  }
+}

@@ -1,0 +1,1103 @@
+{
+  "format": "researchify-native-ci-provenance-v1",
+  "scope": "Latest accepted NFA V2 core; native results from generated surrogates, not the user's computer",
+  "workflow_run_id": 39976554801,
+  "workflow_run_url": "https://github.com/r1skme/ReSearchify/actions/runs/39976554801",
+  "run_head_commit": "8a917c53a090b3cc3b75a9bc7e085b2c2d0adf57",
+  "run_head_tree": "be76b16b61a1e5879ad2daf050bdf54aa551bc14",
+  "checkout_commit": "547b8da292e90b34b22a73a9e46125db52617372",
+  "checkout_tree": "be76b16b61a1e5879ad2daf050bdf54aa551bc14",
+  "checkout_parents": [
+    "f06dfbcca862407167a672cb42a6df8653c86791",
+    "8a917c53a090b3cc3b75a9bc7e085b2c2d0adf57"
+  ],
+  "local_core_commit": "c0522628da1300d2c01637c5276ca5628d409b5b",
+  "local_core_tree": "be76b16b61a1e5879ad2daf050bdf54aa551bc14",
+  "source_trees_equal": true,
+  "jobs": [
+    {
+      "id": 120492551229,
+      "name": "Address/UB sanitizer",
+      "status": "completed",
+      "conclusion": "success",
+      "run_id": 39976554801,
+      "logs_url": null,
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2
+        },
+        {
+          "name": "Run cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DRESEARCHIFY_SANITIZERS=ON -DBUILD_TESTING=ON",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3
+        },
+        {
+          "name": "Run cmake --build build --parallel 4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4
+        },
+        {
+          "name": "Run ctest --test-dir build --output-on-failure",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11
+        }
+      ]
+    },
+    {
+      "id": 120492551383,
+      "name": "Linux x64 (GCC)",
+      "status": "completed",
+      "conclusion": "success",
+      "run_id": 39976554801,
+      "logs_url": null,
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3
+        },
+        {
+          "name": "Ensure ripgrep comparison is available",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4
+        },
+        {
+          "name": "Configure",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5
+        },
+        {
+          "name": "Build",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6
+        },
+        {
+          "name": "Test",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7
+        },
+        {
+          "name": "Test measurement harness",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8
+        },
+        {
+          "name": "Benchmark smoke (not a performance gate)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10
+        },
+        {
+          "name": "Verify architecture, smoke-test and package",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 23
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 24
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 25
+        }
+      ]
+    },
+    {
+      "id": 120492551518,
+      "name": "macOS arm64 (Clang)",
+      "status": "completed",
+      "conclusion": "success",
+      "run_id": 39976554801,
+      "logs_url": null,
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3
+        },
+        {
+          "name": "Ensure ripgrep comparison is available",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4
+        },
+        {
+          "name": "Configure",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5
+        },
+        {
+          "name": "Build",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6
+        },
+        {
+          "name": "Test",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7
+        },
+        {
+          "name": "Test measurement harness",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8
+        },
+        {
+          "name": "Benchmark smoke (not a performance gate)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10
+        },
+        {
+          "name": "Check whether native timing inputs changed",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11
+        },
+        {
+          "name": "Check out original performance baseline",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12
+        },
+        {
+          "name": "Check out previous optimized checkpoint",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13
+        },
+        {
+          "name": "Build native comparison binaries",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 14
+        },
+        {
+          "name": "Paired native performance comparisons (correctness gate only)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 15
+        },
+        {
+          "name": "Preserve native comparison evidence, including failed/incomplete runs",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 16
+        },
+        {
+          "name": "Verify architecture, smoke-test and package",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 17
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 18
+        },
+        {
+          "name": "Post Check out previous optimized checkpoint",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 33
+        },
+        {
+          "name": "Post Check out original performance baseline",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 34
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 35
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 36
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 37
+        }
+      ]
+    },
+    {
+      "id": 120492551657,
+      "name": "Linux x64 (Clang)",
+      "status": "completed",
+      "conclusion": "success",
+      "run_id": 39976554801,
+      "logs_url": null,
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2
+        },
+        {
+          "name": "Run cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=clang++ -DBUILD_TESTING=ON",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3
+        },
+        {
+          "name": "Run cmake --build build --parallel 4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4
+        },
+        {
+          "name": "Run ctest --test-dir build --output-on-failure",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11
+        }
+      ]
+    },
+    {
+      "id": 120492551839,
+      "name": "macOS x64 (Clang)",
+      "status": "completed",
+      "conclusion": "success",
+      "run_id": 39976554801,
+      "logs_url": null,
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3
+        },
+        {
+          "name": "Ensure ripgrep comparison is available",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4
+        },
+        {
+          "name": "Configure",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5
+        },
+        {
+          "name": "Build",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6
+        },
+        {
+          "name": "Test",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7
+        },
+        {
+          "name": "Test measurement harness",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8
+        },
+        {
+          "name": "Benchmark smoke (not a performance gate)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10
+        },
+        {
+          "name": "Check whether native timing inputs changed",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11
+        },
+        {
+          "name": "Check out original performance baseline",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12
+        },
+        {
+          "name": "Check out previous optimized checkpoint",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13
+        },
+        {
+          "name": "Build native comparison binaries",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 14
+        },
+        {
+          "name": "Paired native performance comparisons (correctness gate only)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 15
+        },
+        {
+          "name": "Preserve native comparison evidence, including failed/incomplete runs",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 16
+        },
+        {
+          "name": "Verify architecture, smoke-test and package",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 17
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 18
+        },
+        {
+          "name": "Post Check out previous optimized checkpoint",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 33
+        },
+        {
+          "name": "Post Check out original performance baseline",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 34
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 35
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 36
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 37
+        }
+      ]
+    },
+    {
+      "id": 120492552092,
+      "name": "Windows x64 (MSVC)",
+      "status": "in_progress",
+      "conclusion": null,
+      "run_id": 39976554801,
+      "logs_url": null,
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3
+        },
+        {
+          "name": "Ensure ripgrep comparison is available",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4
+        },
+        {
+          "name": "Configure",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5
+        },
+        {
+          "name": "Build",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6
+        },
+        {
+          "name": "Test",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7
+        },
+        {
+          "name": "Test measurement harness",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8
+        },
+        {
+          "name": "Benchmark smoke (not a performance gate)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10
+        },
+        {
+          "name": "Check whether tiny-file timing inputs changed",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11
+        },
+        {
+          "name": "Check out original Windows performance baseline",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12
+        },
+        {
+          "name": "Build original native Windows comparison binary",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13
+        },
+        {
+          "name": "Native 100k tiny-file comparison (correctness gate only)",
+          "status": "in_progress",
+          "conclusion": null,
+          "number": 14
+        },
+        {
+          "name": "Preserve Windows tiny-file evidence, including incomplete runs",
+          "status": "pending",
+          "conclusion": null,
+          "number": 15
+        },
+        {
+          "name": "Quick start check",
+          "status": "pending",
+          "conclusion": null,
+          "number": 16
+        },
+        {
+          "name": "Package portable ZIP",
+          "status": "pending",
+          "conclusion": null,
+          "number": 17
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "pending",
+          "conclusion": null,
+          "number": 18
+        },
+        {
+          "name": "Post Check out original Windows performance baseline",
+          "status": "pending",
+          "conclusion": null,
+          "number": 34
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "pending",
+          "conclusion": null,
+          "number": 35
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "pending",
+          "conclusion": null,
+          "number": 36
+        }
+      ]
+    },
+    {
+      "id": 120492552245,
+      "name": "Linux arm64 (GCC)",
+      "status": "completed",
+      "conclusion": "success",
+      "run_id": 39976554801,
+      "logs_url": null,
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3
+        },
+        {
+          "name": "Ensure ripgrep comparison is available",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4
+        },
+        {
+          "name": "Configure",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5
+        },
+        {
+          "name": "Build",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6
+        },
+        {
+          "name": "Test",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7
+        },
+        {
+          "name": "Test measurement harness",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8
+        },
+        {
+          "name": "Benchmark smoke (not a performance gate)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10
+        },
+        {
+          "name": "Verify architecture, smoke-test and package",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 23
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 24
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 25
+        }
+      ]
+    }
+  ],
+  "artifacts": [
+    {
+      "id": 12512726018,
+      "name": "native-performance-macos-x64",
+      "size_in_bytes": 228187,
+      "url": "https://api.github.com/repos/r1skme/ReSearchify/actions/artifacts/12512726018",
+      "archive_download_url": "https://api.github.com/repos/r1skme/ReSearchify/actions/artifacts/12512726018/zip",
+      "expired": false,
+      "created_at": "2026-10-23T15:29:51Z",
+      "expires_at": "2027-01-21T15:14:25Z",
+      "updated_at": "2026-10-23T15:29:51Z",
+      "digest": "sha256:0caf1196605f1d2d7e9a2108af52621aaabea673e3badc3ac0b492dcdb1eec5b",
+      "workflow_run": {
+        "id": 39976554801,
+        "repository_id": 1427610584,
+        "head_repository_id": 1427610584,
+        "head_branch": "perf/cross-platform-optimization",
+        "head_sha": "8a917c53a090b3cc3b75a9bc7e085b2c2d0adf57"
+      },
+      "local_file": "bench/results/native-tiny-39976554801-macos-x64.zip",
+      "local_sha256": "0caf1196605f1d2d7e9a2108af52621aaabea673e3badc3ac0b492dcdb1eec5b",
+      "digest_verified": true,
+      "members": [
+        {
+          "name": "current-compact-create.json",
+          "size_bytes": 1068,
+          "sha256": "b606884dc29535f7ad52a32b44676e449214dce8b9ca05ff8af2c5a234c90097"
+        },
+        {
+          "name": "correctness.json",
+          "size_bytes": 6066,
+          "sha256": "9abc58e61eda8f81d6c028096d6042c7e43a66b0bdd07aa1d956f3b7db0720bb"
+        },
+        {
+          "name": "expected-broad_literal.json",
+          "size_bytes": 678893,
+          "sha256": "6a6d764f03adafa63a6936497d270a9d0cf3f7765f8866da715bdb314f70ceae"
+        },
+        {
+          "name": "current-fast-create.json",
+          "size_bytes": 1056,
+          "sha256": "6f703e2230bc8a38f2d046cffee087d5e0ddc03a8bce3543fc4d780a781005af"
+        },
+        {
+          "name": "expected-broad_regex.json",
+          "size_bytes": 658893,
+          "sha256": "07c1d555d4ec25039da7d6275d238f6e6e49edef24d6465af9bd4686f1dffe83"
+        },
+        {
+          "name": "expected-literal.json",
+          "size_bytes": 33,
+          "sha256": "4de2e38270f723e1b4f56c8bcdb7b986d9537602eedc3cf97f2c4187c2c3b00c"
+        },
+        {
+          "name": "expected-no_match.json",
+          "size_bytes": 3,
+          "sha256": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356"
+        },
+        {
+          "name": "expected-term.json",
+          "size_bytes": 33,
+          "sha256": "4de2e38270f723e1b4f56c8bcdb7b986d9537602eedc3cf97f2c4187c2c3b00c"
+        },
+        {
+          "name": "generation.json",
+          "size_bytes": 423,
+          "sha256": "e685dad2416862445a4f7dc537b2dee141b00832587b5183e459b60ea978af65"
+        },
+        {
+          "name": "index-builds.json",
+          "size_bytes": 6332,
+          "sha256": "c5c703538c548acf7cadeb88f7dd605dd678cc30bdc90a9271dd754b21a40d15"
+        },
+        {
+          "name": "original-compact-create.json",
+          "size_bytes": 1103,
+          "sha256": "843d5fc5d53bd68a0f65d7d8d70610427b51494eab3bb1ad97ceca10e30718b0"
+        },
+        {
+          "name": "original-compact.json",
+          "size_bytes": 85616,
+          "sha256": "d9c4bebb928b1a26b786744ded04344b0ba178ffeb2bca1215a6e7772ac0b291"
+        },
+        {
+          "name": "original-compact.stderr.log",
+          "size_bytes": 3588,
+          "sha256": "a89d218302882c8b6db15abbf31877b3b969817ae15c51dc839bb17441b3fbcd"
+        },
+        {
+          "name": "original-fast-create.json",
+          "size_bytes": 1092,
+          "sha256": "4c0660797f86e049ea3dbdb9848c5a5ef019fa0c1c6441ec86cd1b8694303bda"
+        },
+        {
+          "name": "original-compact.stdout.log",
+          "size_bytes": 85616,
+          "sha256": "d9c4bebb928b1a26b786744ded04344b0ba178ffeb2bca1215a6e7772ac0b291"
+        },
+        {
+          "name": "original-fast.json",
+          "size_bytes": 51435,
+          "sha256": "bb4c96a39da57c2d5de81db9657985db5e645a24ad1138a80ef0b025091bdae1"
+        },
+        {
+          "name": "original-fast.stderr.log",
+          "size_bytes": 2010,
+          "sha256": "ee50c021d55ec6c31624a454f7022382ceb3befd233f2bb1254ec0f183901109"
+        },
+        {
+          "name": "original-fast.stdout.log",
+          "size_bytes": 51435,
+          "sha256": "bb4c96a39da57c2d5de81db9657985db5e645a24ad1138a80ef0b025091bdae1"
+        },
+        {
+          "name": "previous-compact.json",
+          "size_bytes": 29163,
+          "sha256": "036f5c335a8494c72d1748d591c15d82774341264c0a2257c4e6a8d429562041"
+        },
+        {
+          "name": "previous-compact.stderr.log",
+          "size_bytes": 1452,
+          "sha256": "248150c6deea3604997d07d3b59168f2a2c94ca1b0d01a38a6f90bd357330e4f"
+        },
+        {
+          "name": "previous-compact.stdout.log",
+          "size_bytes": 29163,
+          "sha256": "036f5c335a8494c72d1748d591c15d82774341264c0a2257c4e6a8d429562041"
+        },
+        {
+          "name": "previous-jsonl-compact.json",
+          "size_bytes": 524926,
+          "sha256": "0cd3a1940e75e7989459459e5be1cdbd05d30b2bfb105c3e4059952ed84d10c2"
+        },
+        {
+          "name": "previous-jsonl-compact.stdout.log",
+          "size_bytes": 159,
+          "sha256": "ad218efac541f4fe64a6cde82d4abf210baef73116179dd85a01594a9f54c40c"
+        },
+        {
+          "name": "previous-jsonl-fast.json",
+          "size_bytes": 524888,
+          "sha256": "16479fdfc0f4dcf041d8b1a36e080c0221e616625a906e05aed02c3b6d7e143a"
+        },
+        {
+          "name": "previous-jsonl-compact.stderr.log",
+          "size_bytes": 100,
+          "sha256": "7e59ec455e2cbcc1f811a20a24993c8a8746ec758096272b60d4bdb54a1f9f71"
+        },
+        {
+          "name": "previous-jsonl-fast.stderr.log",
+          "size_bytes": 100,
+          "sha256": "7e59ec455e2cbcc1f811a20a24993c8a8746ec758096272b60d4bdb54a1f9f71"
+        },
+        {
+          "name": "previous-jsonl-fast.stdout.log",
+          "size_bytes": 153,
+          "sha256": "841735d8d69735e17582efac6376a8918fcf3c13d4acfd3e1767d6d506a73e95"
+        },
+        {
+          "name": "summary.json",
+          "size_bytes": 41714,
+          "sha256": "0022227d411bc60094a4f0ec78d4fa1abe8b31b53793f21b84812d245a08d8e3"
+        }
+      ]
+    },
+    {
+      "id": 12511897235,
+      "name": "native-performance-macos-arm64",
+      "size_in_bytes": 217826,
+      "url": "https://api.github.com/repos/r1skme/ReSearchify/actions/artifacts/12511897235",
+      "archive_download_url": "https://api.github.com/repos/r1skme/ReSearchify/actions/artifacts/12511897235/zip",
+      "expired": false,
+      "created_at": "2026-10-23T15:23:01Z",
+      "expires_at": "2027-01-21T15:14:25Z",
+      "updated_at": "2026-10-23T15:23:01Z",
+      "digest": "sha256:055ba8a8a7683d248d63d795e1e10d7df649a149cae7e089e5e25770e0c46b19",
+      "workflow_run": {
+        "id": 39976554801,
+        "repository_id": 1427610584,
+        "head_repository_id": 1427610584,
+        "head_branch": "perf/cross-platform-optimization",
+        "head_sha": "8a917c53a090b3cc3b75a9bc7e085b2c2d0adf57"
+      },
+      "local_file": "bench/results/native-tiny-39976554801-macos-arm64.zip",
+      "local_sha256": "055ba8a8a7683d248d63d795e1e10d7df649a149cae7e089e5e25770e0c46b19",
+      "digest_verified": true,
+      "members": [
+        {
+          "name": "current-compact-create.json",
+          "size_bytes": 1066,
+          "sha256": "34884e466dbf1089809c74031010ccd494b4708b4891508875e67ee88ea08dc2"
+        },
+        {
+          "name": "expected-broad_literal.json",
+          "size_bytes": 678893,
+          "sha256": "ef27eb464c3bcaf6edcef85f1a2518af20e98679fbce3da44e8c9217da24af9c"
+        },
+        {
+          "name": "current-fast-create.json",
+          "size_bytes": 1056,
+          "sha256": "9c530519890ae62d7708bf5a1ff03abccedc4c52bb118e8454227c8bbc6e1415"
+        },
+        {
+          "name": "correctness.json",
+          "size_bytes": 6066,
+          "sha256": "9abc58e61eda8f81d6c028096d6042c7e43a66b0bdd07aa1d956f3b7db0720bb"
+        },
+        {
+          "name": "expected-broad_regex.json",
+          "size_bytes": 658893,
+          "sha256": "a9054a29363188eaebe92dc46a4e7c317185792adba6e615c578c83406d14535"
+        },
+        {
+          "name": "expected-literal.json",
+          "size_bytes": 33,
+          "sha256": "4de2e38270f723e1b4f56c8bcdb7b986d9537602eedc3cf97f2c4187c2c3b00c"
+        },
+        {
+          "name": "expected-no_match.json",
+          "size_bytes": 3,
+          "sha256": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356"
+        },
+        {
+          "name": "expected-term.json",
+          "size_bytes": 33,
+          "sha256": "4de2e38270f723e1b4f56c8bcdb7b986d9537602eedc3cf97f2c4187c2c3b00c"
+        },
+        {
+          "name": "generation.json",
+          "size_bytes": 425,
+          "sha256": "3bf93dc3b85b48d1dde4a9d7b3415beebed906cceb69c9afae9c1e60a705eb7e"
+        },
+        {
+          "name": "index-builds.json",
+          "size_bytes": 6310,
+          "sha256": "9784d5365ad97b646b7713c9b9bf1c75f8441ca4aa5519b94a3a7bbd189c4f39"
+        },
+        {
+          "name": "original-compact-create.json",
+          "size_bytes": 1095,
+          "sha256": "c7edfb54d1f0c7e66a29151a010185b31b28bf140bec3bfd1da03b09295ac020"
+        },
+        {
+          "name": "original-compact.json",
+          "size_bytes": 85538,
+          "sha256": "67a643580a3e3cad420279f9c3ec3f66094d66a1a3b9a050d92ac6fff8ce8e1d"
+        },
+        {
+          "name": "original-compact.stderr.log",
+          "size_bytes": 3588,
+          "sha256": "a89d218302882c8b6db15abbf31877b3b969817ae15c51dc839bb17441b3fbcd"
+        },
+        {
+          "name": "original-compact.stdout.log",
+          "size_bytes": 85538,
+          "sha256": "67a643580a3e3cad420279f9c3ec3f66094d66a1a3b9a050d92ac6fff8ce8e1d"
+        },
+        {
+          "name": "original-fast-create.json",
+          "size_bytes": 1080,
+          "sha256": "bf1cc86d081fae70da56062cec54385aae087afeabefbc00f47253f947d47577"
+        },
+        {
+          "name": "original-fast.json",
+          "size_bytes": 51358,
+          "sha256": "c12f3d32aaa8429c136e94c2b3921e6575019c4cce3015c87dd7d32bb5fc4e6e"
+        },
+        {
+          "name": "original-fast.stderr.log",
+          "size_bytes": 2010,
+          "sha256": "ee50c021d55ec6c31624a454f7022382ceb3befd233f2bb1254ec0f183901109"
+        },
+        {
+          "name": "original-fast.stdout.log",
+          "size_bytes": 51358,
+          "sha256": "c12f3d32aaa8429c136e94c2b3921e6575019c4cce3015c87dd7d32bb5fc4e6e"
+        },
+        {
+          "name": "previous-compact.json",
+          "size_bytes": 29145,
+          "sha256": "a5024d5f103edd75a02143ca85d8d5fe0593bf6796fcdaeb2cec7b6cb883cf74"
+        },
+        {
+          "name": "previous-compact.stderr.log",
+          "size_bytes": 1452,
+          "sha256": "248150c6deea3604997d07d3b59168f2a2c94ca1b0d01a38a6f90bd357330e4f"
+        },
+        {
+          "name": "previous-compact.stdout.log",
+          "size_bytes": 29145,
+          "sha256": "a5024d5f103edd75a02143ca85d8d5fe0593bf6796fcdaeb2cec7b6cb883cf74"
+        },
+        {
+          "name": "previous-jsonl-compact.json",
+          "size_bytes": 524640,
+          "sha256": "7492eaa01993c48e1e45215c51b8b6f3bf6deca64de85439702e2d10638d12df"
+        },
+        {
+          "name": "previous-jsonl-compact.stderr.log",
+          "size_bytes": 100,
+          "sha256": "7e59ec455e2cbcc1f811a20a24993c8a8746ec758096272b60d4bdb54a1f9f71"
+        },
+        {
+          "name": "previous-jsonl-compact.stdout.log",
+          "size_bytes": 159,
+          "sha256": "ad218efac541f4fe64a6cde82d4abf210baef73116179dd85a01594a9f54c40c"
+        },
+        {
+          "name": "previous-jsonl-fast.json",
+          "size_bytes": 524294,
+          "sha256": "4f29f7ca013e5a071c8748d8c99a738038cb50aae76bea81ab9764c90277a302"
+        },
+        {
+          "name": "previous-jsonl-fast.stderr.log",
+          "size_bytes": 100,
+          "sha256": "7e59ec455e2cbcc1f811a20a24993c8a8746ec758096272b60d4bdb54a1f9f71"
+        },
+        {
+          "name": "previous-jsonl-fast.stdout.log",
+          "size_bytes": 153,
+          "sha256": "841735d8d69735e17582efac6376a8918fcf3c13d4acfd3e1767d6d506a73e95"
+        },
+        {
+          "name": "summary.json",
+          "size_bytes": 41627,
+          "sha256": "0c39248e50ed2d61cec14eec32f505cc44a878c84da995f41b67b122327f0bea"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "Artifact ZIP SHA256 is checked against GitHub's digest.",
+    "The actual pull-request merge checkout in summary.json is preserved; its complete tree equals the workflow head and local source tree.",
+    "Only completed native artifacts are represented; pending jobs are not claimed to have passed.",
+    "Core, native benchmark drivers and CI workflow are unchanged between local361aac6 (run39975881618) and c052262 (this run); Apple Silicon current binaries have identical SHA256.",
+    "No local native benchmark, build or cache operation is involved in collecting this evidence.",
+    "Signed download URLs are intentionally omitted."
+  ],
+  "latest_equivalent_native_inputs": {
+    "local_commit": "78fcf5701762888349b04642a020db8f5bbf04c7",
+    "remote_head": "708b46f54fdfd3d571b1145e36253866dd1a1bc6",
+    "tree": "d72e3bad31a4db37a5028d90d145dec9b91fb9cb",
+    "all_changed_paths_from_measured_local_commit": [
+      "scripts/external_source_benchmark.py"
+    ],
+    "native_core_and_drivers_unchanged": true,
+    "verification": "git diff --name-only c052262 78fcf570; explicit git diff --exit-code over src/include/CMake/cmake/bench (excluding results) and native drivers/workflow was empty"
+  }
+}
