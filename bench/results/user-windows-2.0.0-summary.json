@@ -1,0 +1,45 @@
+{
+  "provenance": "User-reported on 2026-10-23; exact fixture, queries, commands and binary hash not provided; not locally reproduced",
+  "version": "ReSearchify 2.0.0",
+  "os": "Windows 11",
+  "cpu": "Intel Core i9-13950HX",
+  "ram_gb": 64,
+  "files": 100000,
+  "lines": 800101,
+  "source_mb_reported": 18.7,
+  "ripgrep": "15.2.0",
+  "search_ms": {
+    "rare_term": {
+      "rs": 31,
+      "rg": 794
+    },
+    "common_term": {
+      "rs": 357,
+      "rg": 774
+    },
+    "literal": {
+      "rs": 5412,
+      "rg": 635
+    },
+    "regex": {
+      "rs": 5117,
+      "rg": 624
+    },
+    "anchored_regex": {
+      "rs": 4977,
+      "rg": 630
+    },
+    "missing_term": {
+      "rs": 18,
+      "rg": 612
+    }
+  },
+  "sequential_1000_seconds": {
+    "rs": 17.21,
+    "rg": 648.61,
+    "process_or_session_mode": "unspecified"
+  },
+  "create_seconds": 20.22,
+  "one_file_update_seconds": 8.66,
+  "peak_rss_mib_reported": 63.3
+}
