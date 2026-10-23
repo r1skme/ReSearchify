@@ -152,6 +152,7 @@ jobs:
   macos:
     name: macOS ${{ matrix.arch }} (Clang)
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
@@ -193,6 +194,48 @@ jobs:
         with:
           name: perf-macos-${{ matrix.arch }}
           path: perf-smoke/measurements.json
+      - name: Check out original performance baseline
+        uses: actions/checkout@v4
+        with:
+          ref: eb858348169157686e70104af6b64f9539a39fe8
+          path: native-baselines/original
+          persist-credentials: false
+      - name: Check out previous optimized checkpoint
+        uses: actions/checkout@v4
+        with:
+          ref: dbcddf76708b614c26e212fa27b48efa33ddfd58
+          path: native-baselines/previous
+          persist-credentials: false
+      - name: Build native comparison binaries
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(uname -m)" = "${{ matrix.machine }}"
+          for revision in original previous; do
+            cmake -S "native-baselines/$revision" -B "native-baselines/$revision/build" \
+              -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_DEPLOYMENT_TARGET=13.3 -DBUILD_TESTING=OFF
+            cmake --build "native-baselines/$revision/build" --target researchify --parallel 3
+            test "$(lipo -archs "native-baselines/$revision/build/rs")" = "${{ matrix.machine }}"
+          done
+          test "$(lipo -archs build/rs)" = "${{ matrix.machine }}"
+      - name: Paired native performance comparisons (correctness gate only)
+        timeout-minutes: 25
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/native_comparison.py \
+            --original native-baselines/original/build/rs --original-checkout native-baselines/original \
+            --previous native-baselines/previous/build/rs --previous-checkout native-baselines/previous \
+            --current build/rs --current-checkout . --generator build/cs_bench \
+            --machine "${{ matrix.machine }}" --files 20000 --iterations 21 --term-iterations 201 \
+            --rg rg --output-dir native-perf
+      - name: Preserve native comparison evidence, including failed/incomplete runs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-performance-macos-${{ matrix.arch }}
+          path: native-perf/results/
+          if-no-files-found: warn
       - name: Verify architecture, smoke-test and package
         shell: bash
         run: |
