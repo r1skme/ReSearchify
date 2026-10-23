@@ -78,7 +78,9 @@ int main() {
             write(w.root / "exact.txt", std::string(65536, 'x'));
             write(w.root / "too_long.txt", std::string(65537, 'x'));
             write(w.root / "invalid_utf8.txt", std::string(65535, 'x') + "\xc3\n");
-            write(w.root / "nul.txt", std::string("text\0tail\n", 10));
+            // NUL (also with an extension) is a Windows device name, not a
+            // regular fixture file. Keep the embedded NUL, not that filename.
+            write(w.root / "binary_nul.txt", std::string("text\0tail\n", 10));
             auto o = options();
             o.max_line_bytes = 65536;
             auto result = create_index(w.root, w.index, o);
