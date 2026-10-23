@@ -1217,9 +1217,13 @@ struct TermSource {
 class ExactStream {
     std::map<std::uint64_t, std::unique_ptr<disk::PostingCursor>> cursors_;
     bool terms_ = false;
+    std::size_t misses_ = 0;
+    const std::function<bool()>* cancelled_ = nullptr;
+    std::size_t cancellation_poll_ = 0;
 public:
-    ExactStream(const Snapshot& snapshot, const TermSource& source)
-        : terms_(!source.term.empty() && source.term.front() == '\2') {
+    ExactStream(const Snapshot& snapshot, const TermSource& source,
+                const std::function<bool()>* cancelled = nullptr)
+        : terms_(!source.term.empty() && source.term.front() == '\2'), cancelled_(cancelled) {
         for (const auto& [segment, descriptor] : source.lists)
             cursors_.emplace(segment, std::make_unique<disk::PostingCursor>(segment_path(snapshot.directory, segment), snapshot.cache, descriptor));
     }
@@ -1230,11 +1234,29 @@ public:
         if (value.document != record.id) return nullptr;
         if (value.line > record.lines || value.column > std::uint64_t(record.max_line) + 1 || (terms_ && value.frequency > record.tokens))
             throw Error("E_INDEX_CORRUPT", "Term posting exceeds document bounds");
+        misses_ = 0;
         return &value;
+    }
+    std::uint64_t hint_after_miss(std::uint64_t target) {
+        // A global raw-posting lower bound can skip a disjoint ID range, but
+        // inspecting every segment on every miss would penalize interleaved
+        // lists. Amortize those inspections over at least four misses per cursor.
+        if (++misses_ < (std::max)(std::size_t(64), cursors_.size() * 4)) return target;
+        misses_ = 0;
+        auto next = EndDoc;
+        for (auto& [segment, cursor] : cursors_) {
+            if (cancelled_ && (cancellation_poll_++ & 63U) == 0 && (*cancelled_)())
+                throw Error("E_CANCELLED", "Search cancelled", true);
+            (void)segment;
+            if (cursor->seek(target)) next = (std::min)(next, cursor->current().document);
+        }
+        return next;
     }
 };
 class LiveStream {
     DocumentLookup& documents_;
+    const std::function<bool()>* cancelled_ = nullptr;
+    std::size_t cancellation_poll_ = 0;
     struct Part { std::uint64_t segment;
     disk::PostingCursor cursor;
     disk::Posting current;
@@ -1246,9 +1268,15 @@ class LiveStream {
     } };
     std::priority_queue<Head, std::vector<Head>, std::greater<Head>> heads_;
     bool initialized_ = false, terms_ = false;
+    void check_cancelled() {
+        if (cancelled_ && (cancellation_poll_++ & 63U) == 0 && (*cancelled_)())
+            throw Error("E_CANCELLED", "Search cancelled", true);
+    }
     bool advance(std::size_t p, std::uint64_t target) {
+        check_cancelled();
         auto& part = parts_[p];
         while (part.cursor.seek(target)) {
+            check_cancelled();
             const auto& value = part.cursor.current();
             auto r = documents_.get(value.document);
             if (r && r->segment == part.segment) {
@@ -1264,7 +1292,9 @@ class LiveStream {
         return false;
     }
 public:
-    LiveStream(const Snapshot& s, DocumentLookup& d, const TermSource& source) : documents_(d), terms_(!source.term.empty() && source.term.front() == '\2') {
+    LiveStream(const Snapshot& s, DocumentLookup& d, const TermSource& source,
+               const std::function<bool()>* cancelled = nullptr)
+        : documents_(d), cancelled_(cancelled), terms_(!source.term.empty() && source.term.front() == '\2') {
         parts_.reserve(source.lists.size());
         for (const auto& [id, descriptor] : source.lists) parts_.push_back({id, disk::PostingCursor(segment_path(s.directory, id), s.cache, descriptor), {}});
     }
@@ -1324,13 +1354,17 @@ Anchor or_anchor(Anchor a, Anchor b) {
 class AnchorStream {
     Anchor::Kind kind_;
     DocumentLookup& documents_;
+    const std::function<bool()>* cancelled_ = nullptr;
+    std::size_t cancellation_poll_ = 0;
     std::unique_ptr<LiveStream> term_;
     std::vector<std::unique_ptr<ExactStream>> memberships_;
     std::unique_ptr<AnchorStream> left_, right_;
 public:
     AnchorStream(const Snapshot& snapshot, DocumentLookup& documents, const Anchor& anchor,
-                 const std::map<std::string, std::shared_ptr<TermSource>>& sources) : kind_(anchor.kind), documents_(documents) {
-        if (kind_ == Anchor::Kind::Term) term_ = std::make_unique<LiveStream>(snapshot, documents, *sources.at(anchor.term));
+                 const std::map<std::string, std::shared_ptr<TermSource>>& sources,
+                 const std::function<bool()>* cancelled = nullptr)
+        : kind_(anchor.kind), documents_(documents), cancelled_(cancelled) {
+        if (kind_ == Anchor::Kind::Term) term_ = std::make_unique<LiveStream>(snapshot, documents, *sources.at(anchor.term), cancelled_);
         else {
             // A pure conjunction has one live-document driver.
             // Additional posting streams only need membership checks in that
@@ -1345,13 +1379,13 @@ public:
             };
             if (kind_ == Anchor::Kind::And && collect(anchor)) {
                 const auto cheapest = *std::min_element(terms.begin(), terms.end(), [](const auto* a, const auto* b) { return a->cost < b->cost; });
-                term_ = std::make_unique<LiveStream>(snapshot, documents, *sources.at(cheapest->term));
+                term_ = std::make_unique<LiveStream>(snapshot, documents, *sources.at(cheapest->term), cancelled_);
                 for (const auto* item : terms) if (item != cheapest)
-                    memberships_.push_back(std::make_unique<ExactStream>(snapshot, *sources.at(item->term)));
+                    memberships_.push_back(std::make_unique<ExactStream>(snapshot, *sources.at(item->term), cancelled_));
                 return;
             }
-            left_ = std::make_unique<AnchorStream>(snapshot, documents, *anchor.left, sources);
-            right_ = std::make_unique<AnchorStream>(snapshot, documents, *anchor.right, sources);
+            left_ = std::make_unique<AnchorStream>(snapshot, documents, *anchor.left, sources, cancelled_);
+            right_ = std::make_unique<AnchorStream>(snapshot, documents, *anchor.right, sources, cancelled_);
         }
     }
     std::uint64_t seek(std::uint64_t target) {
@@ -1359,19 +1393,32 @@ public:
             auto doc = term_->seek(target);
             if (memberships_.empty()) return doc;
             while (doc != EndDoc) {
+                // A selective conjunction may reject every driver document,
+                // never reaching evaluate()'s ordinary cancellation checks.
+                if (cancelled_ && (cancellation_poll_++ & 63U) == 0 && (*cancelled_)())
+                    throw Error("E_CANCELLED", "Search cancelled", true);
                 const auto* record = documents_.get(doc);
                 if (!record) throw Error("E_INDEX_CORRUPT", "Live anchor posting has no document");
                 bool accepted = true;
-                for (auto& membership : memberships_)
-                    if (!membership->match(*record)) { accepted = false; break; }
+                auto next = doc + 1;
+                for (auto& membership : memberships_) {
+                    if (!membership->match(*record)) {
+                        accepted = false;
+                        next = membership->hint_after_miss(next);
+                        break;
+                    }
+                }
                 if (accepted) return doc;
-                doc = term_->seek(doc + 1);
+                if (next == EndDoc) return EndDoc;
+                doc = term_->seek(next);
             }
             return EndDoc;
         }
         auto a = left_->seek(target), b = right_->seek(target);
         if (kind_ == Anchor::Kind::Or) return (std::min)(a, b);
         while (a != b && a != EndDoc && b != EndDoc) {
+            if (cancelled_ && (cancellation_poll_++ & 63U) == 0 && (*cancelled_)())
+                throw Error("E_CANCELLED", "Search cancelled", true);
             if (a < b) a = left_->seek(b);
             else b = right_->seek(a);
         }
@@ -1470,6 +1517,7 @@ std::string snippet_text(std::string_view line, std::size_t column, std::size_t 
 }
 SearchReport do_search(const Snapshot& snapshot, const Query& query, const SearchOptions& options) {
     const auto started = Clock::now();
+    if (options.cancelled && options.cancelled()) throw Error("E_CANCELLED", "Search cancelled", true);
     validate_query(query);
     const auto budget = budget_bytes(options.memory_mb);
     if (options.limit > 10000 || options.offset > 10000 || options.offset + options.limit > 10000 || options.snippets_per_file > 32 ||
@@ -1571,7 +1619,8 @@ SearchReport do_search(const Snapshot& snapshot, const Query& query, const Searc
     std::unique_ptr<AnchorStream> anchors;
     std::vector<std::unique_ptr<ExactStream>> values(query.leaves.size());
     for (std::size_t i = 0; i < exact.size(); ++i) if (exact[i]) values[i] = std::make_unique<ExactStream>(snapshot, *exact[i]);
-    if (!anchor.universe) anchors = std::make_unique<AnchorStream>(snapshot, documents, anchor, sources);
+    if (!anchor.universe) anchors = std::make_unique<AnchorStream>(snapshot, documents, anchor, sources,
+        options.cancelled ? &options.cancelled : nullptr);
     std::vector<bool> positive(query.leaves.size(), false), present(query.leaves.size());
     positive_leaves(query.root, false, positive);
     std::vector<std::uint64_t> scratch_counts(query.leaves.size()), scratch_lines(query.leaves.size());

@@ -1,5 +1,6 @@
 #include "test_support.hpp"
 #include "researchify/query.hpp"
+#include "researchify/storage.hpp"
 #include <algorithm>
 #include <future>
 #include <limits>
@@ -338,6 +339,52 @@ int main() {
                 limited.cancelled = {};
                 REQUIRE(index.search("\"MARK!\"", limited).total_matches == 768);
             }
+        }},
+        {"and_range_skips_and_no_match_cancellation", [] {
+            Workspace w;
+            Corpus corpus;
+            for (unsigned n = 0; n < 1536; ++n) {
+                const auto name = "range_" + std::to_string(n) + ".cpp";
+                const bool low = (storage::term_hash(name) & 1023U) < 400;
+                const auto text = std::string(low ? "low " : "high ") + (n % 2 ? "odd\n" : "even\n");
+                corpus.emplace(name, text);
+                write(w.root / name, text);
+            }
+            auto bo = options();
+            bo.segment_documents = 64;
+            create_index(w.root, w.index, bo);
+            Index index(w.index, 128);
+            auto so = search_options();
+            for (const auto* expression : {"low AND high", "even AND odd", "low AND even", "high AND odd"})
+                matches_oracle(index.search(expression, so), oracle(corpus, expression));
+            auto limited = so;
+            limited.max_candidates = 1;
+            limited.max_scan_bytes = 1;
+            REQUIRE(index.search("low AND high", limited).candidates == 0);
+            rejects([&] { index.search("low AND even", limited); }, "E_BUDGET");
+            std::size_t polls = 0;
+            so.cancelled = [&] { return ++polls >= 8; };
+            rejects([&] { index.search("even AND odd", so); }, "E_CANCELLED");
+            REQUIRE(polls == 8);
+            polls = 0;
+            rejects([&] { index.search("even AND (odd OR absent_token)", so); }, "E_CANCELLED");
+            REQUIRE(polls == 8);
+            so.cancelled = [] { return true; };
+            rejects([&] { index.search("absent_token", so); }, "E_CANCELLED");
+            bo.changed_only = true;
+            for (unsigned n = 0; n < 1536; n += 2) {
+                const auto name = "range_" + std::to_string(n) + ".cpp";
+                write(w.root / name, "replacement\n");
+                bo.changed_files.push_back(name);
+            }
+            update_index(w.index, bo);
+            Index fresh(w.index, 128);
+            so.cancelled = {};
+            REQUIRE(fresh.search("even", so).total_matches == 0);
+            polls = 0;
+            so.cancelled = [&] { return ++polls >= 8; };
+            rejects([&] { fresh.search("even", so); }, "E_CANCELLED");
+            REQUIRE(polls == 8);
         }},
         {"parallel_queries_and_update_gc_preserve_snapshot", [] {
             Workspace w;
