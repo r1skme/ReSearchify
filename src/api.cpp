@@ -8,6 +8,7 @@
 #include <iomanip>
 #include <iostream>
 #include <limits>
+#include <locale>
 #include <optional>
 #include <set>
 #include <sstream>
@@ -294,8 +295,12 @@ Cursor cursor(const std::string& value, const std::string& expected) {
         result.path = v.at("path").text();
         if (!v.at("score").is_number()) throw Error("E_CURSOR", "Invalid score in cursor");
         const auto& number = std::get<json::Number>(v.at("score").data()).text;
-        auto [end, ec] = std::from_chars(number.data(), number.data() + number.size(), result.score);
-        if (ec != std::errc{} || end != number.data() + number.size() || !std::isfinite(result.score) || !result.generation ||
+        // Apple's libc++ does not provide floating-point from_chars.
+        // Parse with a fixed classic locale so cursors remain locale-independent.
+        std::istringstream parser(number);
+        parser.imbue(std::locale::classic());
+        parser >> std::noskipws >> result.score;
+        if (!parser || parser.peek() != std::char_traits<char>::eof() || !std::isfinite(result.score) || !result.generation ||
             result.path.empty() || result.path.size() > 32768 || result.path.find('\0') != std::string::npos)
             throw Error("E_CURSOR", "Invalid continuation key");
         return result;
