@@ -1,4 +1,4 @@
-name: Build and test
+name: Build, test and publish previews
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   windows:
@@ -40,14 +40,89 @@ jobs:
           path: dist/ReSearchify-Windows-x64.zip
           if-no-files-found: error
 
+
   linux:
-    name: Linux (GCC)
-    runs-on: ubuntu-latest
+    name: Linux ${{ matrix.arch }} (GCC)
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-22.04
+            arch: x64
+            machine: x86_64
+          - os: ubuntu-22.04-arm
+            arch: arm64
+            machine: aarch64
     steps:
       - uses: actions/checkout@v4
-      - run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON
-      - run: cmake --build build --parallel 4
-      - run: ctest --test-dir build --output-on-failure
+      - name: Configure
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON -DRESEARCHIFY_BUILD_BENCHMARKS=OFF
+      - name: Build
+        run: cmake --build build --parallel 4
+      - name: Test
+        run: ctest --test-dir build --output-on-failure
+      - name: Verify architecture, smoke-test and package
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(uname -m)" = "${{ matrix.machine }}"
+          ./build/rs --help
+          ./build/rs --version
+          mkdir -p dist/package dist/verify
+          cp build/rs README.md README.ru.md dist/package/
+          tar -czf "dist/ReSearchify-Linux-${{ matrix.arch }}.tar.gz" -C dist/package .
+          tar -xzf "dist/ReSearchify-Linux-${{ matrix.arch }}.tar.gz" -C dist/verify
+          test -x dist/verify/rs
+          dist/verify/rs --version
+          file dist/verify/rs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: researchify-linux-${{ matrix.arch }}
+          path: dist/ReSearchify-Linux-${{ matrix.arch }}.tar.gz
+          if-no-files-found: error
+
+  macos:
+    name: macOS ${{ matrix.arch }} (Clang)
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-15-intel
+            arch: x64
+            machine: x86_64
+          - os: macos-15
+            arch: arm64
+            machine: arm64
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_DEPLOYMENT_TARGET=13.3 -DBUILD_TESTING=ON -DRESEARCHIFY_BUILD_BENCHMARKS=OFF
+      - name: Build
+        run: cmake --build build --parallel 3
+      - name: Test
+        run: ctest --test-dir build --output-on-failure
+      - name: Verify architecture, smoke-test and package
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(uname -m)" = "${{ matrix.machine }}"
+          ./build/rs --help
+          ./build/rs --version
+          test "$(lipo -archs build/rs)" = "${{ matrix.machine }}"
+          mkdir -p dist/package dist/verify
+          cp build/rs README.md README.ru.md dist/package/
+          tar -czf "dist/ReSearchify-macOS-${{ matrix.arch }}.tar.gz" -C dist/package .
+          tar -xzf "dist/ReSearchify-macOS-${{ matrix.arch }}.tar.gz" -C dist/verify
+          test -x dist/verify/rs
+          dist/verify/rs --version
+          file dist/verify/rs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: researchify-macos-${{ matrix.arch }}
+          path: dist/ReSearchify-macOS-${{ matrix.arch }}.tar.gz
+          if-no-files-found: error
 
   sanitizers:
     name: Address/UB sanitizer
@@ -59,26 +134,46 @@ jobs:
       - run: ctest --test-dir build --output-on-failure
 
   preview:
-    name: Publish tested Windows download
+    name: Publish tested multi-platform preview
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: [windows, linux, sanitizers]
-    runs-on: ubuntu-latest
+    needs: [windows, linux, macos, sanitizers]
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: researchify-windows-portable
+          pattern: researchify-*
           path: dist
-      - name: Checksums
+          merge-multiple: true
+      - name: Verify all five archives and write checksums
+        shell: bash
         run: |
+          set -euo pipefail
           cd dist
-          sha256sum ReSearchify-Windows-x64.zip > SHA256SUMS.txt
-      - name: GitHub preview release
+          archives=(
+            ReSearchify-Windows-x64.zip
+            ReSearchify-Linux-x64.tar.gz
+            ReSearchify-Linux-arm64.tar.gz
+            ReSearchify-macOS-x64.tar.gz
+            ReSearchify-macOS-arm64.tar.gz
+          )
+          for archive in "${archives[@]}"; do test -s "$archive"; done
+          sha256sum "${archives[@]}" > SHA256SUMS.txt
+          sha256sum --check SHA256SUMS.txt
+      - name: Create or update GitHub preview release
+        shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          set -euo pipefail
           tag="preview-${GITHUB_SHA:0:12}"
-          gh release create "$tag" \
-            dist/ReSearchify-Windows-x64.zip dist/SHA256SUMS.txt \
-            --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --prerelease \
-            --title "ReSearchify preview (${GITHUB_SHA:0:7})" \
-            --notes "Windows x64 portable build. MSVC, Linux and sanitizer tests passed for this commit. Download the ZIP, extract rs.exe and open a terminal in your project."
+          notes="Portable CLI builds for Windows x64, Linux x64/arm64 and macOS Intel/Apple Silicon. All five native builds and test suites plus Linux sanitizers passed for this commit. Verify your download against SHA256SUMS.txt before extracting. macOS binaries are not Apple-notarized."
+          if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$tag" dist/ReSearchify-*.zip dist/ReSearchify-*.tar.gz dist/SHA256SUMS.txt --clobber --repo "$GITHUB_REPOSITORY"
+            gh release edit "$tag" --prerelease --title "ReSearchify preview (${GITHUB_SHA:0:7})" --notes "$notes" --repo "$GITHUB_REPOSITORY"
+          else
+            gh release create "$tag" dist/ReSearchify-*.zip dist/ReSearchify-*.tar.gz dist/SHA256SUMS.txt \
+              --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --prerelease \
+              --title "ReSearchify preview (${GITHUB_SHA:0:7})" --notes "$notes"
+          fi

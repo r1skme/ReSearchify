@@ -8,25 +8,39 @@ ReSearchify indexes source code and lets you find identifiers, exact text, regul
 
 ## Download and run
 
-**Windows 11 (x64):**
+Choose the archive for your system from the newest [GitHub preview release](https://github.com/r1skme/ReSearchify/releases):
 
-1. Open **[Releases](https://github.com/r1skme/ReSearchify/releases)**. Download `ReSearchify-Windows-x64.zip` from the newest preview release.
-2. Extract it, for example to `C:\Tools\ReSearchify`. You should see `rs.exe`. No Python, Node.js, service, or installer is needed.
-3. Open PowerShell **in the project you want to search**, then run:
+| System | Download | Executable |
+| --- | --- | --- |
+| Windows x64 | `ReSearchify-Windows-x64.zip` | `rs.exe` |
+| macOS Apple Silicon (M1–M4+) | `ReSearchify-macOS-arm64.tar.gz` | `rs` |
+| macOS Intel | `ReSearchify-macOS-x64.tar.gz` | `rs` |
+| Linux x86-64 | `ReSearchify-Linux-x64.tar.gz` | `rs` |
+| Linux ARM64 | `ReSearchify-Linux-arm64.tar.gz` | `rs` |
+
+Download `SHA256SUMS.txt` from **the same release** and verify your archive before extracting. The archives contain a standalone CLI executable and the English/Russian READMEs; no Python, Node.js or source compilation is required.
+
+**Windows (PowerShell):** extract the ZIP to `C:\Tools\ReSearchify`, then from your source project:
 
 ```powershell
-# Make 'rs' available in this PowerShell window (adjust the folder if needed)
 $env:Path += ';C:\Tools\ReSearchify'
-
 rs -i .                             # Index this project once
 rs -s "RenderFrame"                # Find an identifier
 rs -rs "Render[A-Za-z]*Frame"      # Regex search
 rs -u                               # Update the existing index
 ```
 
-A release appears only after its Windows build and automated tests pass. If the Releases page is still empty or a run failed, see [build from source](#build-from-source). This repository is **private**: GitHub access is required to download it.
+**Linux / macOS (Terminal):** extract the matching `.tar.gz` archive and run `./rs --version`. Put the executable on your `PATH` or call it by absolute path. From the source project you approve:
 
-Alternatively, download the repo as a ZIP (**Code → Download ZIP**) and build it yourself. Detailed steps: [INSTALL.md](docs/INSTALL.md).
+```sh
+rs -i .
+rs -s RenderFrame
+rs -u
+```
+
+The Linux binaries are built on Ubuntu 22.04 (older Linux distributions may need a local rebuild). macOS builds target macOS 13.3+ and are **not Apple-notarized**, so Gatekeeper may show a warning. Release assets are uploaded only if all five native build/test jobs and the Linux sanitizer job pass.
+
+See the OS-specific extraction, hash verification and troubleshooting instructions in [INSTALL.md](docs/INSTALL.md). **Code → Download ZIP** is the source code, not a prebuilt executable.
 
 ## Commands
 
@@ -109,9 +123,9 @@ Index size is **29% smaller** on that corpus; a warm rare-term query was about *
 
 Give your agent the repository link and this request:
 
-> Set up ReSearchify for my project. Read `AGENTS.md` and `skills/researchify/SKILL.md`. Download the latest Windows x64 archive from this repository's Releases, check its SHA-256 against `SHA256SUMS.txt`, and install `rs.exe`. Index my project only after I approve the target folder. Demonstrate one search and show me how to update the index. Prefer JSON for subsequent searches. If no release is available, tell me before attempting a source build.
+> Set up ReSearchify for my project. Read `AGENTS.md` and `skills/researchify/SKILL.md`. Download the newest tested archive for my operating system and CPU architecture from Releases, verify its SHA-256 against `SHA256SUMS.txt`, and install `rs` (or `rs.exe` on Windows). Index my project only after I approve the target directory. Demonstrate one search and explain updating the index. Prefer JSON for subsequent searches. Ask before building from source if no suitable release exists.
 
-A private GitHub repository requires an authenticated account with access. The agent also needs permission to execute programs on your computer; a web-only chat cannot install software by itself.
+The agent needs permission to execute programs on your computer; a web-only chat cannot install software by itself.
 
 For an already authenticated terminal with GitHub CLI, there is an optional installer:
 
@@ -153,11 +167,11 @@ ctest --test-dir build --output-on-failure
 ./build/rs --help
 ```
 
-The C++ core requires **no third-party libraries**. Windows builds use a static MSVC runtime by default. CI checks Windows (MSVC), Linux and sanitizer builds; see [the workflow](.github/workflows/windows.yml). An Actions workflow is not evidence of a successful run—check its actual result before sharing a binary.
+The C++ core requires **no third-party libraries**. Windows builds use a static MSVC runtime by default. CI checks Windows x64, Linux x64/ARM64, macOS Intel/Apple Silicon and Linux sanitizers; see [the workflow](.github/workflows/windows.yml). An Actions workflow is not evidence of a successful run—check its actual result before sharing a binary.
 
 ## Documentation
 
-[Windows install](docs/INSTALL.md) · [Agent instructions](AGENTS.md) · [Agent skill](skills/researchify/SKILL.md) · [Search syntax](docs/QUERY.md) · [API](docs/AGENT_API.md) · [Index format](docs/FORMAT_STORAGE.md) · [Benchmarks](docs/BENCHMARKS.md)
+[Installation](docs/INSTALL.md) · [Agent instructions](AGENTS.md) · [Agent skill](skills/researchify/SKILL.md) · [Search syntax](docs/QUERY.md) · [API](docs/AGENT_API.md) · [Index format](docs/FORMAT_STORAGE.md) · [Benchmarks](docs/BENCHMARKS.md)
 
 The index stores source text, so keep `.researchify/` out of Git and avoid indexing secrets. Indexes from the older v1 format must be rebuilt. Process-crash recovery does not guarantee durability after a sudden power failure.
 
