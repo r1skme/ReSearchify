@@ -4,11 +4,12 @@
 
 ## When a user asks you to install ReSearchify
 
-1. Check the operating system and make sure you have permission to execute programs there. For Windows x64, prefer a tested portable ZIP from [Releases](https://github.com/r1skme/ReSearchify/releases), **not** a source build. The repository is private: access must be authenticated. Never ask the user to paste tokens in chat or print credentials.
-2. Download `ReSearchify-Windows-x64.zip` and `SHA256SUMS.txt` from the **same** release. Verify SHA-256 before extracting. If `gh` is already installed and authenticated, you can use `./scripts/install.ps1` from the checkout. The script installs to the user profile and updates user PATH; no admin permissions.
-3. If no Windows release is available, report that fact. Build from source only if the user approves and CMake/MSVC tools are available.
+1. Check the host operating system and CPU architecture and make sure you have permission to execute programs. Prefer the tested, matching [Release](https://github.com/r1skme/ReSearchify/releases) archive over a source build: Windows x64 ZIP, macOS x64/arm64 or Linux x64/arm64 TAR.GZ. Never ask users to paste tokens into chat.
+2. Download the selected archive and `SHA256SUMS.txt` from the **same** release. Verify the exact archive checksum before extracting. Follow [INSTALL.md](docs/INSTALL.md), including the macOS Gatekeeper warning and Linux system-library requirements. On Windows, `./scripts/install.ps1` automates installation when GitHub CLI is available.
+3. If there is no tested archive for the host, say so. Build from source only with the user's approval and suitable CMake/C++20 tools.
 4. Confirm the **exact target project** before indexing. Run `rs -i PROJECT_PATH` only on that approved project, then `rs -st` and one test search. Never index unrelated user directories or secrets automatically.
 5. For regular work, prefer `rs -s 'Identifier' --json --limit 8`. Use `rs -l 'exact text'` for punctuation and `rs -rs 'pattern'` for regex. Run `rs -u` after code changes; a known-file update is not a full freshness check.
+
 
 ### Agent-friendly interfaces
 
