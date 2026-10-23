@@ -55,7 +55,7 @@ export PATH="$HOME/Tools/ReSearchify:$PATH"
 
 После этого перейди в **свой проект** и выполни `rs -i .`, `rs -s RenderFrame` или `rs -u`.
 
-Сборки нацелены на **macOS 13 и новее**. Программы пока **не подписаны сертификатом Apple и не нотариализованы**, поэтому Gatekeeper может показать предупреждение. Перед разрешением запуска убедись, что скачал архив из официального релиза и его хеш совпадает.
+Сборки нацелены на **macOS 13.3 и новее**. Программы пока **не подписаны сертификатом Apple и не нотариализованы**, поэтому Gatekeeper может показать предупреждение. Перед разрешением запуска убедись, что скачал архив из официального релиза и его хеш совпадает.
 
 ### Linux (x64 / ARM64)
 
@@ -96,7 +96,7 @@ tar -xzf ReSearchify-macOS-arm64.tar.gz -C "$HOME/Tools/ReSearchify"
 "$HOME/Tools/ReSearchify/rs" --version
 ```
 
-For Intel replace `arm64` in the archive name with `x64`. macOS 13+ is targeted; the executable is **not Apple-signed or notarized** and may trigger a Gatekeeper warning. Verify the official release and hash before choosing to allow it.
+For Intel replace `arm64` in the archive name with `x64`. macOS 13.3+ is targeted; the executable is **not Apple-signed or notarized** and may trigger a Gatekeeper warning. Verify the official release and hash before choosing to allow it.
 
 **Linux:** Use `uname -m`: `x86_64` → `x64`, `aarch64` → `arm64`. Example for x64:
 

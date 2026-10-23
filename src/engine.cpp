@@ -579,13 +579,18 @@ BuildReport build(const fs::path& source, const fs::path& requested, const Build
     auto words = old && !options.changed_only && !compacting ? static_cast<std::size_t>((old->manifest.next_id + 63) / 64) : 0;
     if (words > budget / 64) throw Error("E_BUDGET", "Seen-document map exceeds budget");
     std::vector<std::uint64_t> seen(words, 0);
-    auto fixed = (old && !compacting && !options.changed_only ? 12 : 8) * MiB + words * 8 + (old ? (std::min)(budget / 4, std::size_t(64 * MiB)) : 0);
-    const auto gram_memory = options.profile == "fast" ? 3 * MiB : 0;
-    auto per_worker = 2 * options.max_line_bytes + 3 * MiB + gram_memory;
+    // Byte budgets use size_t consistently: macOS defines uint64_t differently
+    // from size_t, unlike the Linux toolchain used for earlier builds.
+    constexpr auto MemoryMiB = static_cast<std::size_t>(MiB);
+    const std::size_t fixed = (old && !compacting && !options.changed_only ? 12 : 8) * MemoryMiB + words * 8
+        + (old ? (std::min)(budget / 4, std::size_t(64 * MiB)) : 0);
+    const std::size_t gram_memory = options.profile == "fast" ? 3 * MemoryMiB : 0;
+    const std::size_t per_worker = 2 * options.max_line_bytes + 3 * MemoryMiB + gram_memory;
     std::size_t workers = (std::min)(options.threads, (std::max)(std::size_t(1), budget > fixed ? (budget - fixed) / per_worker : 0));
     if (fixed + per_worker > budget) throw Error("E_BUDGET", "Memory budget too small for line buffers and metadata");
-    auto sorter_budget = (std::min)(std::size_t(4 * MiB), (budget - fixed) / workers - 2 * options.max_line_bytes - 2 * MiB - gram_memory);
-    sorter_budget = (std::max)(std::size_t(MiB / 4), sorter_budget);
+    auto sorter_budget = (std::min)(std::size_t(4 * MemoryMiB),
+        (budget - fixed) / workers - 2 * options.max_line_bytes - 2 * MemoryMiB - gram_memory);
+    sorter_budget = (std::max)(std::size_t(MemoryMiB / 4), sorter_budget);
     disk::Sorter deltas(transaction / "changes", 2 * MiB, [](std::string&, const std::string&) { throw Error("E_ARGUMENT", "Duplicate changed document"); });
     std::mutex deltas_mutex, failure_mutex, segments_mutex;
     std::exception_ptr failure;
@@ -597,7 +602,19 @@ BuildReport build(const fs::path& source, const fs::path& requested, const Build
     std::vector<std::uint64_t> new_segments;
     std::vector<WorkerReport> reports(workers);
     JobQueue queue;
-    std::vector<std::jthread> pool;
+    // Apple libc++ does not expose std::jthread on all supported macOS SDKs.
+    // Keep the same explicit join below, and close the queue before joining
+    // during stack unwinding (including a failed thread creation).
+    std::vector<std::thread> pool;
+    struct PoolJoiner {
+        JobQueue& queue;
+        std::vector<std::thread>& threads;
+        ~PoolJoiner() {
+            if (std::any_of(threads.begin(), threads.end(), [](const std::thread& thread) { return thread.joinable(); }))
+                queue.close(true);
+            for (auto& thread : threads) if (thread.joinable()) thread.join();
+        }
+    } joiner{queue, pool};
     pool.reserve(workers);
     auto fail = [&] { std::lock_guard lock(failure_mutex);
     if (!failure) failure = std::current_exception();

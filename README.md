@@ -38,7 +38,7 @@ rs -s RenderFrame
 rs -u
 ```
 
-The Linux binaries are built on Ubuntu 22.04 (older Linux distributions may need a local rebuild). macOS builds target macOS 13+ and are **not Apple-notarized**, so Gatekeeper may show a warning. Release assets are uploaded only if all five native build/test jobs and the Linux sanitizer job pass.
+The Linux binaries are built on Ubuntu 22.04 (older Linux distributions may need a local rebuild). macOS builds target macOS 13.3+ and are **not Apple-notarized**, so Gatekeeper may show a warning. Release assets are uploaded only if all five native build/test jobs and the Linux sanitizer job pass.
 
 See the OS-specific extraction, hash verification and troubleshooting instructions in [INSTALL.md](docs/INSTALL.md). **Code → Download ZIP** is the source code, not a prebuilt executable.
 
