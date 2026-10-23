@@ -787,7 +787,9 @@ J mcp_tools(const std::string& version) {
 void help(const std::string& name = "") {
     if (name.empty()) {
         std::cout << "ReSearchify 2.0.0 - local C++20 code search, no external runtime\n\n"
-                  << "Start: rs -i .\n       rs -s RenderFrame --path 'src/**'\n"
+                  << "Start (from your source project root, NOT Downloads): rs -i .\n"
+                  << "Or from anywhere: rs init \"FULL_PROJECT_PATH\"\n"
+                  << "       rs -s RenderFrame --path 'src/**'\n"
                   << "       rs -s RenderFrame --json --limit 8\n"
                   << "       rs -r src/render.cpp --lines 80:120\n\n";
         for (const auto& c : registry()) std::cout << "  " << std::left << std::setw(15) << c.name << c.description << '\n';

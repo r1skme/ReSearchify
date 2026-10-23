@@ -8,43 +8,26 @@ ReSearchify indexes source code and lets you find identifiers, exact text, regul
 
 ## Download and run
 
-Choose the archive for your system from the newest [GitHub preview release](https://github.com/r1skme/ReSearchify/releases):
+Pick the **tested release asset** for your operating system and CPU from [GitHub Releases](https://github.com/r1skme/ReSearchify/releases) and download its `SHA256SUMS.txt` from **the same release**:
 
-| System | Download | Executable |
+| System | Archive | Step-by-step setup (Russian + English) |
 | --- | --- | --- |
-| Windows x64 | `ReSearchify-Windows-x64.zip` | `rs.exe` |
-| macOS Apple Silicon (M1–M4+) | `ReSearchify-macOS-arm64.tar.gz` | `rs` |
-| macOS Intel | `ReSearchify-macOS-x64.tar.gz` | `rs` |
-| Linux x86-64 | `ReSearchify-Linux-x64.tar.gz` | `rs` |
-| Linux ARM64 | `ReSearchify-Linux-arm64.tar.gz` | `rs` |
+| Windows x64 | `ReSearchify-Windows-x64.zip` | [Windows guide](docs/INSTALL_WINDOWS.md) |
+| macOS Apple Silicon (M1/M2/M3/M4+) | `ReSearchify-macOS-arm64.tar.gz` | [macOS guide](docs/INSTALL_MACOS.md) |
+| macOS Intel | `ReSearchify-macOS-x64.tar.gz` | [macOS guide](docs/INSTALL_MACOS.md) |
+| Linux x86-64 | `ReSearchify-Linux-x64.tar.gz` | [Linux guide](docs/INSTALL_LINUX.md) |
+| Linux ARM64 | `ReSearchify-Linux-arm64.tar.gz` | [Linux guide](docs/INSTALL_LINUX.md) |
 
-Download `SHA256SUMS.txt` from **the same release** and verify your archive before extracting. The archives contain a standalone CLI executable and the English/Russian READMEs; no Python, Node.js or source compilation is required.
+Prebuilt releases contain a portable `rs`/`rs.exe` CLI; no Python, Node.js, or compilation is required. **Code → Download ZIP** downloads source code, not an executable.
 
-**Windows (PowerShell):** extract the ZIP to `C:\Tools\ReSearchify`, then from your source project:
+**Important:** `rs -i .` indexes the terminal's **current directory**. If you are still in Downloads after installing, it will index Downloads — not your source project. Each OS guide now includes a safe one-file test and explicit-path commands (`rs init "FULL_PROJECT_PATH"`, `rs status --root "FULL_PROJECT_PATH"`) so you can confirm the right folder before indexing real code. The index stores source-text copies in `.researchify/`; never automatically index secrets or unrelated folders.
 
-```powershell
-$env:Path += ';C:\Tools\ReSearchify'
-rs -i .                             # Index this project once
-rs -s "RenderFrame"                # Find an identifier
-rs -rs "Render[A-Za-z]*Frame"      # Regex search
-rs -u                               # Update the existing index
-```
+Linux prebuilt packages are built on Ubuntu 22.04 and need compatible system libraries; macOS builds target 13.3+ and are not Apple-notarized. Published preview assets require successful native tests for all five platforms plus Linux sanitizer tests. See [installation overview](docs/INSTALL.md) and the [agent-specific checklist](docs/AGENT_SETUP.md).
 
-**Linux / macOS (Terminal):** extract the matching `.tar.gz` archive and run `./rs --version`. Put the executable on your `PATH` or call it by absolute path. From the source project you approve:
-
-```sh
-rs -i .
-rs -s RenderFrame
-rs -u
-```
-
-The Linux binaries are built on Ubuntu 22.04 (older Linux distributions may need a local rebuild). macOS builds target macOS 13.3+ and are **not Apple-notarized**, so Gatekeeper may show a warning. Release assets are uploaded only if all five native build/test jobs and the Linux sanitizer job pass.
-
-See the OS-specific extraction, hash verification and troubleshooting instructions in [INSTALL.md](docs/INSTALL.md). **Code → Download ZIP** is the source code, not a prebuilt executable.
 
 ## Commands
 
-Once `rs.exe` is in your `PATH`, run these commands from any folder inside an indexed project:
+After indexing an explicitly selected project, these examples work from its root (or supply `--root "FULL_PROJECT_PATH"`). They assume `rs` is available on PATH; otherwise use the full executable path:
 
 | Command | Meaning | When to use it |
 | --- | --- | --- |
@@ -139,33 +122,29 @@ These options describe the current source branch; an older downloaded release ma
 
 ## Use with an AI agent
 
-Give your agent the repository link and this request:
+Share the repository link with your agent and ask:
 
-> Set up ReSearchify for my project. Read `AGENTS.md` and `skills/researchify/SKILL.md`. Download the newest tested archive for my operating system and CPU architecture from Releases, verify its SHA-256 against `SHA256SUMS.txt`, and install `rs` (or `rs.exe` on Windows). Index my project only after I approve the target directory. Demonstrate one search and explain updating the index. Prefer JSON for subsequent searches. Ask before building from source if no suitable release exists.
+> Set up ReSearchify on the machine where I want it to run. Read `docs/AGENT_SETUP.md` and `AGENTS.md`. Check the actual OS/CPU, select a completed tested release, verify the archive against `SHA256SUMS.txt`, and install the executable. First prove it works on an isolated one-file demo. **Ask me for the exact absolute source-project directory and permission before indexing it**; never use Downloads or assume `.` is correct. Confirm `root=`, run one known-term search and `verify`, and explain `update`. Use JSON for subsequent queries. Ask before any source build or security bypass.
 
-The agent needs permission to execute programs on your computer; a web-only chat cannot install software by itself.
+The agent must be allowed to execute programs **on your target computer**. A web-only chat cannot perform an installation. For detailed OS-specific setup, safe command sequences, error handling, and MCP/JSONL rules, read [Agent setup](docs/AGENT_SETUP.md).
 
-For an already authenticated terminal with GitHub CLI, there is an optional installer:
+The optional Windows installer `scripts/install.ps1` is for users who have **already cloned this repository** and have GitHub CLI (`gh`) installed; ordinary users can follow [the manual Windows guide](docs/INSTALL_WINDOWS.md) without `gh`.
 
-```powershell
-.\scripts\install.ps1     # Download a checked release to your user profile
-rs -s RenderFrame --json --limit 8
+For agent integrations, using the confirmed project path:
+
+```text
+rs capabilities --json
+rs schema find --json
+rs find RenderFrame --root "FULL_PROJECT_PATH" --json --limit 8
+rs serve --stdio --root "FULL_PROJECT_PATH"     # Persistent JSONL session
+rs mcp --stdio --root "FULL_PROJECT_PATH"       # MCP transport (different protocol)
 ```
 
-To integrate directly, use:
-
-```powershell
-rs capabilities --json             # Discover features and limits
-rs schema find --json             # Exact argument schema for 'find'
-rs serve --stdio --root .         # One process, many JSONL requests
-rs mcp --stdio --root .           # MCP tools for compatible agents
-```
-
-No separate plugin is required for a terminal-capable agent. MCP requires a compatible client configuration; see [AGENT_API.md](docs/AGENT_API.md) and [MCP example](examples/mcp-client.json).
+Prefer an absolute executable path if `rs` is not on PATH. MCP requires a compatible client; see [Agent API](docs/AGENT_API.md) and the [Windows](examples/mcp-client.json), [macOS](examples/mcp-client-macos.json), or [Linux](examples/mcp-client-linux.json) example.
 
 ## Build from source
 
-Install CMake 3.21+ and Visual Studio 2022 with the MSVC C++ desktop workload (Windows), or a C++20 compiler and CMake 3.20+ (Linux/macOS).
+Install CMake 3.20+ and Visual Studio 2022 with the MSVC C++ desktop workload (Windows), or a C++20 compiler and CMake 3.20+ (Linux/macOS).
 
 **Windows — PowerShell:**
 
@@ -189,7 +168,7 @@ The C++ core requires **no third-party libraries**. Windows builds use a static 
 
 ## Documentation
 
-[Installation](docs/INSTALL.md) · [Agent instructions](AGENTS.md) · [Agent skill](skills/researchify/SKILL.md) · [Search syntax](docs/QUERY.md) · [API](docs/AGENT_API.md) · [Index format](docs/FORMAT_STORAGE.md) · [Benchmarks](docs/BENCHMARKS.md)
+[Installation](docs/INSTALL.md) · [Agent setup](docs/AGENT_SETUP.md) · [Agent instructions](AGENTS.md) · [Agent skill](skills/researchify/SKILL.md) · [Search syntax](docs/QUERY.md) · [API](docs/AGENT_API.md) · [Index format](docs/FORMAT_STORAGE.md) · [Benchmarks](docs/BENCHMARKS.md)
 
 The index stores source text, so keep `.researchify/` out of Git and avoid indexing secrets. Indexes from the older v1 format must be rebuilt. Process-crash recovery does not guarantee durability after a sudden power failure.
 
