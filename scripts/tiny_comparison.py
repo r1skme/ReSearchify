@@ -153,6 +153,76 @@ def snippet_check(executable, index, corpus, case, rg, timeout):
     return checked
 
 
+def brief(value):
+    """Keep metric/provenance fields without emitting all samples into job logs."""
+    if isinstance(value, dict):
+        return {key: brief(item) for key, item in value.items() if key not in ("samples", "raw")}
+    if isinstance(value, list):
+        return [brief(item) for item in value]
+    return value
+
+
+def run_update_comparisons(args, binaries, work, reports, summary):
+    """Mutate only the marked generated source, after all read-only measurements."""
+    source = work / "fixture" / "source"
+    edit = source / "group_0" / "module_42.cpp"
+    original_hash = hashlib.sha256(edit.read_bytes()).hexdigest()
+    manifest = {"format": "researchify-update-fixture-v1", "source": str(source),
+                "edit_file": "group_0/module_42.cpp", "edit_sha256": original_hash,
+                "files": args.files,
+                "description": "Owned generated eight-line tiny-file surrogate; not the supplied Windows corpus",
+                "corpus": summary["fixture"]}
+    fixture_path = work / "fixture" / "update-fixture.json"
+    save(fixture_path, manifest)
+    save(reports / "update-fixture.json", manifest)
+    for profile in ("compact", "fast"):
+        if hashlib.sha256(edit.read_bytes()).hexdigest() != original_hash:
+            raise RuntimeError("Source changed before the next update experiment")
+        child_work = work / ("updates-" + profile)
+        target = reports / (profile + "-updates.json")
+        argv = [sys.executable, str(Path(__file__).with_name("update_benchmark.py")),
+                "--baseline", binaries["baseline"], "--candidate", binaries["current"],
+                "--base-index", str(work / ("current-" + profile)),
+                "--fixture", str(fixture_path), "--work", str(child_work),
+                "--iterations", str(args.update_iterations), "--threads", str(args.index_threads),
+                "--memory-mb", "256", "--timeout", str(args.timeout)]
+        record = {"profile": profile, "command": argv, "report": target.name, "complete": False,
+                  "base_index_writer": "current", "source_restored": False}
+        summary["update_reports"].append(record)
+        save(reports / "summary.json", summary)
+        try:
+            with (reports / (profile + "-updates.log")).open("w", encoding="utf-8") as output:
+                subprocess.run(argv, stdout=output, stderr=output, check=True, timeout=1800)
+        finally:
+            raw_path = child_work / "results.json"
+            if raw_path.is_file():
+                shutil.copyfile(raw_path, target)
+            # This parent checks the actual file independently of child status.
+            actual_hash = hashlib.sha256(edit.read_bytes()).hexdigest() if edit.is_file() else None
+            record["post_run_sha256"] = actual_hash
+            record["source_restored"] = actual_hash == original_hash
+            save(reports / "summary.json", summary)
+        measured = json.loads(target.read_text(encoding="utf-8"))
+        if (measured.get("format") != "researchify-update-workflow-v1"
+                or not measured.get("complete") or not measured.get("source_restored")
+                or not record["source_restored"]
+                or len(measured.get("operations", [])) != 10 * args.update_iterations
+                or len(measured.get("summaries", [])) != 5):
+            raise RuntimeError("Incomplete or unrestored update experiment")
+        record["complete"] = True
+        record["operations"] = len(measured["operations"])
+        record["checks"] = len(measured["checks"])
+        summary["reports"].append(target.name)
+        save(reports / "summary.json", summary)
+        print("RESEARCHIFY_TINY_UPDATE_SUMMARY " + json.dumps({
+            "format": "researchify-tiny-update-summary-v1", "profile": profile,
+            "iterations": args.update_iterations, "base_index_writer": "current",
+            "binaries": summary["binaries"], "fixture": summary["fixture"],
+            "conditions": measured["conditions"], "complete": True,
+            "source_restored": True, "operations": record["operations"], "checks": record["checks"],
+            "summaries": brief(measured["summaries"])}), flush=True)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--baseline", type=Path, required=True)
@@ -164,12 +234,15 @@ def main():
     parser.add_argument("--iterations", type=int, default=21)
     parser.add_argument("--session-iterations", type=int, default=1000)
     parser.add_argument("--fresh-processes", type=int, default=1000)
+    parser.add_argument("--update-iterations", type=int, default=0,
+                        help="Paired updates per stage/profile after all search runs (0 disables)")
     parser.add_argument("--index-threads", type=int, default=4)
     parser.add_argument("--rg", default="rg")
     parser.add_argument("--timeout", type=float, default=300)
     args = parser.parse_args()
     if (not 64 <= args.files <= 1000000 or not 1 <= args.iterations <= 100
-            or not 1 <= args.session_iterations <= 1000 or not 1 <= args.fresh_processes <= 1000):
+            or not 1 <= args.session_iterations <= 1000 or not 1 <= args.fresh_processes <= 1000
+            or not 0 <= args.update_iterations <= 100):
         parser.error("Invalid bounded fixture/repetition count")
     if not 1 <= args.index_threads <= 32 or args.timeout <= 0:
         parser.error("Invalid thread/timeout value")
@@ -196,8 +269,10 @@ def main():
                               "correctness": "All matching paths/counts; real rg JSON line/byte-column/text checks for first 16 files per query",
                               "timing": "Fresh process count-only samples, paired shuffled order; separate warm JSONL session",
                               "build": "One independent sample per writer/profile; not a stable build p95",
+                              "updates": "Optional paired strict-global and known-path operations on separate copies of current-writer indexes, measured after searches; source restored and independently checked",
+                              "update_iterations": args.update_iterations,
                               "gates": "Correctness/completion, no performance threshold on shared runners"},
-               "builds": [], "correctness": [], "reports": [], "sequential_process_batches": []}
+               "builds": [], "correctness": [], "reports": [], "sequential_process_batches": [], "update_reports": []}
     save(reports / "summary.json", summary)
     try:
         generator = Path(__file__).with_name("generate_tiny_corpus.py")
@@ -286,6 +361,8 @@ def main():
                                       "iterations": args.fresh_processes, "expected": expected_term})
                 summary["sequential_process_batches"].append({"tool": "rg", "profile": "unindexed", **row})
             save(reports / "summary.json", summary)
+        if args.update_iterations:
+            run_update_comparisons(args, binaries, work, reports, summary)
         if any(bench.binary_identity(exe) != summary["binaries"][name]["sha256"] for name, exe in binaries.items()):
             raise RuntimeError("Executable changed during benchmark")
         summary["complete"] = True

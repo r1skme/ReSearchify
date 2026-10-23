@@ -13,7 +13,7 @@ jobs:
   windows:
     name: Windows x64 (MSVC)
     runs-on: windows-2022
-    timeout-minutes: 60
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -35,7 +35,7 @@ jobs:
       - name: Test
         run: ctest --test-dir build -C Release --output-on-failure
       - name: Test measurement harness
-        run: python scripts/test_perf_benchmark.py
+        run: python -m unittest discover -s scripts -p "test_*.py"
       - name: Benchmark smoke (not a performance gate)
         shell: pwsh
         run: |
@@ -88,14 +88,14 @@ jobs:
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
       - name: Native 100k tiny-file comparison (correctness gate only)
         if: steps.tiny_perf.outputs.run == 'true'
-        timeout-minutes: 45
+        timeout-minutes: 70
         shell: pwsh
         run: |
           $baselineRevision = git -C native-baselines/original rev-parse HEAD
           if ($LASTEXITCODE -or $baselineRevision -ne 'eb858348169157686e70104af6b64f9539a39fe8') { throw 'Wrong baseline source revision' }
           $currentRevision = git rev-parse HEAD
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
-          python scripts/tiny_comparison.py --baseline native-baselines/original/build/Release/rs.exe --current build/Release/rs.exe --baseline-revision $baselineRevision --current-revision $currentRevision --files 100000 --iterations 21 --session-iterations 1000 --index-threads 4 --rg rg --work tiny-native-perf
+          python scripts/tiny_comparison.py --baseline native-baselines/original/build/Release/rs.exe --current build/Release/rs.exe --baseline-revision $baselineRevision --current-revision $currentRevision --files 100000 --iterations 21 --session-iterations 1000 --update-iterations 7 --index-threads 4 --rg rg --work tiny-native-perf
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
       - name: Preserve Windows tiny-file evidence, including incomplete runs
         if: always() && steps.tiny_perf.outputs.run == 'true'
@@ -166,7 +166,7 @@ jobs:
       - name: Test
         run: ctest --test-dir build --output-on-failure
       - name: Test measurement harness
-        run: python scripts/test_perf_benchmark.py
+        run: python -m unittest discover -s scripts -p "test_*.py"
       - name: Benchmark smoke (not a performance gate)
         run: |
           ./build/cs_bench --work perf-smoke --phase generate --files 64 --lines 12
@@ -231,7 +231,7 @@ jobs:
       - name: Test
         run: ctest --test-dir build --output-on-failure
       - name: Test measurement harness
-        run: python scripts/test_perf_benchmark.py
+        run: python -m unittest discover -s scripts -p "test_*.py"
       - name: Benchmark smoke (not a performance gate)
         run: |
           ./build/cs_bench --work perf-smoke --phase generate --files 64 --lines 12
