@@ -1,0 +1,389 @@
+{
+  "format": "researchify-paired-v1",
+  "platform": "Linux-6.18.55-x86_64-with-glibc2.39",
+  "machine": "x86_64",
+  "seed": 1729,
+  "iterations": 7,
+  "binaries": {
+    "baseline": {
+      "path": "/workspace/scratch/93bfa6b783da/rs-tiny-before",
+      "sha256": "c0046d12c64100b636bed378d8796a3d1c058b9ed692d3f8c8915adf6c80a4dd"
+    },
+    "current": {
+      "path": "/workspace/scratch/93bfa6b783da/ReSearchify-tiny-literal/build/rs",
+      "sha256": "70f3b983b141dd3504df919119e956c64decd463f1264527be43b16d6f1b545a"
+    }
+  },
+  "indexes": {
+    "baseline": {
+      "generation": "1",
+      "profile": "compact",
+      "files": 1000000,
+      "lines": 5000000,
+      "bytes": 222455560,
+      "status_directory_bytes_including_scratch": 482530418,
+      "committed_index_bytes": 482530403,
+      "transaction_scratch_bytes": 0,
+      "spill_scratch_bytes": 0,
+      "coordination_bytes": 10,
+      "literal_sidecar_bytes": 0,
+      "total_file_bytes": 482530413,
+      "measurement": "logical file sizes; transaction-* scratch, nested segment sort/literal-sort spills and reader/writer coordination separated; no deletion"
+    },
+    "current": {
+      "generation": "1",
+      "profile": "compact",
+      "files": 1000000,
+      "lines": 5000000,
+      "bytes": 222455560,
+      "status_directory_bytes_including_scratch": 482530418,
+      "committed_index_bytes": 482530403,
+      "transaction_scratch_bytes": 0,
+      "spill_scratch_bytes": 0,
+      "coordination_bytes": 10,
+      "literal_sidecar_bytes": 0,
+      "total_file_bytes": 482530413,
+      "measurement": "logical file sizes; transaction-* scratch, nested segment sort/literal-sort spills and reader/writer coordination separated; no deletion"
+    }
+  },
+  "conditions": {
+    "execution": "fresh target process per sample, helper startup excluded",
+    "cache": "OS cache uncontrolled, explicit warm-up; NOT cold-cache",
+    "ordering": "deterministically shuffled baseline/current/rg order for each paired repetition",
+    "correctness": "matching-file count on every sample; full path/count checks separately in perf_benchmark.py",
+    "comparison": "RS count-only; rg complete occurrence scans via --count-matches, not -l early exit",
+    "cpu": "target process CPU",
+    "rss": "process high-water; POSIX can include Python inherited pre-exec floor",
+    "build": "excluded; baseline/current creation must be timed separately",
+    "memory_mb": 256,
+    "current_threads": null,
+    "rg_threads": null
+  },
+  "queries": [
+    {
+      "name": "literal",
+      "query": "\"needle_42 = 0;\"",
+      "matching_files": 1,
+      "commands": {
+        "baseline": [
+          "/workspace/scratch/93bfa6b783da/rs-tiny-before",
+          "find",
+          "\"needle_42 = 0;\"",
+          "--index",
+          "/workspace/scratch/93bfa6b783da/perf-million-tiny/optimized-compact",
+          "--json",
+          "--limit",
+          "0",
+          "--snippets",
+          "0",
+          "--memory-mb",
+          "256",
+          "--regex-steps",
+          "18446744073709551615"
+        ],
+        "current": [
+          "/workspace/scratch/93bfa6b783da/ReSearchify-tiny-literal/build/rs",
+          "find",
+          "\"needle_42 = 0;\"",
+          "--index",
+          "/workspace/scratch/93bfa6b783da/perf-million-tiny/optimized-compact",
+          "--json",
+          "--limit",
+          "0",
+          "--snippets",
+          "0",
+          "--memory-mb",
+          "256",
+          "--regex-steps",
+          "18446744073709551615"
+        ],
+        "rg": [
+          "/opt/codex/codex-path/rg",
+          "--no-config",
+          "--no-ignore",
+          "--hidden",
+          "--text",
+          "--color",
+          "never",
+          "--case-sensitive",
+          "--count-matches",
+          "--null",
+          "--fixed-strings",
+          "--regexp",
+          "needle_42 = 0;",
+          "."
+        ]
+      },
+      "order": [
+        [
+          "current",
+          "baseline",
+          "rg"
+        ],
+        [
+          "baseline",
+          "rg",
+          "current"
+        ],
+        [
+          "current",
+          "rg",
+          "baseline"
+        ],
+        [
+          "rg",
+          "current",
+          "baseline"
+        ],
+        [
+          "baseline",
+          "current",
+          "rg"
+        ],
+        [
+          "rg",
+          "baseline",
+          "current"
+        ],
+        [
+          "rg",
+          "current",
+          "baseline"
+        ]
+      ],
+      "engine_metrics": {
+        "baseline": [
+          {
+            "candidates": 1000000,
+            "scanned_bytes": 222455560,
+            "seconds": 4.582918331
+          },
+          {
+            "candidates": 1000000,
+            "scanned_bytes": 222455560,
+            "seconds": 4.460619133
+          },
+          {
+            "candidates": 1000000,
+            "scanned_bytes": 222455560,
+            "seconds": 4.460658653
+          },
+          {
+            "candidates": 1000000,
+            "scanned_bytes": 222455560,
+            "seconds": 4.760574021
+          },
+          {
+            "candidates": 1000000,
+            "scanned_bytes": 222455560,
+            "seconds": 4.030073449
+          },
+          {
+            "candidates": 1000000,
+            "scanned_bytes": 222455560,
+            "seconds": 4.497515014
+          },
+          {
+            "candidates": 1000000,
+            "scanned_bytes": 222455560,
+            "seconds": 4.170612513
+          }
+        ],
+        "current": [
+          {
+            "candidates": 1000000,
+            "scanned_bytes": 222455560,
+            "seconds": 4.04999315
+          },
+          {
+            "candidates": 1000000,
+            "scanned_bytes": 222455560,
+            "seconds": 4.116644958
+          },
+          {
+            "candidates": 1000000,
+            "scanned_bytes": 222455560,
+            "seconds": 3.558259105
+          },
+          {
+            "candidates": 1000000,
+            "scanned_bytes": 222455560,
+            "seconds": 3.979212487
+          },
+          {
+            "candidates": 1000000,
+            "scanned_bytes": 222455560,
+            "seconds": 3.691466273
+          },
+          {
+            "candidates": 1000000,
+            "scanned_bytes": 222455560,
+            "seconds": 3.951363326
+          },
+          {
+            "candidates": 1000000,
+            "scanned_bytes": 222455560,
+            "seconds": 3.314042579
+          }
+        ]
+      },
+      "tools": {
+        "baseline": {
+          "wall_ms": {
+            "iterations": 7,
+            "median": 4505.579421995208,
+            "p95": 4804.2310570017435,
+            "min": 4075.704336995841,
+            "max": 4804.2310570017435,
+            "samples": [
+              4626.694073995168,
+              4501.722798995615,
+              4505.579421995208,
+              4804.2310570017435,
+              4075.704336995841,
+              4539.555482995638,
+              4215.335878994665
+            ]
+          },
+          "cpu_ms": {
+            "iterations": 7,
+            "median": 9098.164999999999,
+            "p95": 9334.049,
+            "min": 8494.432999999999,
+            "max": 9334.049,
+            "samples": [
+              9334.049,
+              9083.81,
+              9198.294,
+              9098.164999999999,
+              8494.432999999999,
+              9250.203,
+              8767.497000000001
+            ]
+          },
+          "peak_rss_bytes": {
+            "iterations": 7,
+            "median": 92827648,
+            "p95": 92860416,
+            "min": 92774400,
+            "max": 92860416,
+            "samples": [
+              92860416,
+              92778496,
+              92827648,
+              92798976,
+              92860416,
+              92774400,
+              92827648
+            ]
+          },
+          "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor"
+        },
+        "current": {
+          "wall_ms": {
+            "iterations": 7,
+            "median": 3988.2831849972717,
+            "p95": 4159.079708006175,
+            "min": 3352.13811200083,
+            "max": 4159.079708006175,
+            "samples": [
+              4105.146189001971,
+              4159.079708006175,
+              3597.6092330020037,
+              4026.3367049992667,
+              3731.257594001363,
+              3988.2831849972717,
+              3352.13811200083
+            ]
+          },
+          "cpu_ms": {
+            "iterations": 7,
+            "median": 8332.732,
+            "p95": 8660.342999999999,
+            "min": 7848.97,
+            "max": 8660.342999999999,
+            "samples": [
+              8537.618,
+              8660.342999999999,
+              8125.197999999999,
+              8645.537999999999,
+              8332.732,
+              7962.889999999999,
+              7848.97
+            ]
+          },
+          "peak_rss_bytes": {
+            "iterations": 7,
+            "median": 89272320,
+            "p95": 89325568,
+            "min": 89227264,
+            "max": 89325568,
+            "samples": [
+              89227264,
+              89288704,
+              89235456,
+              89325568,
+              89272320,
+              89239552,
+              89313280
+            ]
+          },
+          "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor"
+        },
+        "rg": {
+          "wall_ms": {
+            "iterations": 7,
+            "median": 883.6367660042015,
+            "p95": 22409.261967004568,
+            "min": 831.2226940033725,
+            "max": 22409.261967004568,
+            "samples": [
+              22409.261967004568,
+              14278.713104999042,
+              834.055482999247,
+              883.6367660042015,
+              831.2226940033725,
+              831.6474509992986,
+              1003.4905559950857
+            ]
+          },
+          "cpu_ms": {
+            "iterations": 7,
+            "median": 6859.604,
+            "p95": 20785.879,
+            "min": 6475.747,
+            "max": 20785.879,
+            "samples": [
+              20785.879,
+              15495.539,
+              6521.941,
+              6859.604,
+              6475.747,
+              6498.656,
+              7109.119
+            ]
+          },
+          "peak_rss_bytes": {
+            "iterations": 7,
+            "median": 15728640,
+            "p95": 15728640,
+            "min": 15728640,
+            "max": 15728640,
+            "samples": [
+              15728640,
+              15728640,
+              15728640,
+              15728640,
+              15728640,
+              15728640,
+              15728640
+            ]
+          },
+          "resource_method": "isolated child getrusage(RUSAGE_CHILDREN); RSS may include inherited Python pre-exec high-water floor"
+        }
+      }
+    }
+  ],
+  "ripgrep": "ripgrep 15.2.0 (rev e89fff89ac)",
+  "complete": true
+}
