@@ -12,9 +12,12 @@ separate Linux measurements are recorded in [literal-filter lookup and serial
 setup](PERFORMANCE_LITERAL_FOLLOWUP.md) and [verified-content regex
 execution](PERFORMANCE_REGEX_FOLLOWUP.md). Earlier intermediate experiments keep
 their own recorded binary identities. Do not multiply speedup ratios from these
-independent measurement windows. Native macOS paired measurements and validation
-of the combined follow-up head are pending; the older green matrix does not
-establish their outcome.
+independent measurement windows. The combined follow-up checkpoint subsequently
+passed the native matrix and paired macOS Intel/Apple Silicon measurements in
+[run 39961942957](https://github.com/r1skme/ReSearchify/actions/runs/39961942957).
+Those separate results, including remaining regex and startup regressions, are
+recorded in [native measurements](PERFORMANCE_NATIVE.md). They precede the later
+tiny-file/update changes and do not replace the frozen Linux tables below.
 
 This report describes implemented code, measured tradeoffs and remaining limits. It is not a claim that ReSearchify beats ripgrep on every query. Historical v1/v2 figures in [BENCHMARKS.md](BENCHMARKS.md) describe different revisions and must not be mixed with these results.
 

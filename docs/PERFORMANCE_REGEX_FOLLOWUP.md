@@ -144,11 +144,13 @@ as a timing distribution.
 
 ## Scope and platform status
 
-The local test and timing evidence covers Linux x86-64 only. Native validation
-of the combined later head and paired macOS Intel/Apple Silicon measurements
-are **pending**. The earlier native Windows/Linux/ARM64/macOS green matrix in
-the main report belongs to its recorded checkpoint, before this change; it
-cannot establish that the new code passed on those targets. Cross-compilation
+The isolated test and timing evidence in this report covers Linux x86-64 only.
+The combined later checkpoint subsequently passed the native Windows/Linux/
+ARM64/macOS matrix and paired macOS Intel/Apple Silicon measurements in
+[run 39961942957](https://github.com/r1skme/ReSearchify/actions/runs/39961942957).
+See [native measurements](PERFORMANCE_NATIVE.md) for that checkpoint's separate
+results and binary identities. They do not change the scope of this isolated
+experiment or establish the outcome of subsequent C++ changes. Cross-compilation
 would not substitute for runtime tests.
 
 No new cold-OS-cache, million-file, fast-profile regex or production multi-agent

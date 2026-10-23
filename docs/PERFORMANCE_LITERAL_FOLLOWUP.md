@@ -114,8 +114,10 @@ Every benchmark sample checked matching-file counts. The persistent comparison
 also compared the complete count-only response fields. Those benchmark requests
 do not independently validate ranking, positions or snippets; the ordinary
 engine and search test suites cover those contracts. No new runtime dependency
-or platform-specific core API was added. No Windows, macOS or ARM64 runtime
-test is claimed by this local follow-up.
+or platform-specific core API was added. This isolated follow-up is a local
+Linux experiment. Subsequent native validation and paired macOS measurements
+of the combined checkpoint are recorded separately in
+[native measurements](PERFORMANCE_NATIVE.md).
 
 ## Evidence and reproduction
 
