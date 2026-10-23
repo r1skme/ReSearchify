@@ -104,8 +104,22 @@ public:
             if (fs::create_directory(path_, error)) { held_ = true;
             return;
             }
-            if (!wait || Clock::now() >= until || (error && error != std::errc::file_exists))
-                throw Error("E_LOCKED", name + " is held or could not be created; recover only after stopping owners", true);
+            bool may_retry = !error || error == std::errc::file_exists;
+#ifdef _WIN32
+            // A removed lock can remain delete-pending until the final directory
+            // handle closes. MSVC also stats an already-existing directory after
+            // CreateDirectoryW fails; a concurrent removal can make that stat
+            // return access denied or not found. Neither error grants ownership.
+            may_retry = may_retry || error == std::errc::permission_denied
+                || error == std::errc::no_such_file_or_directory;
+#endif
+            if (!wait || Clock::now() >= until || !may_retry) {
+                auto detail = name + " is held or could not be created; recover only after stopping owners";
+                if (error) detail += "; filesystem error=" + std::string(error.category().name())
+                    + ":" + std::to_string(error.value()) + " (" + error.message() + ")";
+                else detail += "; lock directory already exists";
+                throw Error("E_LOCKED", detail, true);
+            }
             std::this_thread::sleep_for(std::chrono::milliseconds(2));
         }
     }
