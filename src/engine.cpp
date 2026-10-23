@@ -1216,8 +1216,10 @@ struct TermSource {
 // only need that segment's cursor, not a merge of every obsolete/live version.
 class ExactStream {
     std::map<std::uint64_t, std::unique_ptr<disk::PostingCursor>> cursors_;
+    bool terms_ = false;
 public:
-    ExactStream(const Snapshot& snapshot, const TermSource& source) {
+    ExactStream(const Snapshot& snapshot, const TermSource& source)
+        : terms_(!source.term.empty() && source.term.front() == '\2') {
         for (const auto& [segment, descriptor] : source.lists)
             cursors_.emplace(segment, std::make_unique<disk::PostingCursor>(segment_path(snapshot.directory, segment), snapshot.cache, descriptor));
     }
@@ -1226,7 +1228,7 @@ public:
         if (found == cursors_.end() || !found->second->seek(record.id)) return nullptr;
         const auto& value = found->second->current();
         if (value.document != record.id) return nullptr;
-        if (value.line > record.lines || value.column > std::uint64_t(record.max_line) + 1 || value.frequency > record.tokens)
+        if (value.line > record.lines || value.column > std::uint64_t(record.max_line) + 1 || (terms_ && value.frequency > record.tokens))
             throw Error("E_INDEX_CORRUPT", "Term posting exceeds document bounds");
         return &value;
     }
@@ -1321,19 +1323,52 @@ Anchor or_anchor(Anchor a, Anchor b) {
 // No posting list or candidate set is materialized.
 class AnchorStream {
     Anchor::Kind kind_;
+    DocumentLookup& documents_;
     std::unique_ptr<LiveStream> term_;
+    std::vector<std::unique_ptr<ExactStream>> memberships_;
     std::unique_ptr<AnchorStream> left_, right_;
 public:
     AnchorStream(const Snapshot& snapshot, DocumentLookup& documents, const Anchor& anchor,
-                 const std::map<std::string, std::shared_ptr<TermSource>>& sources) : kind_(anchor.kind) {
+                 const std::map<std::string, std::shared_ptr<TermSource>>& sources) : kind_(anchor.kind), documents_(documents) {
         if (kind_ == Anchor::Kind::Term) term_ = std::make_unique<LiveStream>(snapshot, documents, *sources.at(anchor.term));
         else {
+            // A pure conjunction has one live-document driver.
+            // Additional posting streams only need membership checks in that
+            // document's active segment, not separate catalog lookups for the
+            // union of all their intermediate postings. OR subtrees retain
+            // the generic monotone merge/intersection path below.
+            std::vector<const Anchor*> terms;
+            std::function<bool(const Anchor&)> collect = [&](const Anchor& node) {
+                if (node.universe || node.kind == Anchor::Kind::Or) return false;
+                if (node.kind == Anchor::Kind::Term) { terms.push_back(&node); return true; }
+                return collect(*node.left) && collect(*node.right);
+            };
+            if (kind_ == Anchor::Kind::And && collect(anchor)) {
+                const auto cheapest = *std::min_element(terms.begin(), terms.end(), [](const auto* a, const auto* b) { return a->cost < b->cost; });
+                term_ = std::make_unique<LiveStream>(snapshot, documents, *sources.at(cheapest->term));
+                for (const auto* item : terms) if (item != cheapest)
+                    memberships_.push_back(std::make_unique<ExactStream>(snapshot, *sources.at(item->term)));
+                return;
+            }
             left_ = std::make_unique<AnchorStream>(snapshot, documents, *anchor.left, sources);
             right_ = std::make_unique<AnchorStream>(snapshot, documents, *anchor.right, sources);
         }
     }
     std::uint64_t seek(std::uint64_t target) {
-        if (term_) return term_->seek(target);
+        if (term_) {
+            auto doc = term_->seek(target);
+            if (memberships_.empty()) return doc;
+            while (doc != EndDoc) {
+                const auto* record = documents_.get(doc);
+                if (!record) throw Error("E_INDEX_CORRUPT", "Live anchor posting has no document");
+                bool accepted = true;
+                for (auto& membership : memberships_)
+                    if (!membership->match(*record)) { accepted = false; break; }
+                if (accepted) return doc;
+                doc = term_->seek(doc + 1);
+            }
+            return EndDoc;
+        }
         auto a = left_->seek(target), b = right_->seek(target);
         if (kind_ == Anchor::Kind::Or) return (std::min)(a, b);
         while (a != b && a != EndDoc && b != EndDoc) {
@@ -1648,6 +1683,8 @@ SearchReport do_search(const Snapshot& snapshot, const Query& query, const Searc
     };
     std::vector<Pending> pending;
     std::size_t pending_memory = 0;
+    constexpr std::uint64_t ParallelContentThreshold = 2 * MiB;
+    std::uint64_t admitted_content_bytes = 0;
     const auto batch_limit = (std::max)(std::size_t(16), workers * 16);
     std::vector<SearchProfile> worker_profiles(workers);
     std::vector<std::unique_ptr<ContentReader>> readers;
@@ -1684,7 +1721,8 @@ SearchReport do_search(const Snapshot& snapshot, const Query& query, const Searc
     auto flush = [&] {
         if (pending.empty()) return;
         // Do not create threads for a selective prefilter's tiny remainder.
-        if (!pool && pending.size() >= (std::max)(std::size_t(32), workers * 4)) {
+        if (!pool && admitted_content_bytes >= ParallelContentThreshold &&
+            pending.size() >= (std::max)(std::size_t(32), workers * 4)) {
             for (std::size_t i = 0; i < workers; ++i) {
                 worker_profiles[i].enabled = options.profile;
                 readers.push_back(std::make_unique<ContentReader>(snapshot, (std::max)(std::size_t(1), std::size_t(64) / workers),
@@ -1761,6 +1799,9 @@ SearchReport do_search(const Snapshot& snapshot, const Query& query, const Searc
                 const auto cost = sizeof(Pending) + file.path.size() + 128 + query.leaves.size() * 16;
                 if (pending_memory + cost > budget / 64) flush();
                 pending.push_back({file, scratch_counts, scratch_lines});
+                // Count admitted work only after an owning queue item exists:
+                // charge_read() can precede a pressure flush of the old batch.
+                admitted_content_bytes += (std::min)(file.size, ParallelContentThreshold - admitted_content_bytes);
                 pending_memory += cost;
                 if (pending.size() >= batch_limit) flush();
                 return;

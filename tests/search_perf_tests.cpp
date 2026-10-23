@@ -88,7 +88,7 @@ Corpus make_corpus(const fs::path& root) {
         text += "MARK! punctuation a.b[c] \xe7\xb5\x82\xe3\x82\x8f\xe3\x82\x8a!\n";
         if (n % 7 == 0) text += "\nMARK! MARK!\r\n";
         if (n == 6) text += "\xef\xbb\xbf" "MARK!\n";
-        for (unsigned line = 0; line < 40; ++line)
+        for (unsigned line = 0; line < 80; ++line)
             text += "int common = value + 17; return common; // padding\n";
         text += "tail_without_final_newline";
         corpus.emplace(name, text);
@@ -179,12 +179,110 @@ int main() {
                 profiled.snippets_per_file = 0;
                 // A two-byte literal has no trigram prefilter and leaves
                 // enough candidate work to exercise the actual worker pool.
-                REQUIRE(index.search("\"42\"", profiled).profile.workers > 1);
+                const auto broad = index.search("\"42\"", profiled);
+                REQUIRE(broad.scanned_bytes > 2ULL * 1024 * 1024);
+                REQUIRE(broad.profile.workers > 1);
+
+                // The universe estimate and corpus are large, but path scope
+                // leaves only a small amount of actual content verification.
+                // A short literal cannot hide that work behind a gram filter.
+                auto scoped_auto = search_options();
+                scoped_auto.threads = 0;
+                scoped_auto.profile = true;
+                scoped_auto.snippets_per_file = 0;
+                std::uint64_t scoped_bytes = 0;
+                for (const auto& [path, text] : corpus) {
+                    if (!path.starts_with("source/")) continue;
+                    scoped_auto.paths.push_back(path);
+                    scoped_bytes += text.size();
+                    if (scoped_auto.paths.size() == 112) break;
+                }
+                REQUIRE(scoped_auto.paths.size() == 112);
+                auto scoped_serial = scoped_auto;
+                scoped_serial.threads = 1;
+                const auto small = index.search("\"!\"", scoped_auto);
+                same_result(index.search("\"!\"", scoped_serial), small);
+                REQUIRE(small.total_matches == 112);
+                REQUIRE(small.scanned_bytes == scoped_bytes);
+                REQUIRE(small.scanned_bytes < 2ULL * 1024 * 1024);
+                REQUIRE(small.profile.workers == 1);
                 // Regex retains its single global step budget even when a
                 // worker count is requested; result equivalence is mandatory.
                 serial.max_regex_steps = parallel.max_regex_steps = 1000000000;
                 same_result(index.search("/needle_[0-9]+/", serial), index.search("/needle_[0-9]+/", parallel));
             }
+        }},
+        {"fast_trigram_membership_accepts_zero_token_documents_after_updates", [] {
+            Workspace w;
+            Corpus corpus;
+            const std::string literal = "@@@%%%$$$";
+            const std::string alternative = "!!!^^^&&&";
+            const auto primary_path = [](unsigned n) {
+                return "primary/" + std::to_string(n) + ".txt";
+            };
+            const auto alternative_path = [](unsigned n) {
+                return "alternative/" + std::to_string(n) + ".txt";
+            };
+            for (unsigned n = 0; n < 128; ++n) {
+                auto text = literal + "\n";
+                if (n % 4 == 0) text += literal + "\n";
+                corpus.emplace(primary_path(n), std::move(text));
+            }
+            for (unsigned n = 0; n < 40; ++n)
+                corpus.emplace(alternative_path(n), alternative + "\n");
+            for (const auto& [path, text] : corpus)
+                write(w.root / path_from_utf8(path), text);
+
+            auto bo = options();
+            bo.profile = "fast";
+            bo.threads = 1;
+            bo.segment_documents = 32;
+            create_index(w.root, w.index, bo);
+            Index pinned(w.index, 128);
+            const auto before = corpus;
+            // Each trigram has a posting with frequency one, although every
+            // document has zero indexed words. More than 32 matching files
+            // keep the planner's bounded conjunction path exercised.
+            const std::vector<std::string> expressions{
+                "\"@@@%%%$$$\"", "\"!!!^^^&&&\"",
+                "\"@@@%%%\" AND \"%%%$$$\"",
+                "\"@@@%%%$$$\" OR \"!!!^^^&&&\""
+            };
+            const auto check = [&](const Index& view, const Corpus& expected) {
+                REQUIRE(view.stats(false).tokens == 0);
+                for (const auto& expression : expressions)
+                    matches_oracle(view.search(expression, search_options()),
+                                   oracle(expected, expression));
+            };
+            check(pinned, before);
+
+            for (unsigned n = 0; n < 32; ++n) {
+                const auto path = primary_path(n);
+                corpus.at(path) = alternative + "\n" + alternative + "\n";
+                write(w.root / path_from_utf8(path), corpus.at(path));
+            }
+            for (unsigned n = 32; n < 48; ++n) {
+                const auto path = primary_path(n);
+                REQUIRE(fs::remove(w.root / path_from_utf8(path)));
+                REQUIRE(corpus.erase(path) == 1);
+            }
+            for (unsigned n = 0; n < 8; ++n) {
+                const auto path = alternative_path(n);
+                corpus.at(path) = literal + "\n";
+                write(w.root / path_from_utf8(path), corpus.at(path));
+            }
+            for (unsigned n = 8; n < 12; ++n) {
+                const auto path = alternative_path(n);
+                REQUIRE(fs::remove(w.root / path_from_utf8(path)));
+                REQUIRE(corpus.erase(path) == 1);
+            }
+            const auto updated = update_index(w.index, bo);
+            REQUIRE(updated.changed == 40);
+            REQUIRE(updated.removed == 20);
+            Index fresh(w.index, 128);
+            check(fresh, corpus);
+            REQUIRE(fresh.verify().files == corpus.size());
+            check(pinned, before);
         }},
         {"parallel_sort_offset_keyset_scope_and_global_budgets", [] {
             Workspace w;
