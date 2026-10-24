@@ -154,4 +154,12 @@ The C++ core requires **no third-party libraries**. Windows builds use a static 
 
 The index stores source text, so keep `.researchify/` out of Git and avoid indexing secrets. Indexes from the older v1 format must be rebuilt. Process-crash recovery does not guarantee durability after a sudden power failure.
 
-No license has been granted yet. Contact the repository owner before redistributing the source or binary.
+## License
+
+**Free to use. Source-available, not open source.** Anyone may use ReSearchify
+for personal or commercial work and share unmodified official builds.
+You may study the source, make private improvements, and submit pull requests.
+Reusing the source code in other products or distributing modified builds
+requires the author's written permission.
+
+See [LICENSE](LICENSE) and [CONTRIBUTING.md](CONTRIBUTING.md).
