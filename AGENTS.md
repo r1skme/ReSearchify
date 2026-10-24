@@ -37,3 +37,7 @@ On Windows: follow [README.md](README.md#build-from-source). After changing CLI 
 Never modify the index format without corruption, truncation, varint-overflow, crash and reader/writer tests. Do not reclaim snapshots held by readers. Query prefilters must not lose real matches. Only publish preview binaries if the related build/tests actually passed. Power-loss durability is not guaranteed by a standard stream flush.
 
 Report benchmark regressions, include measurement conditions, and distinguish warm search time from complete process time. Do not claim unperformed Windows, sanitizer, or large-corpus checks.
+
+## License
+
+ReSearchify is licensed under **GNU GPLv3 only** (`GPL-3.0-only`). See [LICENSE](LICENSE). Contributions use the same license; do not copy incompatible third-party code. Details: [CONTRIBUTING.md](CONTRIBUTING.md).

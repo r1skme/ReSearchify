@@ -31,7 +31,7 @@ jobs:
         run: |
           New-Item -ItemType Directory -Force -Path dist/package | Out-Null
           Copy-Item build/Release/rs.exe dist/package/rs.exe
-          Copy-Item README.md, README.ru.md dist/package/
+          Copy-Item README.md, README.ru.md, LICENSE, SOURCE.md dist/package/
           Compress-Archive -Path dist/package/* -DestinationPath dist/ReSearchify-Windows-x64.zip -Force
           if (!(Test-Path dist/ReSearchify-Windows-x64.zip)) { throw 'Portable archive missing' }
       - uses: actions/upload-artifact@v4
@@ -70,7 +70,7 @@ jobs:
           ./build/rs --help
           ./build/rs --version
           mkdir -p dist/package dist/verify
-          cp build/rs README.md README.ru.md dist/package/
+          cp build/rs README.md README.ru.md LICENSE SOURCE.md dist/package/
           tar -czf "dist/ReSearchify-Linux-${{ matrix.arch }}.tar.gz" -C dist/package .
           tar -xzf "dist/ReSearchify-Linux-${{ matrix.arch }}.tar.gz" -C dist/verify
           test -x dist/verify/rs
@@ -112,7 +112,7 @@ jobs:
           ./build/rs --version
           test "$(lipo -archs build/rs)" = "${{ matrix.machine }}"
           mkdir -p dist/package dist/verify
-          cp build/rs README.md README.ru.md dist/package/
+          cp build/rs README.md README.ru.md LICENSE SOURCE.md dist/package/
           tar -czf "dist/ReSearchify-macOS-${{ matrix.arch }}.tar.gz" -C dist/package .
           tar -xzf "dist/ReSearchify-macOS-${{ matrix.arch }}.tar.gz" -C dist/verify
           test -x dist/verify/rs
@@ -168,7 +168,7 @@ jobs:
         run: |
           set -euo pipefail
           tag="preview-${GITHUB_SHA:0:12}"
-          notes="Portable CLI builds for Windows x64, Linux x64/arm64 and macOS Intel/Apple Silicon. All five native builds and test suites plus Linux sanitizers passed for this commit. Verify your download against SHA256SUMS.txt before extracting. macOS binaries are not Apple-notarized."
+          notes="Portable CLI builds for Windows x64, Linux x64/arm64 and macOS Intel/Apple Silicon. All five native builds and test suites plus Linux sanitizers passed for this commit. Verify your download against SHA256SUMS.txt before extracting. macOS binaries are not Apple-notarized. License: GNU GPLv3 only; corresponding source is available as the source archive for this release tag."
           if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             gh release upload "$tag" dist/ReSearchify-*.zip dist/ReSearchify-*.tar.gz dist/SHA256SUMS.txt --clobber --repo "$GITHUB_REPOSITORY"
             gh release edit "$tag" --prerelease --title "ReSearchify preview (${GITHUB_SHA:0:7})" --notes "$notes" --repo "$GITHUB_REPOSITORY"

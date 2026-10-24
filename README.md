@@ -154,4 +154,10 @@ The C++ core requires **no third-party libraries**. Windows builds use a static 
 
 The index stores source text, so keep `.researchify/` out of Git and avoid indexing secrets. Indexes from the older v1 format must be rebuilt. Process-crash recovery does not guarantee durability after a sudden power failure.
 
-No license has been granted yet. Contact the repository owner before redistributing the source or binary.
+## License
+
+ReSearchify is licensed under the **GNU General Public License v3.0 only** (`GPL-3.0-only`).
+
+You may use it for personal or commercial work, read and modify the source, and redistribute it under the terms of GPLv3. If you distribute modified versions or binaries, follow GPLv3's requirements, including providing the corresponding source code.
+
+[Full license](LICENSE) · [Contributing](CONTRIBUTING.md) · [Source for releases](SOURCE.md)

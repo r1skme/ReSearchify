@@ -38,7 +38,7 @@ try {
     if (-not (Test-Path $executable)) { throw 'rs.exe missing in the verified archive.' }
     New-Item -ItemType Directory -Force -Path $InstallDir | Out-Null
     Copy-Item -LiteralPath $executable -Destination (Join-Path $InstallDir 'rs.exe') -Force
-    foreach ($readme in @('README.md', 'README.ru.md')) {
+    foreach ($readme in @('README.md', 'README.ru.md', 'LICENSE', 'SOURCE.md')) {
         $source = Join-Path $expanded $readme
         if (Test-Path $source) { Copy-Item -LiteralPath $source -Destination (Join-Path $InstallDir $readme) -Force }
     }
